@@ -4,7 +4,7 @@ This README file is best viewed [online](http://github.com/commtech/synccom-wind
 ## Installing Driver
 
 ##### Downloading Driver Package
-You can download a pre-built driver package directly from our [website](http://www.commtech-fastcom.com/CommtechSoftware.html).
+You can download a pre-built driver package directly from our [website](https://fastcomproducts.com/software/).
 
 ## Quick Start Guide
 There is documentation for each specific function listed below, but lets get started with a quick programming example for fun.
@@ -193,15 +193,8 @@ git tag
 git checkout v2.2.8
 ```
 
-###### Status Bytes
-Getting the frame status has now been designed to be configurable. When using the 1.x driver, you will always have the frame status appended to your data on a read. When using the 2.x driver, this can be toggled and defaults to not appending the status to the data.
-
-All of the 2.2.X releases will not break API compatability. If a function in the 2.2.X series returns an incorrect value, it can be fixed to return the correct value in a later release.
-
-When and if we switch to a 2.3 release there will only be minor API changes.
-
 ## Build Dependencies
-- Windows Driver Kit (7.1.0 used internally to support XP)
+- Windows Driver Kit (7.1.0 used internally)
 
 
 ## Run-time Dependencies
