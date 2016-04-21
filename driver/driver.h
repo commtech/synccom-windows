@@ -1,26 +1,21 @@
-/*++
+/*
+Copyright (C) 2016  Commtech, Inc.
 
-Copyright (c) Microsoft Corporation.  All rights reserved.
+This file is part of synccom-windows.
 
-    THIS CODE AND INFORMATION IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY
-    KIND, EITHER EXPRESSED OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE
-    IMPLIED WARRANTIES OF MERCHANTABILITY AND/OR FITNESS FOR A PARTICULAR
-    PURPOSE.
+synccom-windows is free software: you can redistribute it and/or modify it
+under the terms of the GNU General Public License as published bythe Free
+Software Foundation, either version 3 of the License, or (at your option)
+any later version.
 
-Module Name:
+synccom-windows is distributed in the hope that it will be useful, but WITHOUT
+ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for
+more details.
 
-    private.h
-
-Abstract:
-
-    Contains structure definitions and function prototypes private to
-    the driver.
-
-Environment:
-
-    Kernel mode
-
---*/
+You should have received a copy of the GNU General Public License along
+with synccom-windows.  If not, see <http://www.gnu.org/licenses/>.
+*/
 
 #ifndef SYNCCOM_DRIVER_H
 #define SYNCCOM_DRIVER_H
