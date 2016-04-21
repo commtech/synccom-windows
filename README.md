@@ -9,7 +9,8 @@ You can download a pre-built driver package directly from our [website](http://w
 ## Quick Start Guide
 There is documentation for each specific function listed below, but lets get started with a quick programming example for fun.
 
-_This tutorial has already been set up for you at_ [`synccom-windows/exe/tutorial/tutorial.c`](exe/tutorial.c).
+_This tutorial has already been set up for you at_ [`synccom-windows/exe/tutorial/tutorial.c`](exe/tutorial/tutorial.c).
+
 
 Create a new C file (named tutorial.c) with the following code.
 
