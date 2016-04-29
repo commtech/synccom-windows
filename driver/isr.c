@@ -263,7 +263,7 @@ int prepare_frame_for_fifo(struct synccom_port *port, struct synccom_frame *fram
 	current_length = synccom_frame_get_length(frame);
 	size_in_fifo = ((current_length % 4) == 0) ? current_length : current_length + (4 - current_length % 4);
 	frame_size = synccom_frame_get_frame_size(frame);
-	fifo_space = port->tx_space_left;
+	fifo_space = TX_FIFO_SIZE - 1;
 	fifo_space -= fifo_space % 4;
 
 	/* Determine the maximum amount of data we can send this time around. */
@@ -273,13 +273,13 @@ int prepare_frame_for_fifo(struct synccom_port *port, struct synccom_frame *fram
 
 	status = synccom_port_data_write(port, frame->buffer, transmit_length);
 	if (NT_SUCCESS(status)) synccom_frame_remove_data(frame, NULL, transmit_length);
-	port->tx_space_left -= transmit_length;
 	*length = transmit_length;
-	/* If this is the first time we add data to the FIFO for this frame we
-	tell the port how much data is in this frame. */
+
+	/* If this is the first time we add data to the FIFO for this frame we tell the port how much data is in this frame. */
 	if (current_length == frame_size) synccom_port_set_register_async(port, FPGA_UPPER_ADDRESS + SYNCCOM_UPPER_OFFSET, BC_FIFO_L_OFFSET, frame_size, basic_completion);
 	TraceEvents(TRACE_LEVEL_INFORMATION, DBG_IOCTL, "%s: setting oframe_size: %d.", __FUNCTION__, frame_size);
 	synccom_port_get_register_async(port, FPGA_UPPER_ADDRESS + SYNCCOM_UPPER_OFFSET, FIFO_BC_OFFSET, register_completion, port);
+
 	/* We still have more data to send. */
 	if (!synccom_frame_is_empty(frame)) {
 		return 1;
@@ -409,9 +409,11 @@ void oframe_worker(WDFDPC Dpc)
 
 		port->pending_oframe = 0;
 	}
-
 	WdfSpinLockRelease(port->pending_oframe_spinlock);
 	WdfSpinLockRelease(port->board_tx_spinlock);
+	if (result != 0) {
+		WdfDpcEnqueue(port->oframe_dpc);
+	}
 }
 
 void clear_oframe_worker(WDFDPC Dpc)
@@ -511,17 +513,6 @@ void iframe_worker(WDFDPC Dpc) {
 	WdfDpcEnqueue(port->process_read_dpc);
 }
 
-void isr_worker(WDFDPC Dpc)
-{
-	struct synccom_port *port = 0;
-
-	return_if_untrue(Dpc);
-	port = GetPortContext(WdfDpcGetParentObject(Dpc));
-	return_if_untrue(port);
-
-	synccom_port_get_isr(port, register_completion, port);
-}
-
 void register_completion(_In_ WDFREQUEST Request, _In_ WDFIOTARGET Target, _In_ PWDF_REQUEST_COMPLETION_PARAMS CompletionParams, _In_ WDFCONTEXT Context)
 {
 	NTSTATUS    status;
@@ -530,7 +521,6 @@ void register_completion(_In_ WDFREQUEST Request, _In_ WDFIOTARGET Target, _In_ 
 	PWDF_USB_REQUEST_COMPLETION_PARAMS usb_completion_params;
 	unsigned char *read_buffer = 0, address = 0;
 	ULONG value;
-	unsigned streaming = 0;
 
 	UNREFERENCED_PARAMETER(Target);
 
@@ -545,16 +535,14 @@ void register_completion(_In_ WDFREQUEST Request, _In_ WDFIOTARGET Target, _In_ 
 
 	if (!NT_SUCCESS(status)) {
 		TraceEvents(TRACE_LEVEL_ERROR, DBG_WRITE, "%s: Read failed: Request status: 0x%x, UsbdStatus: 0x%x\n", __FUNCTION__, status, usb_completion_params->UsbdStatus);
-		if (Request != port->isr_read_request) WdfObjectDelete(Request);
-		//else WdfDpcEnqueue(port->isr_dpc); // Causes an infinite loop when unplugged - check for USB status?
+		WdfObjectDelete(Request);
 		return;
 	}
 
 	bytes_read = usb_completion_params->Parameters.PipeRead.Length;
 	if (bytes_read != 6) {
 		TraceEvents(TRACE_LEVEL_WARNING, DBG_WRITE, "%s: Wrong number of bytes! Expected 6, got %d!\n", __FUNCTION__, (int)bytes_read);
-		if (Request != port->isr_read_request) WdfObjectDelete(Request);
-		else WdfDpcEnqueue(port->isr_dpc);
+		WdfObjectDelete(Request);
 		return;
 	}
 
@@ -575,54 +563,19 @@ void register_completion(_In_ WDFREQUEST Request, _In_ WDFIOTARGET Target, _In_ 
 	
 	switch (address)
 	{
-	case ISR_OFFSET:
-		port->last_isr_value |= (UINT32)value;
-		streaming = synccom_port_is_streaming(port);
-		if (value & TFT) {
-			WdfDpcEnqueue(port->oframe_dpc);
-			TraceEvents(TRACE_LEVEL_VERBOSE, DBG_WRITE, "%s: TFT.\n", __FUNCTION__);
-		}
-		if (value & RFE) {
-			synccom_port_get_register_async(port, FPGA_UPPER_ADDRESS + SYNCCOM_UPPER_OFFSET, FIFO_FC_OFFSET, register_completion, port);
-			synccom_port_get_register_async(port, FPGA_UPPER_ADDRESS + SYNCCOM_UPPER_OFFSET, BC_FIFO_L_OFFSET, register_completion, port);
-			TraceEvents(TRACE_LEVEL_VERBOSE, DBG_WRITE, "%s: RFE.\n", __FUNCTION__);
-		}
-		if (value & RFT) {
-			synccom_port_get_register_async(port, FPGA_UPPER_ADDRESS + SYNCCOM_UPPER_OFFSET, FIFO_BC_OFFSET, register_completion, port);
-			TraceEvents(TRACE_LEVEL_VERBOSE, DBG_WRITE, "%s: RFT.\n", __FUNCTION__);
-		}
-		if (value & ALLS) {
-			WdfDpcEnqueue(port->clear_oframe_dpc);
-			TraceEvents(TRACE_LEVEL_VERBOSE, DBG_WRITE, "%s: ALLS.\n", __FUNCTION__);
-		}
-		if (value & TDU) {
-			WdfSpinLockAcquire(port->board_tx_spinlock);
-			port->tx_space_left = TX_FIFO_SIZE;
-			WdfSpinLockRelease(port->board_tx_spinlock);
-			TraceEvents(TRACE_LEVEL_ERROR, DBG_WRITE, "%s: TDU.\n", __FUNCTION__);
-		}
-		if (value & RDO) {
-			TraceEvents(TRACE_LEVEL_ERROR, DBG_WRITE, "%s: RDO.\n", __FUNCTION__);
-		}
-		if (value & RFL) {
-			TraceEvents(TRACE_LEVEL_ERROR, DBG_WRITE, "%s: RFL.\n", __FUNCTION__);
-		}
-		WdfDpcEnqueue(port->isr_dpc);
-		return;
 	case FIFO_FC_OFFSET:
 		if (value & 0x3ff)
 		{
 			TraceEvents(TRACE_LEVEL_INFORMATION, DBG_WRITE, "%s: More than 0 pending frame sizes: %d frames!\n", __FUNCTION__, value & 0x3ff);
 			WdfSpinLockAcquire(port->frame_size_spinlock);
-			port->valid_frame_size = 1;
-			synccom_port_get_register_async(port, FPGA_UPPER_ADDRESS + SYNCCOM_UPPER_OFFSET, FIFO_FC_OFFSET, register_completion, port);
+			port->valid_frame_size = value & 0x3ff;
 			synccom_port_get_register_async(port, FPGA_UPPER_ADDRESS + SYNCCOM_UPPER_OFFSET, BC_FIFO_L_OFFSET, register_completion, port);
 			WdfSpinLockRelease(port->frame_size_spinlock);
 		}
 		break;
 	case BC_FIFO_L_OFFSET:
 		WdfSpinLockAcquire(port->frame_size_spinlock);
-		if (port->valid_frame_size != 0)
+		if (port->valid_frame_size > 0)
 		{
 			if (value > 0)
 			{
@@ -634,7 +587,8 @@ void register_completion(_In_ WDFREQUEST Request, _In_ WDFIOTARGET Target, _In_ 
 				WdfSpinLockRelease(port->pending_iframes_spinlock);
 				TraceEvents(TRACE_LEVEL_INFORMATION, DBG_WRITE, "%s: New frame: %d bytes!\n", __FUNCTION__, value);
 			}
-			port->valid_frame_size = 0;
+			port->valid_frame_size--;
+			if(port->valid_frame_size > 0) synccom_port_get_register_async(port, FPGA_UPPER_ADDRESS + SYNCCOM_UPPER_OFFSET, BC_FIFO_L_OFFSET, register_completion, port);
 		}
 		WdfSpinLockRelease(port->frame_size_spinlock);
 		WdfDpcEnqueue(port->iframe_dpc);
@@ -642,13 +596,10 @@ void register_completion(_In_ WDFREQUEST Request, _In_ WDFIOTARGET Target, _In_ 
 	case STAR_OFFSET:
 		break;
 	case FIFO_BC_OFFSET:
-		WdfSpinLockAcquire(port->board_tx_spinlock);
-		port->tx_space_left = TX_FIFO_SIZE - ((value & 0x1FFF0000) >> 16);
-		WdfSpinLockRelease(port->board_tx_spinlock);
 		WdfDpcEnqueue(port->oframe_dpc);
 		break;
 	}
-	if (Request != port->isr_read_request) WdfObjectDelete(Request);
+	WdfObjectDelete(Request);
 	return;
 }
 
@@ -724,6 +675,8 @@ void port_received_data(__in  WDFUSBPIPE Pipe, __in  WDFMEMORY Buffer, __in  siz
 		}
 	}
 #endif
+	synccom_port_get_register_async(port, FPGA_UPPER_ADDRESS + SYNCCOM_UPPER_OFFSET, FIFO_FC_OFFSET, register_completion, port);
+
 	if (payload_size + current_memory > memory_cap) {
 		unsigned bytes_lost = payload_size + current_memory - memory_cap;
 		struct synccom_frame *frame = 0;

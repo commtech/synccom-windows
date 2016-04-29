@@ -202,30 +202,6 @@ struct synccom_port *synccom_port_new(WDFDRIVER Driver, IN PWDFDEVICE_INIT Devic
 		TraceEvents(TRACE_LEVEL_ERROR, DBG_PNP, "%s: WdfIoQueueCreate failed %!STATUS!", __FUNCTION__, status);
 		return 0;
 	}
-	/*
-	// This appears to be the mechanism used for track-interrupts. It should be 
-	// re-added at a later date, or removed.
-
-	WDF_IO_QUEUE_CONFIG_INIT(&queue_config, WdfIoQueueDispatchManual);
-	status = WdfIoQueueCreate(port->device, &queue_config, WDF_NO_OBJECT_ATTRIBUTES, &port->isr_queue);
-	if (!NT_SUCCESS(status)) {
-		TraceEvents(TRACE_LEVEL_ERROR, DBG_PNP, "%s: WdfIoQueueCreate failed %!STATUS!",__FUNCTION__, status);
-		return 0;
-	}
-	*/
-
-	/*
-	WDF_INTERRUPT_CONFIG_INIT(&interruptConfig, synccom_isr, NULL);
-	interruptConfig.ShareVector = WdfTrue;
-	WDF_OBJECT_ATTRIBUTES_INIT_CONTEXT_TYPE(&interruptAttributes, synccom_PORT);
-
-	status = WdfInterruptCreate(device, &interruptConfig, &interruptAttributes, &port->interrupt);
-	if (!NT_SUCCESS(status)) {
-		TraceEvents(TRACE_LEVEL_ERROR, DBG_PNP, "WdfInterruptCreate failed %!STATUS!", status);
-		return 0;
-	}
-	*/
-
 
 	status = WdfDeviceCreateDeviceInterface(device, (LPGUID)&GUID_DEVINTERFACE_SYNCCOM, NULL);
 	if (!NT_SUCCESS(status)) {
@@ -432,18 +408,6 @@ NTSTATUS setup_request(_In_ struct synccom_port *port)
 {
 	NTSTATUS status = STATUS_SUCCESS;
 
-	status = WdfRequestCreate(WDF_NO_OBJECT_ATTRIBUTES, WdfUsbTargetPipeGetIoTarget(port->register_write_pipe), &port->isr_write_request);
-	if (!NT_SUCCESS(status)) {
-		TraceEvents(TRACE_LEVEL_ERROR, DBG_PNP, "%s: Unable to make WriteRequest! %!STATUS!", __FUNCTION__, status);
-		return status;
-	}
-
-	status = WdfRequestCreate(WDF_NO_OBJECT_ATTRIBUTES, WdfUsbTargetPipeGetIoTarget(port->register_read_pipe), &port->isr_read_request);
-	if (!NT_SUCCESS(status)) {
-		TraceEvents(TRACE_LEVEL_ERROR, DBG_PNP, "%s: Unable to make ReadRequest! %!STATUS!", __FUNCTION__, status);
-		return status;
-	}
-
 	status = WdfRequestCreate(WDF_NO_OBJECT_ATTRIBUTES, WdfUsbTargetPipeGetIoTarget(port->data_read_pipe), &port->data_read_request);
 	if (!NT_SUCCESS(status)) {
 		TraceEvents(TRACE_LEVEL_ERROR, DBG_PNP, "%s: Unable to make ReadRequest! %!STATUS!", __FUNCTION__, status);
@@ -460,18 +424,6 @@ NTSTATUS setup_memory(_In_ struct synccom_port *port)
 
 	WDF_OBJECT_ATTRIBUTES_INIT(&attributes);
 	attributes.ParentObject = port->device;
-
-	status = WdfMemoryCreate(&attributes, NonPagedPool, 0, 8, &port->isr_write_memory, NULL);
-	if (!NT_SUCCESS(status)) {
-		TraceEvents(TRACE_LEVEL_ERROR, DBG_PNP, "%s: WdfMemoryCreate failed! status: 0x%x\n", __FUNCTION__, status);
-		return status;
-	}
-
-	status = WdfMemoryCreate(&attributes, NonPagedPool, 0, 6, &port->isr_read_memory, NULL);
-	if (!NT_SUCCESS(status)) {
-		TraceEvents(TRACE_LEVEL_ERROR, DBG_PNP, "%s: WdfMemoryCreate failed! status: 0x%x\n", __FUNCTION__, status);
-		return status;
-	}
 
 	status = WdfMemoryCreate(&attributes, NonPagedPool, 0, 512, &port->data_read_memory, NULL);
 	if (!NT_SUCCESS(status)) {
@@ -508,16 +460,6 @@ NTSTATUS setup_dpc(_In_ struct synccom_port *port)
 	if (!NT_SUCCESS(status)) {
 		WdfObjectDelete(port->device);
 		TraceEvents(TRACE_LEVEL_ERROR, DBG_PNP, "%s: iframe_dpc failed %!STATUS!", __FUNCTION__, status);
-		return status;
-	}
-
-	WDF_DPC_CONFIG_INIT(&dpcConfig, &isr_worker);
-	dpcConfig.AutomaticSerialization = TRUE;
-
-	status = WdfDpcCreate(&dpcConfig, &dpcAttributes, &port->isr_dpc);
-	if (!NT_SUCCESS(status)) {
-		WdfObjectDelete(port->device);
-		TraceEvents(TRACE_LEVEL_ERROR, DBG_PNP, "%s: isr_dpc failed %!STATUS!", __FUNCTION__, status);
 		return status;
 	}
 
@@ -627,7 +569,6 @@ NTSTATUS SyncComEvtDevicePrepareHardware(WDFDEVICE Device, WDFCMRESLIST Resource
 	synccom_port_set_memory_cap(port, &memory_cap);
 
 	port->pending_oframe = 0;
-	port->last_isr_value = 0;
 
 	SYNCCOM_REGISTERS_INIT(port->register_storage);
 	synccom_port_set_clock_bits(port, clock_bits);
@@ -653,7 +594,6 @@ NTSTATUS SyncComEvtDevicePrepareHardware(WDFDEVICE Device, WDFCMRESLIST Resource
 
 	synccom_port_purge_rx(port);
 	synccom_port_purge_tx(port);
-	WdfDpcEnqueue(port->isr_dpc);
 
 	TraceEvents(TRACE_LEVEL_VERBOSE, DBG_PNP, "%s: Exiting.\n", __FUNCTION__);
     return status;

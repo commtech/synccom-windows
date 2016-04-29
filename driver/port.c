@@ -269,13 +269,6 @@ VOID SyncComEvtIoDeviceControl(_In_ WDFQUEUE Queue, _In_ WDFREQUEST Request, _In
 	case SYNCCOM_DISABLE_WAIT_ON_WRITE:
 		synccom_port_set_wait_on_write(port, FALSE);
 		break;
-	case SYNCCOM_TRACK_INTERRUPTS:
-		//status = WdfRequestForwardToIoQueue(Request, port->isr_queue);
-		if (!NT_SUCCESS(status)) {
-			TraceEvents(TRACE_LEVEL_ERROR, DBG_IOCTL, "%s: WdfRequestForwardToIoQueue failed %!STATUS!", __FUNCTION__, status);
-			WdfRequestComplete(Request, status);
-		}
-		return;
 
 	case SYNCCOM_GET_MEM_USAGE: {
 			struct synccom_memory_cap *memcap = 0;
@@ -303,6 +296,23 @@ VOID SyncComEvtIoDeviceControl(_In_ WDFQUEUE Queue, _In_ WDFREQUEST Request, _In
 			synccom_port_set_clock_bits(port, clock_bits);
 		}
 		break;
+	case SYNCCOM_REPROGRAM: {
+		unsigned char *firmware_line = 0;
+		size_t buffer_size = 0, data_size = 0;
+		status = WdfRequestRetrieveInputBuffer(Request, 1, &firmware_line, &buffer_size);
+		if (!NT_SUCCESS(status)) {
+			TraceEvents(TRACE_LEVEL_WARNING, DBG_IOCTL, "WdfRequestRetrieveInputMemory failed %!STATUS!", status);
+			break;
+		}
+		for (data_size = 0;; data_size++)
+		{
+			if (firmware_line[data_size] == 0x13) break; // Should pass everything before 0x13. This will return the size of everything before 0x13.
+			if (data_size > 50) break; // Best safety check I can think of - highest should be ~47, so this will see a runaway line.
+		}
+		if(data_size < 51) status = synccom_port_program_firmware(port, firmware_line, data_size);
+		// Currently I get, store, get, modify, send the buffer - there's a better way, I'm just rushed.
+	}
+	break;
     default :
         status = STATUS_INVALID_DEVICE_REQUEST;
         break;
@@ -376,6 +386,58 @@ void synccom_port_set_clock_bits(_In_ struct synccom_port *port, unsigned char *
 
 	ExFreePoolWithTag(data, 'stiB');
 	TraceEvents(TRACE_LEVEL_VERBOSE, DBG_IOCTL, "%s: Exiting.", __FUNCTION__);
+}
+
+NTSTATUS synccom_port_program_firmware(_In_ struct synccom_port *port, unsigned char *firmware_line, size_t data_size)
+{
+	WDFUSBPIPE write_pipe;
+	WDFREQUEST firmware_request;
+	WDFMEMORY firmware_command;
+	WDF_OBJECT_ATTRIBUTES attributes;
+	unsigned char *firmware_buffer = 0;
+	NTSTATUS status = STATUS_SUCCESS;
+
+	UNUSED(firmware_line);
+	write_pipe = port->register_write_pipe;
+
+	WDF_OBJECT_ATTRIBUTES_INIT(&attributes);
+	attributes.ParentObject = port->register_write_pipe;
+	status = WdfRequestCreate(&attributes, WdfUsbTargetPipeGetIoTarget(write_pipe), &firmware_request);
+	if (!NT_SUCCESS(status)) {
+		TraceEvents(TRACE_LEVEL_ERROR, DBG_IOCTL, "%s: Cannot create new request.\n", __FUNCTION__);
+		WdfObjectDelete(firmware_request);
+		return status;
+	}
+	attributes.ParentObject = firmware_request;
+	status = WdfMemoryCreate(&attributes, NonPagedPool, 0, data_size+1, &firmware_command, NULL);
+	if (!NT_SUCCESS(status)) {
+		TraceEvents(TRACE_LEVEL_ERROR, DBG_IOCTL, "%s: Cannot create new request.\n", __FUNCTION__);
+		WdfObjectDelete(firmware_request);
+		return status;
+	}
+	status = WdfMemoryCopyFromBuffer(firmware_command, 1, (void *)firmware_line, data_size);
+	if (!NT_SUCCESS(status)) {
+		TraceEvents(TRACE_LEVEL_ERROR, DBG_IOCTL, "%s: Cannot copy buffer to memory.\n", __FUNCTION__);
+		WdfObjectDelete(firmware_request);
+		return status;
+	}
+	firmware_buffer = WdfMemoryGetBuffer(firmware_command, NULL);
+	firmware_buffer[0] = 0x06;
+	status = WdfUsbTargetPipeFormatRequestForWrite(write_pipe, firmware_request, firmware_command, NULL);
+	if (!NT_SUCCESS(status)) {
+		TraceEvents(TRACE_LEVEL_ERROR, DBG_IOCTL, "%s: Cannot format request for write.\n", __FUNCTION__);
+		WdfObjectDelete(firmware_request);
+		return status;
+	}
+	WdfRequestSetCompletionRoutine(firmware_request, basic_completion, write_pipe);
+	WdfSpinLockAcquire(port->request_spinlock);
+	if (WdfRequestSend(firmware_request, WdfUsbTargetPipeGetIoTarget(write_pipe), WDF_NO_SEND_OPTIONS) == FALSE) {
+		status = WdfRequestGetStatus(firmware_request);
+		WdfObjectDelete(firmware_request);
+	}
+	WdfSpinLockRelease(port->request_spinlock);
+
+	return status;
 }
 
 NTSTATUS synccom_port_set_registers(_In_ struct synccom_port *port, const struct synccom_registers *regs)
@@ -597,63 +659,6 @@ synccom_register synccom_port_read_data_async(struct synccom_port *port, EVT_WDF
 	return status;
 }
 
-synccom_register synccom_port_get_isr(struct synccom_port *port, EVT_WDF_REQUEST_COMPLETION_ROUTINE read_return, WDFCONTEXT Context)
-{
-	NTSTATUS status = STATUS_SUCCESS;
-	WDFUSBPIPE write_pipe, read_pipe;
-	WDF_REQUEST_REUSE_PARAMS  params;
-	unsigned char *write_buffer = 0;
-
-	write_pipe = port->register_write_pipe;
-	read_pipe = port->register_read_pipe;
-
-	write_buffer = WdfMemoryGetBuffer(port->isr_write_memory, NULL);
-
-	write_buffer[0] = SYNCCOM_READ_WAIT_HIGH_VAL;
-	write_buffer[1] = FPGA_UPPER_ADDRESS + SYNCCOM_UPPER_OFFSET;
-	write_buffer[2] = ISR_OFFSET << 1;
-	write_buffer[3] = ISR_TIMEOUT;
-
-	// Four bytes of masking for the register.
-	write_buffer[4] = 0xff;
-	write_buffer[5] = 0xff;
-	write_buffer[6] = 0xff;
-	write_buffer[7] = 0xff;
-
-	WDF_REQUEST_REUSE_PARAMS_INIT(&params, WDF_REQUEST_REUSE_NO_FLAGS, STATUS_SUCCESS);
-	status = WdfRequestReuse(port->isr_write_request, &params);
-
-	status = WdfUsbTargetPipeFormatRequestForWrite(write_pipe, port->isr_write_request, port->isr_write_memory, NULL);
-	if (!NT_SUCCESS(status)) {
-		TraceEvents(TRACE_LEVEL_ERROR, DBG_IOCTL, "%s: Cannot format request for write.\n", __FUNCTION__);
-		return status;
-	}
-	status = WdfUsbTargetPipeFormatRequestForRead(read_pipe, port->isr_read_request, port->isr_read_memory, NULL);
-	if (!NT_SUCCESS(status)) {
-		TraceEvents(TRACE_LEVEL_ERROR, DBG_IOCTL, "%s: Cannot format request for read.\n", __FUNCTION__);
-		return status;
-	}
-	WdfSpinLockAcquire(port->request_spinlock);
-	if (WdfRequestSend(port->isr_write_request, WdfUsbTargetPipeGetIoTarget(write_pipe), WDF_NO_SEND_OPTIONS) == FALSE) {
-		WdfSpinLockRelease(port->request_spinlock);
-		status = WdfRequestGetStatus(port->isr_write_request);
-		return status;
-	}
-	WdfSpinLockRelease(port->request_spinlock);
-	WdfRequestSetCompletionRoutine(port->isr_read_request, read_return, Context);
-
-	WdfSpinLockAcquire(port->request_spinlock);
-	if (WdfRequestSend(port->isr_read_request, WdfUsbTargetPipeGetIoTarget(read_pipe), WDF_NO_SEND_OPTIONS) == FALSE) {
-		WdfSpinLockRelease(port->request_spinlock);
-		status = WdfRequestGetStatus(port->isr_read_request);
-		return status;
-	}
-	WdfSpinLockRelease(port->request_spinlock);
-
-	TraceEvents(TRACE_LEVEL_VERBOSE, DBG_IOCTL, "%s: Reading ISR register...", __FUNCTION__);
-	return status;
-}
-
 void synccom_port_set_memory_cap(struct synccom_port *port, struct synccom_memory_cap *value)
 {
 	return_if_untrue(port);
@@ -832,7 +837,6 @@ NTSTATUS synccom_port_purge_tx(struct synccom_port *port)
 
 	WdfSpinLockAcquire(port->board_tx_spinlock);
 	error_code = synccom_port_execute_TRES(port);
-	port->tx_space_left = TX_FIFO_SIZE - 1;
 	WdfSpinLockRelease(port->board_tx_spinlock);
 
 	if (error_code < 0)

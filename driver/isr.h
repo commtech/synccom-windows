@@ -28,7 +28,6 @@ with synccom-windows.  If not, see <http://www.gnu.org/licenses/>.
 EVT_WDF_DPC		oframe_worker;
 EVT_WDF_DPC		clear_oframe_worker;
 EVT_WDF_DPC		iframe_worker;
-EVT_WDF_DPC		isr_worker;
 EVT_WDF_DPC		SynccomProcessRead;
 
 int				synccom_port_frame_read(struct synccom_port *port, unsigned char *buf, size_t buf_length, size_t *out_length);

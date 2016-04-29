@@ -39,7 +39,7 @@ NTSTATUS DriverEntry(PDRIVER_OBJECT DriverObject, PUNICODE_STRING RegistryPath)
     WDF_OBJECT_ATTRIBUTES   attributes;
 
     WPP_INIT_TRACING( DriverObject, RegistryPath );
-    TraceEvents(TRACE_LEVEL_INFORMATION, DBG_INIT, "Sync-Com Driver\n");
+    TraceEvents(TRACE_LEVEL_INFORMATION, DBG_INIT, "Sync Com Driver\n");
     TraceEvents(TRACE_LEVEL_INFORMATION, DBG_INIT, "Built %s %s\n", __DATE__, __TIME__);
 	TraceEvents(TRACE_LEVEL_INFORMATION, DBG_INIT, "Copyright (c) 2016, Fastcom.");
   

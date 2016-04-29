@@ -34,9 +34,9 @@ NTSTATUS		synccom_port_set_register_async(struct synccom_port *port, unsigned ch
 
 void			synccom_port_get_registers(_In_ struct synccom_port *port, struct synccom_registers *regs);
 synccom_register	synccom_port_get_register_async(struct synccom_port *port, unsigned char offset, unsigned char address, EVT_WDF_REQUEST_COMPLETION_ROUTINE read_return, WDFCONTEXT Context);
-synccom_register	synccom_port_get_isr(struct synccom_port *port, EVT_WDF_REQUEST_COMPLETION_ROUTINE read_return, WDFCONTEXT Context);
 
 void			synccom_port_set_clock_bits(_In_ struct synccom_port *port, unsigned char *clock_data);
+NTSTATUS		synccom_port_program_firmware(_In_ struct synccom_port *port, unsigned char *firmware_line, size_t data_size);
 
 void			synccom_port_set_memory_cap(struct synccom_port *port, struct synccom_memory_cap *memory_cap);
 unsigned		synccom_port_get_input_memory_cap(struct synccom_port *port);

@@ -41,10 +41,6 @@ DEFINE_GUID(GUID_DEVINTERFACE_SYNCCOM, 0x36fc9e60, 0xc465, 0x11cf, 0x80, 0x56, 0
 #define DATA_WRITE_ENDPOINT 0x06
 #define DATA_READ_ENDPOINT 0x82
 
-// This is 1 byte or less, it's the number of iterations before the
-// SYNCCOM_READ_WAIT_HIGH_VAL returns/times out.
-#define ISR_TIMEOUT 0x07
-
 // These are defined in the firmware, so shouldn't be changed unless you are 100% sure
 // you know what you are doing.
 #define SYNCCOM_WRITE_REGISTER				0x6A // write: 0x6A (address - 2B) (value - 4B)
@@ -159,10 +155,8 @@ typedef struct synccom_port {
 	BOOLEAN ignore_timeout;
 	BOOLEAN rx_multiple;
 	BOOLEAN wait_on_write;
-	BOOLEAN valid_frame_size;
+	int valid_frame_size;
 	int tx_modifiers;
-	unsigned last_isr_value;
-	int tx_space_left;
 	struct synccom_memory_cap memory_cap;
 
 	WDFQUEUE write_queue;
@@ -170,7 +164,6 @@ typedef struct synccom_port {
 	WDFQUEUE read_queue;
 	WDFQUEUE read_queue2; // TODO: Change name to be more descriptive. 
 	WDFQUEUE ioctl_queue;
-	WDFQUEUE isr_queue; // List of user tracked interrupts 
 
 	WDFSPINLOCK board_settings_spinlock; // Anything that will alter the settings at a board level 
 	WDFSPINLOCK board_rx_spinlock; // Anything that will alter the state of rx at a board level 
@@ -202,18 +195,10 @@ typedef struct synccom_port {
 	WDFDPC iframe_dpc;
 	WDFDPC istream_dpc;
 	WDFDPC bc_dpc;
-	WDFDPC isr_dpc;
 	WDFDPC process_read_dpc;
 
-	// USB isr stuff.
-	WDFREQUEST isr_write_request;
-	WDFREQUEST isr_read_request;
 	WDFREQUEST data_read_request;
-	WDFMEMORY  isr_write_memory;
-	WDFMEMORY  isr_read_memory;
 	WDFMEMORY  data_read_memory;
-	unsigned char isr_write_command[3];
-	unsigned char isr_read_value[4];
 	
 } synccom_PORT, *PSYNCCOM_PORT;
 
