@@ -546,6 +546,7 @@
     </ClCompile>
     <Inf>
       <CatalogFileName>synccom.cat</CatalogFileName>
+      <TimeStamp>1.1.0</TimeStamp>
     </Inf>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Win8 Release|x64'">
@@ -554,6 +555,9 @@
       </ExceptionHandling>
       <WppEnabled>true</WppEnabled>
     </ClCompile>
+    <Inf>
+      <TimeStamp>1.1.0</TimeStamp>
+    </Inf>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Win8.1 Release|x64'">
     <ClCompile>
@@ -561,6 +565,9 @@
       </ExceptionHandling>
       <WppEnabled>true</WppEnabled>
     </ClCompile>
+    <Inf>
+      <TimeStamp>1.1.0</TimeStamp>
+    </Inf>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Win7 Debug|x64'">
     <ClCompile>
@@ -569,6 +576,9 @@
       <WppEnabled>true</WppEnabled>
       <WppMinimalRebuildFromTracking>true</WppMinimalRebuildFromTracking>
     </ClCompile>
+    <Inf>
+      <TimeStamp>1.1.0</TimeStamp>
+    </Inf>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Win8 Debug|x64'">
     <ClCompile>
@@ -576,6 +586,9 @@
       </ExceptionHandling>
       <WppEnabled>true</WppEnabled>
     </ClCompile>
+    <Inf>
+      <TimeStamp>1.1.0</TimeStamp>
+    </Inf>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Win8.1 Debug|x64'">
     <ClCompile>
@@ -583,6 +596,9 @@
       </ExceptionHandling>
       <WppEnabled>true</WppEnabled>
     </ClCompile>
+    <Inf>
+      <TimeStamp>1.1.0</TimeStamp>
+    </Inf>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Win7 Release|Win32'">
     <ClCompile>
