@@ -494,12 +494,8 @@ NTSTATUS SyncComEvtDevicePrepareHardware(WDFDEVICE Device, WDFCMRESLIST Resource
 	struct synccom_memory_cap			memory_cap;
 	unsigned char						clock_bits[20] = DEFAULT_CLOCK_BITS;
 	struct synccom_port					*port = 0;
-	WDF_TIMER_CONFIG					timerConfig;
-	WDF_OBJECT_ATTRIBUTES				timerAttributes;
 	WDF_USB_CONTINUOUS_READER_CONFIG	readerConfig;
 
-	UNREFERENCED_PARAMETER(timerAttributes);
-	UNREFERENCED_PARAMETER(timerConfig);
     UNREFERENCED_PARAMETER(ResourceList);
     UNREFERENCED_PARAMETER(ResourceListTranslated);
 
