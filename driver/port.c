@@ -533,9 +533,11 @@ void synccom_port_get_registers(struct synccom_port *port, struct synccom_regist
 	unsigned i = 0;
 
 	for (i = 0; i < sizeof(*regs) / sizeof(synccom_register); i++) {
+		unsigned char register_offset = (unsigned char)i * 4;
 		if (((synccom_register *)regs)[i] != SYNCCOM_UPDATE_VALUE) continue;
 		if (is_write_only_register((unsigned char)i * 4)) continue;
 		((synccom_register *)regs)[i] = ((synccom_register *)&port->register_storage)[i];
+		synccom_port_get_register_async(port, FPGA_UPPER_ADDRESS + SYNCCOM_UPPER_OFFSET, register_offset, register_completion, port);
 	}
 }
 
