@@ -43,8 +43,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="device.c" />
-    <ClCompile Include="ioctl.c" />
-    <ClCompile Include="bulkrwr.c" />
     <ClCompile Include="driver.c">
       <Filter>Source Files</Filter>
     </ClCompile>
