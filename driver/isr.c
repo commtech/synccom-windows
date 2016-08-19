@@ -366,8 +366,8 @@ unsigned synccom_port_transmit_frame(struct synccom_port *port, struct synccom_f
 		synccom_port_execute_transmit(port);
 		TraceEvents(TRACE_LEVEL_WARNING, DBG_PNP,
 			"F#%i => %i byte%s%s",
-			frame->number, transmit_length,
-			(transmit_length == 1) ? " " : "s",
+			frame->number, frame->frame_size,
+			(frame->frame_size == 1) ? " " : "s",
 			(result != 2) ? " (starting)" : " ");
 	}
 	return result;
@@ -491,14 +491,14 @@ void iframe_worker(WDFDPC Dpc) {
 			continue;
 		}
 		result = synccom_frame_copy_data(frame, port->istream);
-		if (frame->frame_size + frame->lost_bytes <= frame->data_length)
+		if (frame->data_length + frame->lost_bytes >= frame->frame_size)
 		{
 			struct synccom_frame *finished_frame = 0;
 			finished_frame = synccom_frame_new(port);
 			finished_frame->frame_size = synccom_frame_get_frame_size(frame);
 			synccom_frame_copy_data(finished_frame, frame);
 			KeQuerySystemTime(&finished_frame->timestamp);
-
+			TraceEvents(TRACE_LEVEL_WARNING, DBG_PNP, "F#%i <= %i byte%s", finished_frame->number, finished_frame->frame_size, (finished_frame->frame_size == 1) ? " " : "s");
 			WdfSpinLockAcquire(port->queued_iframes_spinlock);
 			synccom_flist_add_frame(&port->queued_iframes, finished_frame);
 			WdfSpinLockRelease(port->queued_iframes_spinlock);
