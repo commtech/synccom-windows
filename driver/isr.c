@@ -568,7 +568,7 @@ void register_completion(_In_ WDFREQUEST Request, _In_ WDFIOTARGET Target, _In_ 
 		{
 			TraceEvents(TRACE_LEVEL_INFORMATION, DBG_WRITE, "%s: More than 0 pending frame sizes: %d frames!\n", __FUNCTION__, value & 0x3ff);
 			WdfSpinLockAcquire(port->frame_size_spinlock);
-			port->valid_frame_size = value & 0x3ff;
+			port->valid_frame_size += value & 0x3ff;
 			synccom_port_get_register_async(port, FPGA_UPPER_ADDRESS + SYNCCOM_UPPER_OFFSET, BC_FIFO_L_OFFSET, register_completion, port);
 			WdfSpinLockRelease(port->frame_size_spinlock);
 		}
