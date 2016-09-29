@@ -1,25 +1,27 @@
-;/*++
 ;
-;Copyright (c) Microsoft Corporation.  All rights reserved.
+;    Copyright (C) 2016  Commtech, Inc.
 ;
-;   THIS CODE AND INFORMATION IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY
-;   KIND, EITHER EXPRESSED OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE
-;   IMPLIED WARRANTIES OF MERCHANTABILITY AND/OR FITNESS FOR A PARTICULAR
-;   PURPOSE.
+;    This file is part of synccom-windows.
 ;
-;Module Name:
+;    synccom-windows is free software: you can redistribute it and/or modify it
+;    under the terms of the GNU General Public License as published bythe Free
+;    Software Foundation, either version 3 of the License, or (at your option)
+;    any later version.
 ;
-;    OSRUSBFX2.INF
+;	 synccom-windows is distributed in the hope that it will be useful, but WITHOUT
+;    ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+;    FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for
+;    more details.
 ;
-;Abstract:
-;    Installation inf for OSR USB-FX2 Learning Kit
+;    You should have received a copy of the GNU General Public License along
+;    with synccom-windows.  If not, see <http://www.gnu.org/licenses/>.
 ;
-;--*/
+;
 
 [Version]
 Signature="$WINDOWS NT$"
-Class=USBDevice
-ClassGuid={88BAE032-5A81-49f0-BC3D-A4FF138216D6}
+Class=CommtechUSB
+ClassGuid=%commtech.GUID%
 Provider=%ManufacturerName%
 DriverVer=06/29/2015,5.00.3788
 CatalogFile=synccom.cat
@@ -159,9 +161,10 @@ KmdfLibraryVersion = $KMDFVERSION$
 
 [Strings]
 ManufacturerName = "Commtech, Inc."
-Disk_Description="SyncCom Installation Disk"
-SyncCom.DeviceDesc="Commtech SyncCom"
+Disk_Description="Sync Com Installation Disk"
+SyncCom.DeviceDesc="Sync Com Communications Port"
 synccom.SvcDesc="Synccom Service"
-ClassName       = "SyncCom Devices"
+ClassName       = "Commtech USB Devices"
 SPSVCINST_ASSOCSERVICE= 0x00000002
 synccom.GUID="{AE18AA60-7F6A-11d4-97DD-00010229B959}"
+commtech.GUID="{E85C65CC-B33B-40D4-815E-3657C2D05017}"
