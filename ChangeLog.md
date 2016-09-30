@@ -1,4 +1,9 @@
 # ChangeLog
 
+## [1.1.2](https://github.com/commtech/synccom-windows/releases/tag/v1.1.2) (09/30/2016)
+- Reworked the internals to no longer rely on the ISR.
+- Cleaned up the project files and inx files.
+- Fixed an issue that caused occasional frame loss or frame delay.
+
 ## [1.0.0](https://github.com/commtech/synccom-windows/releases/tag/v1.0.0) (04/21/2016)
 This is the initial release of the 1.0 driver series.
