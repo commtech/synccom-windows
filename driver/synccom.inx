@@ -23,7 +23,6 @@ Signature="$WINDOWS NT$"
 Class=CommtechUSB
 ClassGuid=%commtech.GUID%
 Provider=%ManufacturerName%
-DriverVer=06/29/2015,5.00.3788
 CatalogFile=synccom.cat
 
 [SourceDisksNames]
