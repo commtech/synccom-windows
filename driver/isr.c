@@ -35,8 +35,6 @@ VOID SyncComEvtIoRead(IN WDFQUEUE Queue, IN WDFREQUEST Request, IN size_t Length
 	NTSTATUS status = STATUS_SUCCESS;
 	struct synccom_port *port = 0;
 
-	TraceEvents(TRACE_LEVEL_VERBOSE, DBG_PNP, "%s: Entering.", __FUNCTION__);
-
 	if (Length == 0) {
 		WdfRequestCompleteWithInformation(Request, STATUS_SUCCESS, Length);
 		return;
@@ -61,8 +59,6 @@ VOID SyncComEvtIoWrite(_In_ WDFQUEUE Queue, _In_ WDFREQUEST Request, _In_ size_t
 	unsigned char *data_buffer = NULL;
 	struct synccom_frame *frame = 0;
 	struct synccom_port *port = 0;
-
-	TraceEvents(TRACE_LEVEL_VERBOSE, DBG_WRITE, "%s: Entering.", __FUNCTION__);
 
 	port = GetPortContext(WdfIoQueueGetDevice(Queue));
 	if (Length == 0) {
@@ -106,13 +102,11 @@ VOID SyncComEvtIoWrite(_In_ WDFQUEUE Queue, _In_ WDFREQUEST Request, _In_ size_t
 	else {
 		WdfRequestCompleteWithInformation(Request, STATUS_SUCCESS, Length);
 	}
-	//synccom_port_get_register_async(port, FPGA_UPPER_ADDRESS + SYNCCOM_UPPER_OFFSET, FIFO_BC_OFFSET, register_completion, port);
 	WdfDpcEnqueue(port->oframe_dpc);
 }
 
 VOID SyncComEvtIoStop(_In_ WDFQUEUE Queue, _In_ WDFREQUEST Request, _In_ ULONG ActionFlags)
 {
-	TraceEvents(TRACE_LEVEL_VERBOSE, DBG_WRITE, "%s: Entering.", __FUNCTION__);
 	UNREFERENCED_PARAMETER(Queue);
 	UNREFERENCED_PARAMETER(ActionFlags);
 	if (ActionFlags &  WdfRequestStopActionSuspend) {
@@ -135,7 +129,6 @@ void SynccomProcessRead(WDFDPC Dpc)
 	WDF_REQUEST_PARAMETERS params;
 
 	port = GetPortContext(WdfDpcGetParentObject(Dpc));
-	TraceEvents(TRACE_LEVEL_VERBOSE, DBG_PNP, "%s: Entering.", __FUNCTION__);
 	if (!synccom_port_has_incoming_data(port)) return;
 	status = WdfIoQueueRetrieveNextRequest(port->read_queue2, &request);
 	if (!NT_SUCCESS(status)) {
@@ -166,13 +159,12 @@ void SynccomProcessRead(WDFDPC Dpc)
 		WdfRequestComplete(request, status);
 		return;
 	}
-	TraceEvents(TRACE_LEVEL_VERBOSE, DBG_PNP, "%s: Exiting.", __FUNCTION__);
+
 	WdfRequestCompleteWithInformation(request, status, read_count);
 }
 
 int synccom_port_stream_read(struct synccom_port *port, unsigned char *buf, size_t buf_length, size_t *out_length)
 {
-	TraceEvents(TRACE_LEVEL_VERBOSE, DBG_WRITE, "%s: Entering.", __FUNCTION__);
 	return_val_if_untrue(port, 0);
 
 	WdfSpinLockAcquire(port->istream_spinlock);
@@ -190,7 +182,6 @@ int synccom_port_frame_read(struct synccom_port *port, unsigned char *buf, size_
 	int max_frame_length = 0;
 	unsigned current_frame_length = 0;
 
-	TraceEvents(TRACE_LEVEL_VERBOSE, DBG_WRITE, "%s: Entering.", __FUNCTION__);
 	return_val_if_untrue(port, 0);
 
 	*out_length = 0;
@@ -241,7 +232,7 @@ int synccom_port_frame_read(struct synccom_port *port, unsigned char *buf, size_
 void synccom_port_execute_transmit(struct synccom_port *port)
 {
 	unsigned command_value;
-	TraceEvents(TRACE_LEVEL_VERBOSE, DBG_IOCTL, "%s: Entering.", __FUNCTION__);
+
 	return_if_untrue(port);
 	command_value = 0x01000000;
 	if (port->tx_modifiers & XREP) command_value |= 0x02000000;
@@ -259,7 +250,6 @@ int prepare_frame_for_fifo(struct synccom_port *port, struct synccom_frame *fram
 	unsigned transmit_length = 0;
 	NTSTATUS status = STATUS_SUCCESS;
 
-	TraceEvents(TRACE_LEVEL_VERBOSE, DBG_IOCTL, "%s: Entering.", __FUNCTION__);
 	current_length = synccom_frame_get_length(frame);
 	size_in_fifo = ((current_length % 4) == 0) ? current_length : current_length + (4 - current_length % 4);
 	frame_size = synccom_frame_get_frame_size(frame);
@@ -297,7 +287,6 @@ NTSTATUS synccom_port_data_write(struct synccom_port *port, const unsigned char 
 	const unsigned char *outgoing_data = 0;
 	unsigned char *reversed_data = 0;
 
-	TraceEvents(TRACE_LEVEL_VERBOSE, DBG_IOCTL, "%s: Entering.", __FUNCTION__);
 	return_val_if_untrue(port, 0);
 	return_val_if_untrue(data, 0);
 	return_val_if_untrue(byte_count > 0, 0);
@@ -378,7 +367,6 @@ void oframe_worker(WDFDPC Dpc)
 	struct synccom_port *port = 0;
 	int result = 0;
 
-	TraceEvents(TRACE_LEVEL_VERBOSE, DBG_IOCTL, "%s: Entering.", __FUNCTION__);
 	port = GetPortContext(WdfDpcGetParentObject(Dpc));
 	return_if_untrue(port);
 
@@ -472,7 +460,6 @@ void iframe_worker(WDFDPC Dpc) {
 	struct synccom_frame *frame = 0;
 	int result = 0, do_true = 1;
 
-	TraceEvents(TRACE_LEVEL_VERBOSE, DBG_IOCTL, "%s: Entering.", __FUNCTION__);
 	port = GetPortContext(WdfDpcGetParentObject(Dpc));
 	return_if_untrue(port);
 	return_if_untrue(port->istream);
@@ -524,7 +511,6 @@ void register_completion(_In_ WDFREQUEST Request, _In_ WDFIOTARGET Target, _In_ 
 
 	UNREFERENCED_PARAMETER(Target);
 
-	TraceEvents(TRACE_LEVEL_VERBOSE, DBG_WRITE, "%s: Entering.\n", __FUNCTION__);
 	port = (PSYNCCOM_PORT)Context;
 	if (!port) {
 		WdfObjectDelete(Request);

@@ -44,14 +44,13 @@ NTSTATUS SyncComEvtDeviceAdd(WDFDRIVER Driver, PWDFDEVICE_INIT DeviceInit)
 
 	PAGED_CODE();
 
-	TraceEvents(TRACE_LEVEL_VERBOSE, DBG_INIT, "%s: Entering.\n", __FUNCTION__);
 	port = synccom_port_new(Driver, DeviceInit);
 	if (!port)
 	{
 		TraceEvents(TRACE_LEVEL_ERROR, DBG_INIT, "%s: Error: no valid port created!\n", __FUNCTION__);
 		return STATUS_INTERNAL_ERROR;
 	}
-	TraceEvents(TRACE_LEVEL_VERBOSE, DBG_INIT, "%s: Exiting.\n", __FUNCTION__);
+
 	return STATUS_SUCCESS;
 }
 
@@ -76,8 +75,6 @@ struct synccom_port *synccom_port_new(WDFDRIVER Driver, IN PWDFDEVICE_INIT Devic
 	UNREFERENCED_PARAMETER(Driver);
 
 	PAGED_CODE();
-
-	TraceEvents(TRACE_LEVEL_VERBOSE, DBG_INIT, "%s: Entering.\n", __FUNCTION__);
 
 	port_num = instance;
 	instance++;
@@ -224,64 +221,6 @@ struct synccom_port *synccom_port_new(WDFDRIVER Driver, IN PWDFDEVICE_INIT Devic
 		return 0;
 	}
 	TraceEvents(TRACE_LEVEL_INFORMATION, DBG_PNP, "%s: device name %wZ!", __FUNCTION__, &dos_name);
-	// 
-	// Create the lock that we use to serialize calls to ResetDevice(). As an 
-	// alternative to using a WDFWAITLOCK to serialize the calls, a sequential 
-	// WDFQUEUE can be created and reset IOCTLs would be forwarded to it.
-	//
-	/*
-	WDF_OBJECT_ATTRIBUTES_INIT(&attributes);
-	attributes.ParentObject = device;
-
-	status = WdfWaitLockCreate(&attributes, &pDevContext->ResetDeviceWaitLock);
-	if (!NT_SUCCESS(status)) {
-		TraceEvents(TRACE_LEVEL_ERROR, DBG_PNP, "WdfWaitLockCreate failed  %!STATUS!\n", status);
-		return 0;
-	}
-	*/
-	/*
-	if (g_pIoSetDeviceInterfacePropertyData != NULL) {
-
-		status = WdfStringCreate(NULL,
-			WDF_NO_OBJECT_ATTRIBUTES,
-			&symbolicLinkString);
-
-		if (!NT_SUCCESS(status)) {
-			TraceEvents(TRACE_LEVEL_ERROR, DBG_PNP,
-				"WdfStringCreate failed  %!STATUS!\n", status);
-			return 0;
-		}
-
-		status = WdfDeviceRetrieveDeviceInterfaceString(device,
-			(LPGUID)&GUID_DEVINTERFACE_OSRUSBFX2,
-			NULL,
-			symbolicLinkString);
-
-		if (!NT_SUCCESS(status)) {
-			TraceEvents(TRACE_LEVEL_ERROR, DBG_PNP, "WdfDeviceRetrieveDeviceInterfaceString failed  %!STATUS!\n", status);
-			return 0;
-		}
-
-		WdfStringGetUnicodeString(symbolicLinkString, &symbolicLinkName);
-
-		isRestricted = DEVPROP_TRUE;
-
-		status = g_pIoSetDeviceInterfacePropertyData(&symbolicLinkName,
-			&DEVPKEY_DeviceInterface_Restricted,
-			0,
-			0,
-			DEVPROP_TYPE_BOOLEAN,
-			sizeof(isRestricted),
-			&isRestricted);
-
-		WdfObjectDelete(symbolicLinkString);
-
-		if (!NT_SUCCESS(status)) {
-			TraceEvents(TRACE_LEVEL_ERROR, DBG_PNP, "IoSetDeviceInterfacePropertyData failed  %!STATUS!\n", status);
-			return 0;
-		}
-	}
-	*/
 
 	status = setup_spinlocks(port);
 	if (!NT_SUCCESS(status)) {
@@ -312,7 +251,6 @@ struct synccom_port *synccom_port_new(WDFDRIVER Driver, IN PWDFDEVICE_INIT Devic
 	synccom_flist_init(&port->queued_iframes);
 	synccom_flist_init(&port->pending_iframes);
 
-	TraceEvents(TRACE_LEVEL_VERBOSE, DBG_PNP, "%s: Exiting.", __FUNCTION__);
 	return port;
 }
 
@@ -501,7 +439,6 @@ NTSTATUS SyncComEvtDevicePrepareHardware(WDFDEVICE Device, WDFCMRESLIST Resource
 
     PAGED_CODE();
 	wait_wake_enable = FALSE;
-    TraceEvents(TRACE_LEVEL_VERBOSE, DBG_PNP, "%s: Entering.\n", __FUNCTION__);
 
 	port = GetPortContext(Device);
 	return_val_if_untrue(port, STATUS_UNSUCCESSFUL);
@@ -591,7 +528,6 @@ NTSTATUS SyncComEvtDevicePrepareHardware(WDFDEVICE Device, WDFCMRESLIST Resource
 	synccom_port_purge_rx(port);
 	synccom_port_purge_tx(port);
 
-	TraceEvents(TRACE_LEVEL_VERBOSE, DBG_PNP, "%s: Exiting.\n", __FUNCTION__);
     return status;
 }
 
@@ -599,8 +535,8 @@ NTSTATUS SyncComEvtDeviceReleaseHardware(WDFDEVICE Device, WDFCMRESLIST Resource
 {
 	NTSTATUS status = STATUS_SUCCESS;
 	struct synccom_port *port = 0;
-	TraceEvents(TRACE_LEVEL_INFORMATION, DBG_POWER, "%s: Entering\n", __FUNCTION__);
 	UNREFERENCED_PARAMETER(ResourcesTranslated);
+
 	port = GetPortContext(Device);
 	return_val_if_untrue(port, 0);
 
@@ -642,7 +578,6 @@ NTSTATUS SyncComEvtDeviceD0Entry(WDFDEVICE Device, WDF_POWER_DEVICE_STATE Previo
 	port = GetPortContext(Device);
 	return_val_if_untrue(port, STATUS_UNSUCCESSFUL);
 	status = WdfIoTargetStart(WdfUsbTargetPipeGetIoTarget(port->data_read_pipe));
-
 	if (!NT_SUCCESS(status))
 	{
 		TraceEvents(TRACE_LEVEL_ERROR, DBG_POWER, "%!FUNC! Could not start data_read_pipe: failed 0x%x", status);
@@ -660,7 +595,6 @@ NTSTATUS SyncComEvtDeviceD0Exit(WDFDEVICE Device, WDF_POWER_DEVICE_STATE TargetS
 
 	return_val_if_untrue(port, STATUS_SUCCESS);
 	WdfIoTargetStop(WdfUsbTargetPipeGetIoTarget(port->data_read_pipe), WdfIoTargetCancelSentIo);
-    TraceEvents(TRACE_LEVEL_VERBOSE, DBG_POWER, "%s: Exiting.\n", __FUNCTION__);
 
     return STATUS_SUCCESS;
 }

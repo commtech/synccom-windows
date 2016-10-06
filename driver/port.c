@@ -43,7 +43,6 @@ VOID SyncComEvtIoDeviceControl(_In_ WDFQUEUE Queue, _In_ WDFREQUEST Request, _In
 
     PAGED_CODE();
 
-	TraceEvents(TRACE_LEVEL_VERBOSE, DBG_IOCTL, "%s: Entering.\n", __FUNCTION__);
     device = WdfIoQueueGetDevice(Queue);
 	port = GetPortContext(device);
 
@@ -322,8 +321,6 @@ VOID SyncComEvtIoDeviceControl(_In_ WDFQUEUE Queue, _In_ WDFREQUEST Request, _In
 		WdfRequestCompleteWithInformation(Request, status, bytes_returned);
     }
 
-    TraceEvents(TRACE_LEVEL_VERBOSE, DBG_IOCTL, "%s: Exiting.", __FUNCTION__);
-
     return;
 }
 
@@ -342,7 +339,6 @@ void synccom_port_set_clock_bits(_In_ struct synccom_port *port, unsigned char *
 	UINT32 *data = 0;
 	unsigned data_index = 0;
 
-	TraceEvents(TRACE_LEVEL_VERBOSE, DBG_IOCTL, "%s: Entering.", __FUNCTION__);
 #ifdef DISABLE_XTAL
 	clock_data[15] &= 0xfb;
 #else
@@ -385,7 +381,6 @@ void synccom_port_set_clock_bits(_In_ struct synccom_port *port, unsigned char *
 	WdfSpinLockRelease(port->board_settings_spinlock);
 
 	ExFreePoolWithTag(data, 'stiB');
-	TraceEvents(TRACE_LEVEL_VERBOSE, DBG_IOCTL, "%s: Exiting.", __FUNCTION__);
 }
 
 NTSTATUS synccom_port_program_firmware(_In_ struct synccom_port *port, unsigned char *firmware_line, size_t data_size)
@@ -466,7 +461,6 @@ NTSTATUS synccom_port_set_register_async(struct synccom_port *port, unsigned cha
 
 	UNUSED(write_return);
 
-	TraceEvents(TRACE_LEVEL_VERBOSE, DBG_IOCTL, "%s: Entering.", __FUNCTION__);
 	write_pipe = port->register_write_pipe;
 
 	WDF_OBJECT_ATTRIBUTES_INIT(&attributes);
@@ -508,7 +502,7 @@ NTSTATUS synccom_port_set_register_async(struct synccom_port *port, unsigned cha
 		return status;
 	}
 	WdfSpinLockRelease(port->request_spinlock);
-	TraceEvents(TRACE_LEVEL_VERBOSE, DBG_IOCTL, "%s: Exiting.", __FUNCTION__);
+
 	return status;
 }
 
@@ -635,12 +629,9 @@ synccom_register synccom_port_read_data_async(struct synccom_port *port, EVT_WDF
 	NTSTATUS status = STATUS_SUCCESS;
 	WDFUSBPIPE read_pipe;
 
-	TraceEvents(TRACE_LEVEL_INFORMATION, DBG_WRITE, "%s: Entering.", __FUNCTION__);
 	return_val_if_untrue(port, 0);
 
 	read_pipe = port->data_read_pipe;
-
-
 	status = WdfUsbTargetPipeFormatRequestForRead(read_pipe, port->data_read_request, port->data_read_memory, NULL);
 	if (!NT_SUCCESS(status)) {
 		TraceEvents(TRACE_LEVEL_ERROR, DBG_IOCTL, "%s: Cannot format request for read.\n", __FUNCTION__);
@@ -657,7 +648,6 @@ synccom_register synccom_port_read_data_async(struct synccom_port *port, EVT_WDF
 	}
 	WdfSpinLockRelease(port->request_spinlock);
 
-	TraceEvents(TRACE_LEVEL_VERBOSE, DBG_IOCTL, "%s: Reading data...", __FUNCTION__);
 	return status;
 }
 
