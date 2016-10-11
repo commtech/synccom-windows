@@ -552,7 +552,7 @@
     </ClCompile>
     <Inf>
       <CatalogFileName>synccom.cat</CatalogFileName>
-      <TimeStamp>1.1.1</TimeStamp>
+      <TimeStamp>1.1.2</TimeStamp>
     </Inf>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Win8 Release|x64'">
@@ -562,7 +562,7 @@
       <WppEnabled>true</WppEnabled>
     </ClCompile>
     <Inf>
-      <TimeStamp>1.1.1</TimeStamp>
+      <TimeStamp>1.1.2</TimeStamp>
       <CatalogFileName>synccom.cat</CatalogFileName>
     </Inf>
   </ItemDefinitionGroup>
@@ -573,7 +573,7 @@
       <WppEnabled>true</WppEnabled>
     </ClCompile>
     <Inf>
-      <TimeStamp>1.1.1</TimeStamp>
+      <TimeStamp>1.1.2</TimeStamp>
       <CatalogFileName>synccom.cat</CatalogFileName>
     </Inf>
   </ItemDefinitionGroup>
@@ -585,7 +585,7 @@
       <WppMinimalRebuildFromTracking>true</WppMinimalRebuildFromTracking>
     </ClCompile>
     <Inf>
-      <TimeStamp>1.1.1</TimeStamp>
+      <TimeStamp>1.1.2</TimeStamp>
       <CatalogFileName>synccom.cat</CatalogFileName>
     </Inf>
   </ItemDefinitionGroup>
@@ -596,7 +596,7 @@
       <WppEnabled>true</WppEnabled>
     </ClCompile>
     <Inf>
-      <TimeStamp>1.1.1</TimeStamp>
+      <TimeStamp>1.1.2</TimeStamp>
       <CatalogFileName>synccom.cat</CatalogFileName>
     </Inf>
   </ItemDefinitionGroup>
@@ -607,7 +607,7 @@
       <WppEnabled>true</WppEnabled>
     </ClCompile>
     <Inf>
-      <TimeStamp>1.1.1</TimeStamp>
+      <TimeStamp>1.1.2</TimeStamp>
       <CatalogFileName>synccom.cat</CatalogFileName>
     </Inf>
   </ItemDefinitionGroup>
@@ -618,7 +618,7 @@
     </ClCompile>
     <Inf>
       <CatalogFileName>synccom.cat</CatalogFileName>
-      <TimeStamp>1.1.1</TimeStamp>
+      <TimeStamp>1.1.2</TimeStamp>
     </Inf>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Win8 Release|Win32'">
@@ -628,7 +628,7 @@
     </ClCompile>
     <Inf>
       <CatalogFileName>synccom.cat</CatalogFileName>
-      <TimeStamp>1.1.1</TimeStamp>
+      <TimeStamp>1.1.2</TimeStamp>
     </Inf>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Win8.1 Release|Win32'">
@@ -638,7 +638,7 @@
     </ClCompile>
     <Inf>
       <CatalogFileName>synccom.cat</CatalogFileName>
-      <TimeStamp>1.1.1</TimeStamp>
+      <TimeStamp>1.1.2</TimeStamp>
     </Inf>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Win7 Debug|Win32'">
@@ -648,7 +648,7 @@
     </ClCompile>
     <Inf>
       <CatalogFileName>synccom.cat</CatalogFileName>
-      <TimeStamp>1.1.1</TimeStamp>
+      <TimeStamp>1.1.2</TimeStamp>
     </Inf>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Win8 Debug|Win32'">
@@ -658,7 +658,7 @@
     </ClCompile>
     <Inf>
       <CatalogFileName>synccom.cat</CatalogFileName>
-      <TimeStamp>1.1.1</TimeStamp>
+      <TimeStamp>1.1.2</TimeStamp>
     </Inf>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Win8.1 Debug|Win32'">
@@ -668,7 +668,7 @@
     </ClCompile>
     <Inf>
       <CatalogFileName>synccom.cat</CatalogFileName>
-      <TimeStamp>1.1.1</TimeStamp>
+      <TimeStamp>1.1.2</TimeStamp>
     </Inf>
   </ItemDefinitionGroup>
   <ItemGroup>
