@@ -61,7 +61,7 @@ int main(int argc, char *argv[])
 			break;
 		}
 	}
-
+	Sleep(5000);
 	// Unfortunately there's no way to verify success other than testing.
 	printf("\n\nProgramming finished! Please power cycle the device and test it before using it.\n");
 
