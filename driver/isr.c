@@ -353,12 +353,13 @@ unsigned synccom_port_transmit_frame(struct synccom_port *port, struct synccom_f
 
 	if (result) {
 		synccom_port_execute_transmit(port);
-		TraceEvents(TRACE_LEVEL_WARNING, DBG_PNP,
+		TraceEvents(TRACE_LEVEL_INFORMATION, DBG_PNP,
 			"F#%i => %i byte%s%s",
 			frame->number, frame->frame_size,
 			(frame->frame_size == 1) ? " " : "s",
 			(result != 2) ? " (starting)" : " ");
 	}
+	TraceEvents(TRACE_LEVEL_INFORMATION, DBG_PNP, "%s: New outgoing frame: %d bytes!\n", __FUNCTION__, frame->frame_size);
 	return result;
 }
 
@@ -485,7 +486,7 @@ void iframe_worker(WDFDPC Dpc) {
 			finished_frame->frame_size = synccom_frame_get_frame_size(frame);
 			synccom_frame_copy_data(finished_frame, frame);
 			KeQuerySystemTime(&finished_frame->timestamp);
-			TraceEvents(TRACE_LEVEL_WARNING, DBG_PNP, "F#%i <= %i byte%s", finished_frame->number, finished_frame->frame_size, (finished_frame->frame_size == 1) ? " " : "s");
+			TraceEvents(TRACE_LEVEL_INFORMATION, DBG_PNP, "F#%i <= %i byte%s", finished_frame->number, finished_frame->frame_size, (finished_frame->frame_size == 1) ? " " : "s");
 			WdfSpinLockAcquire(port->queued_iframes_spinlock);
 			synccom_flist_add_frame(&port->queued_iframes, finished_frame);
 			WdfSpinLockRelease(port->queued_iframes_spinlock);
@@ -540,7 +541,8 @@ void register_completion(_In_ WDFREQUEST Request, _In_ WDFIOTARGET Target, _In_ 
 #else
 	value = _byteswap_ulong(value);
 #endif
-
+	if (address == 0x00) port->firmware_rev = value;
+	if ((address == 0x00) && (read_buffer[0] == 0x00)) TraceEvents(TRACE_LEVEL_WARNING, DBG_WRITE, "%s: Sync Com firmware: 0x%8.8x\n", __FUNCTION__, value);
 	if((unsigned int)((synccom_register *)&port->register_storage)[(address / 4)] != value) TraceEvents(TRACE_LEVEL_INFORMATION, DBG_WRITE, "%s: Updating register storage: 0x%2.2X%2.2X 0x%8.8X -> 0x%2.2X%2.2X 0x%8.8X.\n", __FUNCTION__, read_buffer[0], address, (unsigned int)((synccom_register *)&port->register_storage)[(address / 4)], read_buffer[0], address, (UINT32)value);
 	WdfSpinLockAcquire(port->board_settings_spinlock);
 	if ((address < MAX_OFFSET) && (read_buffer[0] == 0x80)) ((synccom_register *)&port->register_storage)[(address / 4)] = value;
@@ -571,7 +573,7 @@ void register_completion(_In_ WDFREQUEST Request, _In_ WDFIOTARGET Target, _In_ 
 				frame->frame_size = value;
 				synccom_flist_add_frame(&port->pending_iframes, frame);
 				WdfSpinLockRelease(port->pending_iframes_spinlock);
-				TraceEvents(TRACE_LEVEL_INFORMATION, DBG_WRITE, "%s: New frame: %d bytes!\n", __FUNCTION__, value);
+				TraceEvents(TRACE_LEVEL_INFORMATION, DBG_WRITE, "%s: New incoming frame: %d bytes!\n", __FUNCTION__, value);
 			}
 			port->valid_frame_size--;
 			if(port->valid_frame_size > 0) synccom_port_get_register_async(port, FPGA_UPPER_ADDRESS + SYNCCOM_UPPER_OFFSET, BC_FIFO_L_OFFSET, register_completion, port);
@@ -583,6 +585,9 @@ void register_completion(_In_ WDFREQUEST Request, _In_ WDFIOTARGET Target, _In_ 
 		break;
 	case FIFO_BC_OFFSET:
 		WdfDpcEnqueue(port->oframe_dpc);
+		break;
+	case VSTR_OFFSET:
+		TraceEvents(TRACE_LEVEL_INFORMATION, DBG_WRITE, "%s: VSTR: 0x%8.8x", __FUNCTION__, value);
 		break;
 	}
 	WdfObjectDelete(Request);

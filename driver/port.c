@@ -46,176 +46,166 @@ VOID SyncComEvtIoDeviceControl(_In_ WDFQUEUE Queue, _In_ WDFREQUEST Request, _In
     device = WdfIoQueueGetDevice(Queue);
 	port = GetPortContext(device);
 
-    switch(IoControlCode) {
+	switch (IoControlCode) {
 
 	case SYNCCOM_SET_REGISTERS: {
-			struct synccom_registers *input_regs = 0;
+		struct synccom_registers *input_regs = 0;
 
-			status = WdfRequestRetrieveInputBuffer(Request, sizeof(*input_regs), (PVOID *)&input_regs, NULL);
-			if (!NT_SUCCESS(status)) {
-				TraceEvents(TRACE_LEVEL_ERROR, DBG_IOCTL, "%s: WdfRequestRetrieveInputBuffer failed %!STATUS!", __FUNCTION__, status);
-				break;
-			}
-			WdfSpinLockAcquire(port->board_settings_spinlock);
-			status = synccom_port_set_registers(port, input_regs);
-			WdfSpinLockRelease(port->board_settings_spinlock);
-
-			if (!NT_SUCCESS(status)) {
-				TraceEvents(TRACE_LEVEL_WARNING, DBG_IOCTL, "%s: synccom_port_set_registers failed %!STATUS!", __FUNCTION__, status);
-				break;
-			}
-			bytes_returned = 0;
+		status = WdfRequestRetrieveInputBuffer(Request, sizeof(*input_regs), (PVOID *)&input_regs, NULL);
+		if (!NT_SUCCESS(status)) {
+			TraceEvents(TRACE_LEVEL_ERROR, DBG_IOCTL, "%s: WdfRequestRetrieveInputBuffer failed %!STATUS!", __FUNCTION__, status);
+			break;
 		}
+		WdfSpinLockAcquire(port->board_settings_spinlock);
+		status = synccom_port_set_registers(port, input_regs);
+		WdfSpinLockRelease(port->board_settings_spinlock);
+
+		if (!NT_SUCCESS(status)) {
+			TraceEvents(TRACE_LEVEL_WARNING, DBG_IOCTL, "%s: synccom_port_set_registers failed %!STATUS!", __FUNCTION__, status);
+			break;
+		}
+		bytes_returned = 0;
+	}
 		break;
 	case SYNCCOM_GET_REGISTERS: {
-			struct synccom_registers *input_regs = 0;
-			struct synccom_registers *output_regs = 0;
+		struct synccom_registers *input_regs = 0;
+		struct synccom_registers *output_regs = 0;
 
-			status = WdfRequestRetrieveInputBuffer(Request, sizeof(*input_regs), (PVOID *)&input_regs, NULL);
-			if (!NT_SUCCESS(status)) {
-				TraceEvents(TRACE_LEVEL_ERROR, DBG_IOCTL, "%s: WdfRequestRetrieveInputBuffer failed %!STATUS!", __FUNCTION__, status);
-				break;
-			}
-			status = WdfRequestRetrieveOutputBuffer(Request, sizeof(*output_regs), (PVOID *)&output_regs, NULL);
-			if (!NT_SUCCESS(status)) {
-				TraceEvents(TRACE_LEVEL_WARNING, DBG_IOCTL, "%s: WdfRequestRetrieveOutputBuffer failed %!STATUS!", __FUNCTION__, status);
-				break;
-			}
-			memcpy(output_regs, input_regs, sizeof(struct synccom_registers));
-
-			synccom_port_get_registers(port, output_regs);
-
-			bytes_returned = sizeof(*output_regs);
+		status = WdfRequestRetrieveInputBuffer(Request, sizeof(*input_regs), (PVOID *)&input_regs, NULL);
+		if (!NT_SUCCESS(status)) {
+			TraceEvents(TRACE_LEVEL_ERROR, DBG_IOCTL, "%s: WdfRequestRetrieveInputBuffer failed %!STATUS!", __FUNCTION__, status);
+			break;
 		}
+		status = WdfRequestRetrieveOutputBuffer(Request, sizeof(*output_regs), (PVOID *)&output_regs, NULL);
+		if (!NT_SUCCESS(status)) {
+			TraceEvents(TRACE_LEVEL_WARNING, DBG_IOCTL, "%s: WdfRequestRetrieveOutputBuffer failed %!STATUS!", __FUNCTION__, status);
+			break;
+		}
+		memcpy(output_regs, input_regs, sizeof(struct synccom_registers));
+
+		synccom_port_get_registers(port, output_regs);
+
+		bytes_returned = sizeof(*output_regs);
+	}
 		break;
-	case SYNCCOM_PURGE_TX:
+	case SYNCCOM_PURGE_TX: {
 		status = synccom_port_purge_tx(port);
 		if (!NT_SUCCESS(status)) {
 			TraceEvents(TRACE_LEVEL_WARNING, DBG_IOCTL, "%s: synccom_port_purge_tx failed %!STATUS!", __FUNCTION__, status);
 			break;
 		}
+	}
 		break;
-	case SYNCCOM_PURGE_RX:
+	case SYNCCOM_PURGE_RX: {
 		status = synccom_port_purge_rx(port);
 		if (!NT_SUCCESS(status)) {
 			TraceEvents(TRACE_LEVEL_WARNING, DBG_IOCTL, "%s: synccom_port_purge_rx failed %!STATUS!", __FUNCTION__, status);
 			break;
 		}
+	}
 		break;
 	case SYNCCOM_ENABLE_APPEND_STATUS:
 		synccom_port_set_append_status(port, TRUE);
 		break;
-
 	case SYNCCOM_DISABLE_APPEND_STATUS:
 		synccom_port_set_append_status(port, FALSE);
 		break;
 	case SYNCCOM_GET_APPEND_STATUS: {
-			BOOLEAN *append_status = 0;
+		BOOLEAN *append_status = 0;
 
-			status = WdfRequestRetrieveOutputBuffer(Request, sizeof(*append_status), (PVOID *)&append_status, NULL);
-			if (!NT_SUCCESS(status)) {
-				TraceEvents(TRACE_LEVEL_WARNING, DBG_IOCTL, "%s: WdfRequestRetrieveOutputBuffer failed %!STATUS!", __FUNCTION__, status);
-				break;
-			}
-
-			*append_status = synccom_port_get_append_status(port);
-			bytes_returned = sizeof(*append_status);
+		status = WdfRequestRetrieveOutputBuffer(Request, sizeof(*append_status), (PVOID *)&append_status, NULL);
+		if (!NT_SUCCESS(status)) {
+			TraceEvents(TRACE_LEVEL_WARNING, DBG_IOCTL, "%s: WdfRequestRetrieveOutputBuffer failed %!STATUS!", __FUNCTION__, status);
+			break;
 		}
 
+		*append_status = synccom_port_get_append_status(port);
+		bytes_returned = sizeof(*append_status);
+	}
 		break;
 	case SYNCCOM_ENABLE_APPEND_TIMESTAMP:
 		synccom_port_set_append_timestamp(port, TRUE);
 		break;
-
 	case SYNCCOM_DISABLE_APPEND_TIMESTAMP:
 		synccom_port_set_append_timestamp(port, FALSE);
 		break;
-
 	case SYNCCOM_GET_APPEND_TIMESTAMP: {
-			BOOLEAN *append_timestamp = 0;
+		BOOLEAN *append_timestamp = 0;
 
-			status = WdfRequestRetrieveOutputBuffer(Request, sizeof(*append_timestamp), (PVOID *)&append_timestamp, NULL);
-			if (!NT_SUCCESS(status)) {
-				TraceEvents(TRACE_LEVEL_WARNING, DBG_IOCTL, "%s: WdfRequestRetrieveOutputBuffer failed %!STATUS!", __FUNCTION__, status);
-				break;
-			}
-
-			*append_timestamp = synccom_port_get_append_timestamp(port);
-			bytes_returned = sizeof(*append_timestamp);
+		status = WdfRequestRetrieveOutputBuffer(Request, sizeof(*append_timestamp), (PVOID *)&append_timestamp, NULL);
+		if (!NT_SUCCESS(status)) {
+			TraceEvents(TRACE_LEVEL_WARNING, DBG_IOCTL, "%s: WdfRequestRetrieveOutputBuffer failed %!STATUS!", __FUNCTION__, status);
+			break;
 		}
 
+		*append_timestamp = synccom_port_get_append_timestamp(port);
+		bytes_returned = sizeof(*append_timestamp);
+	}
 		break;
 	case SYNCCOM_ENABLE_RX_MULTIPLE:
 		synccom_port_set_rx_multiple(port, TRUE);
 		break;
-
 	case SYNCCOM_DISABLE_RX_MULTIPLE:
 		synccom_port_set_rx_multiple(port, FALSE);
 		break;
-
 	case SYNCCOM_GET_RX_MULTIPLE: {
-			BOOLEAN *rx_multiple = 0;
+		BOOLEAN *rx_multiple = 0;
 
-			status = WdfRequestRetrieveOutputBuffer(Request, sizeof(*rx_multiple), (PVOID *)&rx_multiple, NULL);
-			if (!NT_SUCCESS(status)) {
-				TraceEvents(TRACE_LEVEL_WARNING, DBG_IOCTL, "%s: WdfRequestRetrieveOutputBuffer failed %!STATUS!", __FUNCTION__, status);
-				break;
-			}
-
-			*rx_multiple = synccom_port_get_rx_multiple(port);
-			bytes_returned = sizeof(*rx_multiple);
+		status = WdfRequestRetrieveOutputBuffer(Request, sizeof(*rx_multiple), (PVOID *)&rx_multiple, NULL);
+		if (!NT_SUCCESS(status)) {
+			TraceEvents(TRACE_LEVEL_WARNING, DBG_IOCTL, "%s: WdfRequestRetrieveOutputBuffer failed %!STATUS!", __FUNCTION__, status);
+			break;
 		}
+
+		*rx_multiple = synccom_port_get_rx_multiple(port);
+		bytes_returned = sizeof(*rx_multiple);
+	}
 		break;
 	case SYNCCOM_SET_MEMORY_CAP: {
-			struct synccom_memory_cap *memcap = 0;
+		struct synccom_memory_cap *memcap = 0;
 
-			status = WdfRequestRetrieveInputBuffer(Request, sizeof(*memcap), (PVOID *)&memcap, NULL);
-			if (!NT_SUCCESS(status)) {
-				TraceEvents(TRACE_LEVEL_WARNING, DBG_IOCTL, "%s: WdfRequestRetrieveInputBuffer failed %!STATUS!", __FUNCTION__, status);
-				break;
-			}
-
-			synccom_port_set_memory_cap(port, memcap);
+		status = WdfRequestRetrieveInputBuffer(Request, sizeof(*memcap), (PVOID *)&memcap, NULL);
+		if (!NT_SUCCESS(status)) {
+			TraceEvents(TRACE_LEVEL_WARNING, DBG_IOCTL, "%s: WdfRequestRetrieveInputBuffer failed %!STATUS!", __FUNCTION__, status);
+			break;
 		}
+
+		synccom_port_set_memory_cap(port, memcap);
+	}
 		break;
-
 	case SYNCCOM_GET_MEMORY_CAP: {
-			struct synccom_memory_cap *memcap = 0;
+		struct synccom_memory_cap *memcap = 0;
 
-			status = WdfRequestRetrieveOutputBuffer(Request, sizeof(*memcap), (PVOID *)&memcap, NULL);
-			if (!NT_SUCCESS(status)) {
-				TraceEvents(TRACE_LEVEL_WARNING, DBG_IOCTL, "%s: WdfRequestRetrieveInputBuffer failed %!STATUS!", __FUNCTION__, status);
-				break;
-			}
-
-			memcap->input = synccom_port_get_input_memory_cap(port);
-			memcap->output = synccom_port_get_output_memory_cap(port);
-			bytes_returned = sizeof(*memcap);
+		status = WdfRequestRetrieveOutputBuffer(Request, sizeof(*memcap), (PVOID *)&memcap, NULL);
+		if (!NT_SUCCESS(status)) {
+			TraceEvents(TRACE_LEVEL_WARNING, DBG_IOCTL, "%s: WdfRequestRetrieveInputBuffer failed %!STATUS!", __FUNCTION__, status);
+			break;
 		}
 
+		memcap->input = synccom_port_get_input_memory_cap(port);
+		memcap->output = synccom_port_get_output_memory_cap(port);
+		bytes_returned = sizeof(*memcap);
+	}
 		break;
 	case SYNCCOM_ENABLE_IGNORE_TIMEOUT:
 		synccom_port_set_ignore_timeout(port, TRUE);
 		break;
-
 	case SYNCCOM_DISABLE_IGNORE_TIMEOUT:
 		synccom_port_set_ignore_timeout(port, FALSE);
 		break;
-
 	case SYNCCOM_GET_IGNORE_TIMEOUT: {
-			BOOLEAN *ignore_timeout = 0;
+		BOOLEAN *ignore_timeout = 0;
 
-			status = WdfRequestRetrieveOutputBuffer(Request, sizeof(*ignore_timeout), (PVOID *)&ignore_timeout, NULL);
-			if (!NT_SUCCESS(status)) {
-				TraceEvents(TRACE_LEVEL_WARNING, DBG_IOCTL, "%s: WdfRequestRetrieveOutputBuffer failed %!STATUS!", __FUNCTION__, status);
-				break;
-			}
-
-			*ignore_timeout = synccom_port_get_ignore_timeout(port);
-			bytes_returned = sizeof(*ignore_timeout);
+		status = WdfRequestRetrieveOutputBuffer(Request, sizeof(*ignore_timeout), (PVOID *)&ignore_timeout, NULL);
+		if (!NT_SUCCESS(status)) {
+			TraceEvents(TRACE_LEVEL_WARNING, DBG_IOCTL, "%s: WdfRequestRetrieveOutputBuffer failed %!STATUS!", __FUNCTION__, status);
+			break;
 		}
-		break;
 
+		*ignore_timeout = synccom_port_get_ignore_timeout(port);
+		bytes_returned = sizeof(*ignore_timeout);
+	}
+		break;
 	case SYNCCOM_SET_TX_MODIFIERS: {
 		int *tx_modifiers = 0;
 
@@ -230,70 +220,65 @@ VOID SyncComEvtIoDeviceControl(_In_ WDFQUEUE Queue, _In_ WDFREQUEST Request, _In
 			TraceEvents(TRACE_LEVEL_WARNING, DBG_IOCTL, "%s: synccom_port_set_tx_modifiers failed %!STATUS!", __FUNCTION__, status);
 			break;
 		}
-		}
+	}
 		break;
-
 	case SYNCCOM_GET_TX_MODIFIERS: {
-			unsigned *tx_modifiers = 0;
+		unsigned *tx_modifiers = 0;
 
-			status = WdfRequestRetrieveOutputBuffer(Request, sizeof(*tx_modifiers), (PVOID *)&tx_modifiers, NULL);
-			if (!NT_SUCCESS(status)) {
-				TraceEvents(TRACE_LEVEL_WARNING, DBG_IOCTL, "%s: WdfRequestRetrieveOutputBuffer failed %!STATUS!", __FUNCTION__, status);
-				break;
-			}
-
-			*tx_modifiers = synccom_port_get_tx_modifiers(port);
-			bytes_returned = sizeof(*tx_modifiers);
+		status = WdfRequestRetrieveOutputBuffer(Request, sizeof(*tx_modifiers), (PVOID *)&tx_modifiers, NULL);
+		if (!NT_SUCCESS(status)) {
+			TraceEvents(TRACE_LEVEL_WARNING, DBG_IOCTL, "%s: WdfRequestRetrieveOutputBuffer failed %!STATUS!", __FUNCTION__, status);
+			break;
 		}
 
+		*tx_modifiers = synccom_port_get_tx_modifiers(port);
+		bytes_returned = sizeof(*tx_modifiers);
+	}
 		break;
 	case SYNCCOM_GET_WAIT_ON_WRITE: {
-			BOOLEAN *wait_on_write = 0;
+		BOOLEAN *wait_on_write = 0;
 
-			status = WdfRequestRetrieveOutputBuffer(Request, sizeof(*wait_on_write), (PVOID *)&wait_on_write, NULL);
-			if (!NT_SUCCESS(status)) {
-				TraceEvents(TRACE_LEVEL_WARNING, DBG_IOCTL, "%s: WdfRequestRetrieveOutputBuffer failed %!STATUS!", __FUNCTION__, status);
-				break;
-			}
-
-			*wait_on_write = synccom_port_get_wait_on_write(port);
-			bytes_returned = sizeof(*wait_on_write);
+		status = WdfRequestRetrieveOutputBuffer(Request, sizeof(*wait_on_write), (PVOID *)&wait_on_write, NULL);
+		if (!NT_SUCCESS(status)) {
+			TraceEvents(TRACE_LEVEL_WARNING, DBG_IOCTL, "%s: WdfRequestRetrieveOutputBuffer failed %!STATUS!", __FUNCTION__, status);
+			break;
 		}
-		break;
 
+		*wait_on_write = synccom_port_get_wait_on_write(port);
+		bytes_returned = sizeof(*wait_on_write);
+	}
+		break;
 	case SYNCCOM_ENABLE_WAIT_ON_WRITE:
 		synccom_port_set_wait_on_write(port, TRUE);
 		break;
-
 	case SYNCCOM_DISABLE_WAIT_ON_WRITE:
 		synccom_port_set_wait_on_write(port, FALSE);
 		break;
-
 	case SYNCCOM_GET_MEM_USAGE: {
-			struct synccom_memory_cap *memcap = 0;
+		struct synccom_memory_cap *memcap = 0;
 
-			status = WdfRequestRetrieveOutputBuffer(Request, sizeof(*memcap), (PVOID *)&memcap, NULL);
-			if (!NT_SUCCESS(status)) {
-				TraceEvents(TRACE_LEVEL_WARNING, DBG_IOCTL,  "%s: WdfRequestRetrieveInputBuffer failed %!STATUS!", __FUNCTION__, status);
-				break;
-			}
-
-			memcap->input = synccom_port_get_input_memory_usage(port);
-			memcap->output = synccom_port_get_output_memory_usage(port);
-
-			bytes_returned = sizeof(*memcap);
+		status = WdfRequestRetrieveOutputBuffer(Request, sizeof(*memcap), (PVOID *)&memcap, NULL);
+		if (!NT_SUCCESS(status)) {
+			TraceEvents(TRACE_LEVEL_WARNING, DBG_IOCTL, "%s: WdfRequestRetrieveInputBuffer failed %!STATUS!", __FUNCTION__, status);
+			break;
 		}
+
+		memcap->input = synccom_port_get_input_memory_usage(port);
+		memcap->output = synccom_port_get_output_memory_usage(port);
+
+		bytes_returned = sizeof(*memcap);
+	}
 		break;
 	case SYNCCOM_SET_CLOCK_BITS: {
-			unsigned char *clock_bits = 0;
+		unsigned char *clock_bits = 0;
 
-			status = WdfRequestRetrieveInputBuffer(Request, NUM_CLOCK_BYTES, (PVOID *)&clock_bits, NULL);
-			if (!NT_SUCCESS(status)) {
-				TraceEvents(TRACE_LEVEL_WARNING, DBG_IOCTL, "WdfRequestRetrieveInputBuffer failed %!STATUS!", status);
-				break;
-			}
-			synccom_port_set_clock_bits(port, clock_bits);
+		status = WdfRequestRetrieveInputBuffer(Request, NUM_CLOCK_BYTES, (PVOID *)&clock_bits, NULL);
+		if (!NT_SUCCESS(status)) {
+			TraceEvents(TRACE_LEVEL_WARNING, DBG_IOCTL, "WdfRequestRetrieveInputBuffer failed %!STATUS!", status);
+			break;
 		}
+		synccom_port_set_clock_bits(port, clock_bits);
+	}
 		break;
 	case SYNCCOM_REPROGRAM: {
 		unsigned char *firmware_line = 0;
@@ -303,20 +288,34 @@ VOID SyncComEvtIoDeviceControl(_In_ WDFQUEUE Queue, _In_ WDFREQUEST Request, _In
 			TraceEvents(TRACE_LEVEL_WARNING, DBG_IOCTL, "WdfRequestRetrieveInputMemory failed %!STATUS!", status);
 			break;
 		}
-		for (data_size = 0;; data_size++)
-		{
-			if (firmware_line[data_size] == 0x13) break; // Should pass everything before 0x13. This will return the size of everything before 0x13.
-			if (data_size > 50) break; // Best safety check I can think of - highest should be ~47, so this will see a runaway line.
+		// Best safety check I can think of - highest should be ~47, so this will see a runaway line.
+		for (data_size = 0; data_size < buffer_size; data_size++) {
+			if (firmware_line[data_size] == '\n') break;
+			if (data_size > 50) break;
 		}
-		if(data_size < 51) status = synccom_port_program_firmware(port, firmware_line, data_size);
+
+		if (data_size < 51) status = synccom_port_program_firmware(port, firmware_line, data_size);
 		// Currently I get, store, get, modify, send the buffer - there's a better way, I'm just rushed.
 	}
-	break;
-    default :
-        status = STATUS_INVALID_DEVICE_REQUEST;
-        break;
-    }
+		break;
+	case SYNCCOM_GET_FIRMWARE: {
+			UINT32 *firmware_revision = 0;
 
+			status = WdfRequestRetrieveOutputBuffer(Request, sizeof(*firmware_revision), (PVOID *)&firmware_revision, NULL);
+			if (!NT_SUCCESS(status)) {
+				TraceEvents(TRACE_LEVEL_WARNING, DBG_IOCTL, "%s: WdfRequestRetrieveInputBuffer failed %!STATUS!", __FUNCTION__, status);
+				break;
+			}
+			*firmware_revision = synccom_port_get_firmware_rev(port);
+			bytes_returned = sizeof(*firmware_revision);
+		}
+		break;
+	default: {
+		TraceEvents(TRACE_LEVEL_INFORMATION, DBG_IOCTL, "%s: Default?\n", __FUNCTION__);
+		status = STATUS_INVALID_DEVICE_REQUEST;
+	}
+		break;
+	}
     if (request_pending == FALSE) {
 		WdfRequestCompleteWithInformation(Request, status, bytes_returned);
     }
@@ -741,6 +740,13 @@ BOOLEAN synccom_port_get_ignore_timeout(struct synccom_port *port)
 
 	return port->ignore_timeout;
 }
+
+UINT32 synccom_port_get_firmware_rev(struct synccom_port *port)
+{
+	return_val_if_untrue(port, 0);
+	return port->firmware_rev;
+}
+
 
 void synccom_port_set_rx_multiple(struct synccom_port *port, BOOLEAN value)
 {

@@ -527,7 +527,8 @@ NTSTATUS SyncComEvtDevicePrepareHardware(WDFDEVICE Device, WDFCMRESLIST Resource
 
 	synccom_port_purge_rx(port);
 	synccom_port_purge_tx(port);
-
+	synccom_port_get_register_async(port, FPGA_UPPER_ADDRESS + SYNCCOM_UPPER_OFFSET, VSTR_OFFSET, register_completion, port);
+	synccom_port_get_register_async(port, FPGA_UPPER_ADDRESS, 0x00, register_completion, port);
     return status;
 }
 

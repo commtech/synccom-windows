@@ -1,0 +1,5 @@
+﻿  get-firmware.c
+  Generating code
+  All 4 functions were compiled because no usable IPDB/IOBJ from previous compilation was found.
+  Finished generating code
+  get-firmware.vcxproj -> C:\Users\Josh\Documents\repos\drivers\synccom-windows\x64\Release\get-firmware.exe

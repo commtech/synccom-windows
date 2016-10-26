@@ -147,6 +147,7 @@ typedef struct synccom_port {
 	WDFUSBPIPE                      data_write_pipe;
 	WDFUSBPIPE						register_write_pipe;
 	WDFUSBPIPE						register_read_pipe;
+	UINT32							firmware_rev;
 
 	unsigned port_number;
 	struct synccom_registers register_storage;

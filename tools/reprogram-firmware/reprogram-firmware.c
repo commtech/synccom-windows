@@ -4,7 +4,7 @@
 #include "../../inc/synccom.h"
 
 // Just for reference, I'll keep this here.
-#define CURRENT_FIRMWARE_FILE "sfscc2usb_Rev_010D.s19"
+#define CURRENT_FIRMWARE_FILE "sfscc2usb_Rev_0115.s19"
 
 int main(int argc, char *argv[])
 {
@@ -61,7 +61,7 @@ int main(int argc, char *argv[])
 			break;
 		}
 	}
-	Sleep(5000);
+	Sleep(10000);
 	// Unfortunately there's no way to verify success other than testing.
 	printf("\n\nProgramming finished! Please power cycle the device and test it before using it.\n");
 
