@@ -620,6 +620,9 @@
       <CatalogFileName>synccom.cat</CatalogFileName>
       <TimeStamp>1.1.2</TimeStamp>
     </Inf>
+    <Link>
+      <EntryPointSymbol>FxDriverEntry</EntryPointSymbol>
+    </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Win8 Release|Win32'">
     <ClCompile>
