@@ -21,15 +21,15 @@
 [Version]
 Signature="$WINDOWS NT$"
 Class=CommtechUSB
-ClassGuid=%commtech.GUID%
+ClassGuid={E85C65CC-B33B-40D4-815E-3657C2D05017}
 Provider=%ManufacturerName%
 CatalogFile=synccom.cat
 
 [SourceDisksNames]
-1=%synccom_Install%,,,
+1=%Disk_Description%,,,
 
 [SourceDisksFiles]
-synccom.sys = 1
+synccom.sys = 1,,""
 ; ================= Class section =====================
 
 [ClassInstall32]
@@ -47,67 +47,50 @@ ExcludeFromSelect = *
 ; ================= Device section =====================
 
 [Manufacturer]
-%ManufacturerName%=Microsoft,NT,NTx86,NTamd64
+%ManufacturerName%=synccom,NT,NTx86,NTamd64
 
-; For Win2K
-[Microsoft.NT]
-%SyncCom.DeviceDesc%=synccom, USB\VID_18f7&PID_0030
+[synccom.NT]
+%SyncCom.DeviceDesc%=synccom.Dev, USB\VID_18f7&PID_0030
 
-[Microsoft.NTx86]
-%SyncCom.DeviceDesc%=synccom, USB\VID_18f7&PID_0030
+[synccom.NTx86]
+%SyncCom.DeviceDesc%=synccom.Dev, USB\VID_18f7&PID_0030
 
-[Microsoft.NTamd64]
-%SyncCom.DeviceDesc%=synccom, USB\VID_18f7&PID_0030
+[synccom.NTamd64]
+%SyncCom.DeviceDesc%=synccom.Dev, USB\VID_18f7&PID_0030
 
 [synccom.Dev.NT]
 CopyFiles=synccom.Files.Ext
 AddReg=synccom.AddReg
 
-[synccom.NT.HW]
-AddReg=synccom.AddReg.Guid
+[synccom.Dev.NTx86]
+CopyFiles=synccom.Files.Ext
+AddReg=synccom.AddReg
+
+[synccom.Dev.NTamd64]
+CopyFiles=synccom.Files.Ext
+AddReg=synccom.AddReg
 
 [synccom.Dev.NT.Services]
-AddService = synccom, %SPSVCINST_ASSOCSERVICE%, synccom.AddService
+AddService = synccom,%SPSVCINST_ASSOCSERVICE%,synccom.AddService
 
-[synccom.NTx86]
-CopyFiles=synccom.Files.Ext
-AddReg=synccom.AddReg
+[synccom.Dev.NTx86.Services]
+AddService = synccom,%SPSVCINST_ASSOCSERVICE%,synccom.AddService
 
-[synccom.NTx86.HW]
-AddReg=synccom.AddReg.Guid
-
-[synccom.NTx86.Services]
-Addservice = synccom,%SPSVCINST_ASSOCSERVICE%,synccom.AddService
-
-[synccom.NTamd64]
-CopyFiles=synccom.Files.Ext
-AddReg=synccom.AddReg
-
-[synccom.NTamd64.HW]
-AddReg=synccom.AddReg.Guid
-
-[synccom.NTamd64.Services]
-Addservice = synccom,%SPSVCINST_ASSOCSERVICE%,synccom.AddService
+[synccom.Dev.NTamd64.Services]
+AddService = synccom,%SPSVCINST_ASSOCSERVICE%,synccom.AddService
 
 [synccom.AddReg]
-; Deprecating - do not use in new apps to identify a osrusbfx2 driver
-HKR,,DevLoader,,*ntkern
-HKR,,NTMPDriver,,synccom.sys
-; You may optionally include a check for DriverBase in your application to check for a synccom driver
 HKR,,DriverBase,,synccom.sys
 HKR,"Parameters","MaximumTransferSize",0x10001,4096
 HKR,"Parameters","DebugLevel",0x10001,2
 HKR,,FriendlyName,,%synccom_Description%
-
-
-
 
 [synccom.AddService]
 DisplayName    = %synccom.SvcDesc%
 ServiceType    = 1                  ; SERVICE_KERNEL_DRIVER
 StartType      = 3                  ; SERVICE_DEMAND_START
 ErrorControl   = 1                  ; SERVICE_ERROR_NORMAL
-ServiceBinary  = %10%\System32\Drivers\synccom.sys
+ServiceBinary  = %12%\synccom.sys
 LoadOrderGroup = Base
 
 [synccom.Files.Ext]
@@ -115,7 +98,6 @@ synccom.sys
 
 [synccom.AddReg.Guid]
 HKR,,DriverGUID,,%synccom.GUID%
-;HKR,,DriverPowerPolicySetup,,%ENABLE_DRIVER_POWER_POLICY%
 
 [SourceDisksNames]
 1=%Disk_Description%,,,
@@ -126,44 +108,13 @@ synccom.sys = 1
 [DestinationDirs]
 DefaultDestDir = 12
 
-;-------------- WDF Coinstaller installation
-
-[DestinationDirs]
-CoInstaller_CopyFiles = 11
-
-[synccom.Dev.NT.CoInstallers]
-AddReg=CoInstaller_AddReg
-CopyFiles=CoInstaller_CopyFiles
-
-[CoInstaller_CopyFiles]
-WdfCoInstaller$KMDFCOINSTALLERVERSION$.dll
-
-[SourceDisksFiles]
-WdfCoInstaller$KMDFCOINSTALLERVERSION$.dll=1 ; make sure the number matches with SourceDisksNames
-
-[CoInstaller_AddReg]
-HKR,,CoInstallers32,0x00010000, "WdfCoInstaller$KMDFCOINSTALLERVERSION$.dll,WdfCoInstaller"
-
-[synccom.Dev.NT.Wdf]
-KmdfService = synccom, synccom_wdfsect
-[synccom.NTamd64.Wdf]
-KmdfService = synccom, synccom_wdfsect
-
-[synccom.NTx86.Wdf]
-KmdfService = synccom, synccom_wdfsect
-
-
-[synccom_wdfsect]
-KmdfLibraryVersion = $KMDFVERSION$
-
 ;---------------------------------------------------------------;
 
 [Strings]
-ManufacturerName = "Commtech, Inc."
+ManufacturerName="Commtech, Inc."
 Disk_Description="Sync Com Installation Disk"
 SyncCom.DeviceDesc="Sync Com Communications Port"
 synccom.SvcDesc="Synccom Service"
-ClassName       = "Commtech USB Devices"
+ClassName="Commtech USB Devices"
 SPSVCINST_ASSOCSERVICE= 0x00000002
 synccom.GUID="{AE18AA60-7F6A-11d4-97DD-00010229B959}"
-commtech.GUID="{E85C65CC-B33B-40D4-815E-3657C2D05017}"
