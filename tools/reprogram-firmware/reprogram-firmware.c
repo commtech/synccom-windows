@@ -4,7 +4,7 @@
 #include "../../inc/synccom.h"
 
 // Just for reference, I'll keep this here.
-#define CURRENT_FIRMWARE_FILE "sfscc2usb_Rev_0115.s19"
+#define CURRENT_FIRMWARE_FILE "sfscc2usb_Rev_0119_sync.s19"
 
 int main(int argc, char *argv[])
 {
