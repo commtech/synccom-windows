@@ -1,5 +1,10 @@
 # ChangeLog
 
+## [1.2.0](https://github.com/commtech/synccom-windows/releases/tag/v1.2.0) (11/11/2016)
+- Added functionality to check the firmware version of the FX2.
+- Fixed the reprogramming widget.
+- Cleaned up several files.
+
 ## [1.1.2](https://github.com/commtech/synccom-windows/releases/tag/v1.1.2) (09/30/2016)
 - Reworked the internals to no longer rely on the ISR.
 - Cleaned up the project files and inx files.
