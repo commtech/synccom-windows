@@ -43,5 +43,6 @@ synccom_register	synccom_port_read_data_async(struct synccom_port *port, EVT_WDF
 EVT_WDF_IO_QUEUE_IO_STOP SyncComEvtIoStop;
 EVT_WDF_USB_READER_COMPLETION_ROUTINE port_received_data;
 EVT_WDF_USB_READERS_FAILED FX3EvtReadFailed;
+EVT_WDF_TIMER timer_handler;
 
 #endif

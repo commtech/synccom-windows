@@ -38,6 +38,7 @@ NTSTATUS setup_spinlocks(_In_ struct synccom_port *port);
 NTSTATUS setup_dpc(_In_ struct synccom_port *port);
 NTSTATUS setup_memory(_In_ struct synccom_port *port);
 NTSTATUS setup_request(_In_ struct synccom_port *port);
+NTSTATUS setup_timer(_In_ struct synccom_port *port);
 
 _IRQL_requires_(PASSIVE_LEVEL)
 NTSTATUS SelectInterfaces(_In_ struct synccom_port *port);

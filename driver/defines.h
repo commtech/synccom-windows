@@ -55,6 +55,7 @@ DEFINE_GUID(GUID_DEVINTERFACE_SYNCCOM, 0x36fc9e60, 0xc465, 0x11cf, 0x80, 0x56, 0
 
 #define TX_FIFO_SIZE 4096
 #define EXTRA_BLOCK_SIZE 16384
+#define TIMER_DELAY_MS 250
 
 #define UNUSED(x) (void)(x)
 
@@ -195,6 +196,8 @@ typedef struct synccom_port {
 	WDFDPC clear_oframe_dpc;
 	WDFDPC iframe_dpc;
 	WDFDPC process_read_dpc;
+
+    WDFTIMER timer;
 
 	WDFREQUEST data_read_request;
 	WDFMEMORY  data_read_memory;

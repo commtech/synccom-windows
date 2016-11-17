@@ -246,6 +246,12 @@ struct synccom_port *synccom_port_new(WDFDRIVER Driver, IN PWDFDEVICE_INIT Devic
 		return 0;
 	}
 
+    status = setup_timer(port);
+    if (!NT_SUCCESS(status)) {
+        TraceEvents(TRACE_LEVEL_ERROR, DBG_PNP, "%s: Failed to set up timer!  %!STATUS!", __FUNCTION__, status);
+        return 0;
+    }
+
 	synccom_flist_init(&port->queued_oframes);
 	synccom_flist_init(&port->sent_oframes);
 	synccom_flist_init(&port->queued_iframes);
@@ -424,6 +430,27 @@ NTSTATUS setup_dpc(_In_ struct synccom_port *port)
 	return STATUS_SUCCESS;
 }
 
+NTSTATUS setup_timer(_In_ struct synccom_port *port) {
+    NTSTATUS status = STATUS_SUCCESS;
+    WDF_TIMER_CONFIG  timerConfig;
+    WDF_OBJECT_ATTRIBUTES  timerAttributes;
+
+    WDF_TIMER_CONFIG_INIT(&timerConfig, timer_handler);
+    timerConfig.Period = TIMER_DELAY_MS;
+    timerConfig.TolerableDelay = TIMER_DELAY_MS;
+
+    WDF_OBJECT_ATTRIBUTES_INIT(&timerAttributes);
+    timerAttributes.ParentObject = port->device;
+
+    status = WdfTimerCreate(&timerConfig, &timerAttributes, &port->timer);
+    if (!NT_SUCCESS(status)) {
+        TraceEvents(TRACE_LEVEL_ERROR, DBG_PNP, "WdfTimerCreate failed %!STATUS!", status);
+        return status;
+    }
+
+    return status;
+}
+
 NTSTATUS SyncComEvtDevicePrepareHardware(WDFDEVICE Device, WDFCMRESLIST ResourceList, WDFCMRESLIST ResourceListTranslated)
 {
     NTSTATUS                            status = STATUS_SUCCESS;
@@ -529,6 +556,9 @@ NTSTATUS SyncComEvtDevicePrepareHardware(WDFDEVICE Device, WDFCMRESLIST Resource
 	synccom_port_purge_tx(port);
 	synccom_port_get_register_async(port, FPGA_UPPER_ADDRESS + SYNCCOM_UPPER_OFFSET, VSTR_OFFSET, register_completion, port);
 	synccom_port_get_register_async(port, FPGA_UPPER_ADDRESS, 0x00, register_completion, port);
+
+    WdfTimerStart(port->timer, WDF_ABS_TIMEOUT_IN_MS(TIMER_DELAY_MS));
+
     return status;
 }
 

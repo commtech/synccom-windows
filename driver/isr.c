@@ -39,11 +39,11 @@ VOID SyncComEvtIoRead(IN WDFQUEUE Queue, IN WDFREQUEST Request, IN size_t Length
 		WdfRequestCompleteWithInformation(Request, STATUS_SUCCESS, Length);
 		return;
 	}
-	port = GetPortContext(WdfIoQueueGetDevice(Queue));
-	if (!port) {
-		WdfRequestComplete(Request, STATUS_UNSUCCESSFUL);
-		return;
-	}
+    port = GetPortContext(WdfIoQueueGetDevice(Queue));
+    if (!port) {
+        WdfRequestComplete(Request, STATUS_UNSUCCESSFUL);
+        return;
+    }
 	status = WdfRequestForwardToIoQueue(Request, port->read_queue2);
 	if (!NT_SUCCESS(status)) {
 		TraceEvents(TRACE_LEVEL_ERROR, DBG_PNP, "%s: WdfRequestForwardToIoQueue failed %!STATUS!", __FUNCTION__, status);
@@ -426,7 +426,7 @@ void clear_oframe_worker(WDFDPC Dpc)
 	synccom_frame_delete(frame);
 
 		if (!synccom_flist_is_empty(&port->sent_oframes))
-			WdfDpcEnqueue(port->clear_oframe_dpc);
+        WdfDpcEnqueue(port->clear_oframe_dpc);
 
 		if (port->wait_on_write) {
 			NTSTATUS status = STATUS_SUCCESS;
@@ -705,4 +705,15 @@ BOOLEAN FX3EvtReadFailed(WDFUSBPIPE Pipe, NTSTATUS Status, USBD_STATUS UsbdStatu
 
 	TraceEvents(TRACE_LEVEL_ERROR, DBG_WRITE, "%s: Data ContinuousReader failed - did you unplug?", __FUNCTION__ );
 	return TRUE;
+}
+
+VOID timer_handler(WDFTIMER Timer)
+{
+    struct synccom_port *port = 0;
+
+    port = GetPortContext(WdfTimerGetParentObject(Timer));
+    return_if_untrue(port);
+
+    WdfDpcEnqueue(port->oframe_dpc);
+    WdfDpcEnqueue(port->iframe_dpc);
 }
