@@ -194,8 +194,6 @@ typedef struct synccom_port {
 	WDFDPC oframe_dpc;
 	WDFDPC clear_oframe_dpc;
 	WDFDPC iframe_dpc;
-	WDFDPC istream_dpc;
-	WDFDPC bc_dpc;
 	WDFDPC process_read_dpc;
 
 	WDFREQUEST data_read_request;
