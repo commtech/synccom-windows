@@ -1,6 +1,6 @@
 # Clock Frequency
 
-The Sync Com device has a programmable clock that can be set anywhere from 20 KHz to 200 MHz. However, this is not the full operational range of an FSCC port, only the range that the on-board clock can be set to.
+The Sync Com device has a programmable clock that can be set anywhere from 20 KHz to 270 MHz. However, this is not the full operational range of an FSCC port, only the range that the on-board clock can be set to.
 
 Using one of the synchronous modes you can only receive data consistently up to 50 MHz (when you are using an external clock). If you are transmitting data using an internal clock, you can safely receive data consistently up to 50 MHz. These values do not represent the throughput of the Synccom, only the speed.
 
