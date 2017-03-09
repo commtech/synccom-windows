@@ -64,4 +64,4 @@ DeviceIoControl(h, SYNCCOM_DISABLE_APPEND_TIMESTAMP,
 
 
 ### Additional Resources
-- Complete example: [`examples/append-timestamp.c`](../examples/append-timestamp.c)
+- Complete example: [`examples/append-timestamp.c`](https://github.com/commtech/synccom-windows/blob/master/examples/append-timestamp/append_timestamp.c)

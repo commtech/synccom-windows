@@ -77,4 +77,4 @@ DeviceIoControl(port, SYNCCOM_SET_MEMORY_CAP,
 
 
 ### Additional Resources
-- Complete example: [`examples/memory-cap.c`](../examples/memory-cap.c)
+- Complete example: [`examples/memory-cap.c`](https://github.com/commtech/synccom-windows/blob/master/examples/memory-cap/memory-cap.c)

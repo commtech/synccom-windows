@@ -36,4 +36,4 @@ DeviceIoControl(h, SYNCCOM_SET_CLOCK_BITS,
 
 
 ### Additional Resources
-- Complete example: [`examples/clock-frequency.c`](../examples/clock-frequency.c)
+- Complete example: [`examples/clock-frequency.c`](https://github.com/commtech/synccom-windows/blob/master/examples/clock-frequency/clock-frequency.c)

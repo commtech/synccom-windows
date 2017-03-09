@@ -45,4 +45,4 @@ DeviceIoControl(h, SYNCCOM_PURGE_RX,
 
 
 ### Additional Resources
-- Complete example: [`examples/purge.c`](../examples/purge.c)
+- Complete example: [`examples/purge.c`](https://github.com/commtech/synccom-windows/blob/master/examples/purge/purge.c)

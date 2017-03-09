@@ -20,4 +20,4 @@ CloseHandle(h);
 
 
 ### Additional Resources
-- Complete example: [`examples/tutorial.c`](../examples/tutorial.c)
+- Complete example: [`examples/tutorial.c`](https://github.com/commtech/synccom-windows/blob/master/examples/tutorial/tutorial.c)

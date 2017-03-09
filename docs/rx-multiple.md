@@ -64,4 +64,4 @@ DeviceIoControl(h, SYNCCOM_DISABLE_RX_MULTIPLE,
 
 
 ### Additional Resources
-- Complete example: [`examples/rx-multiple.c`](../examples/rx-multiple.c)
+- Complete example: [`examples/rx-multiple.c`](https://github.com/commtech/synccom-windows/blob/master/examples/rx-multiple/rx-multiple.c)

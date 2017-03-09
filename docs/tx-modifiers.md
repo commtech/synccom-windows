@@ -55,4 +55,4 @@ DeviceIoControl(h, SYNCCOM_SET_TX_MODIFIERS,
 
 
 ### Additional Resources
-- Complete example: [`examples/tx-modifiers.c`](../examples/tx-modifiers.c)
+- Complete example: [`examples/tx-modifiers.c`](https://github.com/commtech/synccom-windows/blob/master/examples/tx-modifiers/tx-modifiers.c)

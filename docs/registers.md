@@ -118,4 +118,4 @@ At this point `regs.CCR0` and `regs.BGR` would be set to their respective values
 
 
 ### Additional Resources
-- Complete example: [`examples/registers.c`](../examples/registers.c)
+- Complete example: [`examples/registers.c`](https://github.com/commtech/synccom-windows/blob/master/examples/registers/registers.c)

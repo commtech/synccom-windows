@@ -70,18 +70,18 @@ You have now transmitted and received an HDLC frame!
 
 There are likely other configuration options you will need to set up for your  own program. All of these options are described on their respective documentation page.
 
-- [Connect](docs/connect.md)
-- [Append Status](docs/append-status.md)
-- [Append Timestamp](docs/append-timestamp.md)
-- [Clock Frequency](docs/clock-frequency.md)
-- [Memory Cap](docs/memory-cap.md)
-- [Purge](docs/purge.md)
-- [Read](docs/read.md)
-- [Registers](docs/registers.md)
-- [RX Multiple](docs/rx-multiple.md)
-- [TX Modifiers](docs/tx-modifiers.md)
-- [Write](docs/write.md)
-- [Disconnect](docs/disconnect.md)
+- [Connect](https://github.com/commtech/synccom-windows/blob/master/docs/connect.md)
+- [Append Status](https://github.com/commtech/synccom-windows/blob/master/docs/append-status.md)
+- [Append Timestamp](https://github.com/commtech/synccom-windows/blob/master/docs/append-timestamp.md)
+- [Clock Frequency](https://github.com/commtech/synccom-windows/blob/master/docs/clock-frequency.md)
+- [Memory Cap](https://github.com/commtech/synccom-windows/blob/master/docs/memory-cap.md)
+- [Purge](https://github.com/commtech/synccom-windows/blob/master/docs/purge.md)
+- [Read](https://github.com/commtech/synccom-windows/blob/master/docs/read.md)
+- [Registers](https://github.com/commtech/synccom-windows/blob/master/docs/registers.md)
+- [RX Multiple](https://github.com/commtech/synccom-windows/blob/master/docs/rx-multiple.md)
+- [TX Modifiers](https://github.com/commtech/synccom-windows/blob/master/docs/tx-modifiers.md)
+- [Write](https://github.com/commtech/synccom-windows/blob/master/docs/write.md)
+- [Disconnect](https://github.com/commtech/synccom-windows/blob/master/docs/disconnect.md)
 
 ### FAQ
 
