@@ -50,13 +50,13 @@ ExcludeFromSelect = *
 %ManufacturerName%=synccom,NT,NTx86,NTamd64
 
 [synccom.NT]
-%SyncCom.DeviceDesc%=synccom.Dev, USB\VID_18f7&PID_0030
+%SyncCom.DeviceDesc%=synccom.Dev, USB\VID_2eb0&PID_0030
 
 [synccom.NTx86]
-%SyncCom.DeviceDesc%=synccom.Dev, USB\VID_18f7&PID_0030
+%SyncCom.DeviceDesc%=synccom.Dev, USB\VID_2eb0&PID_0030
 
 [synccom.NTamd64]
-%SyncCom.DeviceDesc%=synccom.Dev, USB\VID_18f7&PID_0030
+%SyncCom.DeviceDesc%=synccom.Dev, USB\VID_2eb0&PID_0030
 
 [synccom.Dev.NT]
 CopyFiles=synccom.Files.Ext
