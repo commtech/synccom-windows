@@ -1,5 +1,9 @@
 # ChangeLog
 
+## [1.2.2](https://github.com/commtech/synccom-windows/releases/tag/v1.2.2) (04/12/2017)
+- Updated driver project for new vendor ID. API remains compatible, but going forward all Sync Com devices will not work without the correct VID.
+- Updates to the documentation.
+
 ## [1.2.1](https://github.com/commtech/synccom-windows/releases/tag/v1.2.1) (11/18/2016)
 - Fixed a bug added by v1.2.0.
 - Changed the loopback file for more thorough testing.
