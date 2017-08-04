@@ -3,4 +3,14 @@
   <PropertyGroup>
     <ShowAllFiles>false</ShowAllFiles>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Win10Release|x64'">
+    <FrameWorkInteraction>DvOn</FrameWorkInteraction>
+    <UmdfVEnabled>false</UmdfVEnabled>
+    <SignMode>Off</SignMode>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Win10Release|Win32'">
+    <FrameWorkInteraction>DvOn</FrameWorkInteraction>
+    <UmdfVEnabled>false</UmdfVEnabled>
+    <SignMode>Off</SignMode>
+  </PropertyGroup>
 </Project>

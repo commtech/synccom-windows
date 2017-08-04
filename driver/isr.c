@@ -469,6 +469,7 @@ void iframe_worker(WDFDPC Dpc) {
 	WdfSpinLockAcquire(port->istream_spinlock);
 	WdfSpinLockAcquire(port->pending_iframes_spinlock);
 	do {
+        if (!port->istream) break;
 		if (!(port->istream->data_length > 0)) break;
 		if (synccom_flist_is_empty(&port->pending_iframes)) break;
 		frame = synccom_flist_peak_front(&port->pending_iframes);

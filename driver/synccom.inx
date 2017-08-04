@@ -4,7 +4,7 @@
 ;    This file is part of synccom-windows.
 ;
 ;    synccom-windows is free software: you can redistribute it and/or modify it
-;    under the terms of the GNU General Public License as published bythe Free
+;    under the terms of the GNU General Public License as published by the Free
 ;    Software Foundation, either version 3 of the License, or (at your option)
 ;    any later version.
 ;
@@ -29,7 +29,8 @@ CatalogFile=synccom.cat
 1=%Disk_Description%,,,
 
 [SourceDisksFiles]
-synccom.sys = 1,,""
+synccom.sys = 1
+
 ; ================= Class section =====================
 
 [ClassInstall32]
@@ -39,9 +40,6 @@ Addreg=SyncComClass_AddReg
 HKR,,,0,%ClassName%
 HKR,,Icon,,-10
 
-[DestinationDirs]
-synccom.Files.Ext = 10,System32\Drivers
-
 [ControlFlags]
 ExcludeFromSelect = *
 ; ================= Device section =====================
@@ -50,42 +48,54 @@ ExcludeFromSelect = *
 %ManufacturerName%=synccom,NT,NTx86,NTamd64
 
 [synccom.NT]
-%SyncCom.DeviceDesc%=synccom.Dev, USB\VID_2eb0&PID_0030
+%synccom.DeviceDesc%=synccom_install, USB\VID_2eb0&PID_0030
 
 [synccom.NTx86]
-%SyncCom.DeviceDesc%=synccom.Dev, USB\VID_2eb0&PID_0030
+%synccom.DeviceDesc%=synccom_install, USB\VID_2eb0&PID_0030
 
 [synccom.NTamd64]
-%SyncCom.DeviceDesc%=synccom.Dev, USB\VID_2eb0&PID_0030
+%synccom.DeviceDesc%=synccom_install, USB\VID_2eb0&PID_0030
 
-[synccom.Dev.NT]
-CopyFiles=synccom.Files.Ext
-AddReg=synccom.AddReg
+; ================ Install section ======================
 
-[synccom.Dev.NTx86]
-CopyFiles=synccom.Files.Ext
-AddReg=synccom.AddReg
 
-[synccom.Dev.NTamd64]
-CopyFiles=synccom.Files.Ext
-AddReg=synccom.AddReg
+[synccom_install.NT]
+CopyFiles=synccom_install.Files.Ext
+AddReg=synccom_install.AddReg
 
-[synccom.Dev.NT.Services]
-AddService = synccom,%SPSVCINST_ASSOCSERVICE%,synccom.AddService
+[synccom_install.NTx86]
+CopyFiles=synccom_install.Files.Ext
+AddReg=synccom_install.AddReg
 
-[synccom.Dev.NTx86.Services]
-AddService = synccom,%SPSVCINST_ASSOCSERVICE%,synccom.AddService
+[synccom_install.NTamd64]
+CopyFiles=synccom_install.Files.Ext
+AddReg=synccom_install.AddReg
 
-[synccom.Dev.NTamd64.Services]
-AddService = synccom,%SPSVCINST_ASSOCSERVICE%,synccom.AddService
+[synccom_install.NT.HW]
+AddReg=synccom_install.AddReg.Guid
 
-[synccom.AddReg]
+[synccom_install.NTx86.HW]
+AddReg=synccom_install.AddReg.Guid
+
+[synccom_install.NTamd64.HW]
+AddReg=synccom_install.AddReg.Guid
+
+[synccom_install.NT.Services]
+AddService = synccom,%SPSVCINST_ASSOCSERVICE%,synccom_install.AddService
+
+[synccom_install.NTx86.Services]
+AddService = synccom,%SPSVCINST_ASSOCSERVICE%,synccom_install.AddService
+
+[synccom_install.NTamd64.Services]
+AddService = synccom,%SPSVCINST_ASSOCSERVICE%,synccom_install.AddService
+
+[synccom_install.AddReg]
 HKR,,DriverBase,,synccom.sys
 HKR,"Parameters","MaximumTransferSize",0x10001,4096
 HKR,"Parameters","DebugLevel",0x10001,2
-HKR,,FriendlyName,,%synccom_Description%
+HKR,,FriendlyName,,%synccom.DeviceDesc%
 
-[synccom.AddService]
+[synccom_install.AddService]
 DisplayName    = %synccom.SvcDesc%
 ServiceType    = 1                  ; SERVICE_KERNEL_DRIVER
 StartType      = 3                  ; SERVICE_DEMAND_START
@@ -93,17 +103,11 @@ ErrorControl   = 1                  ; SERVICE_ERROR_NORMAL
 ServiceBinary  = %12%\synccom.sys
 LoadOrderGroup = Base
 
-[synccom.Files.Ext]
+[synccom_install.Files.Ext]
 synccom.sys
 
-[synccom.AddReg.Guid]
+[synccom_install.AddReg.Guid]
 HKR,,DriverGUID,,%synccom.GUID%
-
-[SourceDisksNames]
-1=%Disk_Description%,,,
-
-[SourceDisksFiles]
-synccom.sys = 1
 
 [DestinationDirs]
 DefaultDestDir = 12
@@ -111,10 +115,11 @@ DefaultDestDir = 12
 ;---------------------------------------------------------------;
 
 [Strings]
-ManufacturerName="Commtech, Inc."
+ManufacturerName = "Commtech, Inc."
 Disk_Description="Sync Com Installation Disk"
-SyncCom.DeviceDesc="Sync Com Communications Port"
-synccom.SvcDesc="Synccom Service"
-ClassName="Commtech USB Devices"
+synccom.DeviceDesc="Sync Com Communications Port"
+synccom.SvcDesc="Sync Com Service"
+ClassName = "Commtech USB Devices"
 SPSVCINST_ASSOCSERVICE= 0x00000002
 synccom.GUID="{AE18AA60-7F6A-11d4-97DD-00010229B959}"
+commtech.GUID="{E85C65CC-B33B-40D4-815E-3657C2D05017}"
