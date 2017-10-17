@@ -131,6 +131,21 @@ struct synccom_port *synccom_port_new(WDFDRIVER Driver, IN PWDFDEVICE_INIT Devic
 	device_state.DontDisplayInUI = WdfFalse;
 	WdfDeviceSetDeviceState(port->device, &device_state);
 
+	status = synccom_port_get_port_num(port, &port_num);
+	if (status == STATUS_OBJECT_NAME_NOT_FOUND) {
+		status = synccom_port_set_port_num(port, port_num);
+		if (!NT_SUCCESS(status)) {
+			WdfObjectDelete(port->device);
+			TraceEvents(TRACE_LEVEL_ERROR, DBG_PNP, "synccom_port_set_port_num failed %!STATUS!", status);
+			return 0;
+		}
+	}
+	else if (!NT_SUCCESS(status)) {
+		WdfObjectDelete(port->device);
+		TraceEvents(TRACE_LEVEL_ERROR, DBG_PNP, "synccom_port_get_port_num failed %!STATUS!", status);
+		return 0;
+	}
+
 	WDF_DEVICE_PNP_CAPABILITIES_INIT(&pnpCaps);
 	pnpCaps.SurpriseRemovalOK = WdfTrue;
 	pnpCaps.UniqueID = WdfTrue;

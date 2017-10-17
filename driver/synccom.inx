@@ -25,23 +25,36 @@ ClassGuid={E85C65CC-B33B-40D4-815E-3657C2D05017}
 Provider=%ManufacturerName%
 CatalogFile=synccom.cat
 
+[ClassInstall32]
+Addreg=synccom_classinstaller_addreg
+CopyFiles=synccom_classinstaller_copyfiles
+
+[synccom_classinstaller_addreg]
+HKR,,,0,%ClassName%
+HKR,,Icon,,-10
+HKR,,Installer32,,"synccom.dll,SynccomClassInstaller"
+
+[ControlFlags]
+ExcludeFromSelect = *
+
+[synccom_classinstaller_copyfiles]
+synccom.dll
+
+[DestinationDirs]
+DefaultDestDir = 12
+synccom_coinstaller_copyfiles = 11
+synccom_classinstaller_copyfiles = 11
+
+; ================= Class section =====================
+
 [SourceDisksNames]
 1=%Disk_Description%,,,
 
 [SourceDisksFiles]
 synccom.sys = 1
+synccom.dll = 1
+WdfCoInstaller$KMDFCOINSTALLERVERSION$.dll = 1
 
-; ================= Class section =====================
-
-[ClassInstall32]
-Addreg=SyncComClass_AddReg
-
-[SyncComClass_AddReg]
-HKR,,,0,%ClassName%
-HKR,,Icon,,-10
-
-[ControlFlags]
-ExcludeFromSelect = *
 ; ================= Device section =====================
 
 [Manufacturer]
@@ -63,30 +76,10 @@ ExcludeFromSelect = *
 CopyFiles=synccom_install.Files.Ext
 AddReg=synccom_install.AddReg
 
-[synccom_install.NTx86]
-CopyFiles=synccom_install.Files.Ext
-AddReg=synccom_install.AddReg
-
-[synccom_install.NTamd64]
-CopyFiles=synccom_install.Files.Ext
-AddReg=synccom_install.AddReg
-
 [synccom_install.NT.HW]
 AddReg=synccom_install.AddReg.Guid
 
-[synccom_install.NTx86.HW]
-AddReg=synccom_install.AddReg.Guid
-
-[synccom_install.NTamd64.HW]
-AddReg=synccom_install.AddReg.Guid
-
 [synccom_install.NT.Services]
-AddService = synccom,%SPSVCINST_ASSOCSERVICE%,synccom_install.AddService
-
-[synccom_install.NTx86.Services]
-AddService = synccom,%SPSVCINST_ASSOCSERVICE%,synccom_install.AddService
-
-[synccom_install.NTamd64.Services]
 AddService = synccom,%SPSVCINST_ASSOCSERVICE%,synccom_install.AddService
 
 [synccom_install.AddReg]
@@ -109,8 +102,23 @@ synccom.sys
 [synccom_install.AddReg.Guid]
 HKR,,DriverGUID,,%synccom.GUID%
 
-[DestinationDirs]
-DefaultDestDir = 12
+; ================ ClassInstaller section ======================
+
+[synccom_install.NT.CoInstallers]
+AddReg=synccom_coinstaller_addreg
+CopyFiles=synccom_coinstaller_copyfiles
+
+[synccom_install.NT.Wdf]
+KmdfService = synccom, synccom_wdfsect
+
+[synccom_coinstaller_addreg]
+HKR,,CoInstaller32,0x00010000,"WdfCoInstaller$KMDFCOINSTALLERVERSION$.dll,WdfCoInstaller"
+
+[synccom_coinstaller_copyfiles]
+WdfCoInstaller$KMDFCOINSTALLERVERSION$.dll
+
+[synccom_wdfsect]
+KmdfLibraryVersion = $KMDFVERSION$
 
 ;---------------------------------------------------------------;
 

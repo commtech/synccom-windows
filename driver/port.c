@@ -747,7 +747,6 @@ UINT32 synccom_port_get_firmware_rev(struct synccom_port *port)
 	return port->firmware_rev;
 }
 
-
 void synccom_port_set_rx_multiple(struct synccom_port *port, BOOLEAN value)
 {
 	return_if_untrue(port);
@@ -1007,4 +1006,61 @@ NTSTATUS synccom_port_set_tx_modifiers(struct synccom_port *port, int value)
 	}
 
 	return STATUS_SUCCESS;
+}
+
+NTSTATUS synccom_port_get_port_num(struct synccom_port *port, unsigned *port_num)
+{
+	NTSTATUS status;
+	WDFKEY devkey;
+	UNICODE_STRING key_str;
+	ULONG port_num_long;
+
+	RtlInitUnicodeString(&key_str, L"PortNumber");
+
+	status = WdfDeviceOpenRegistryKey(port->device, PLUGPLAY_REGKEY_DEVICE,
+		STANDARD_RIGHTS_ALL,
+		WDF_NO_OBJECT_ATTRIBUTES, &devkey);
+	if (!NT_SUCCESS(status)) {
+		TraceEvents(TRACE_LEVEL_ERROR, DBG_PNP, "WdfDeviceOpenRegistryKey failed %!STATUS!", status);
+		return status;
+	}
+
+	status = WdfRegistryQueryULong(devkey, &key_str, &port_num_long);
+	if (!NT_SUCCESS(status)) {
+		TraceEvents(TRACE_LEVEL_ERROR, DBG_PNP, "WdfRegistryQueryULong failed %!STATUS!", status);
+		return status;
+	}
+
+	*port_num = (unsigned)port_num_long;
+
+	WdfRegistryClose(devkey);
+
+	return status;
+}
+
+
+
+NTSTATUS synccom_port_set_port_num(struct synccom_port *port, unsigned value)
+{
+	NTSTATUS status;
+	WDFKEY devkey;
+	UNICODE_STRING key_str;
+
+	RtlInitUnicodeString(&key_str, L"PortNumber");
+
+	status = WdfDeviceOpenRegistryKey(port->device, PLUGPLAY_REGKEY_DEVICE, STANDARD_RIGHTS_ALL, WDF_NO_OBJECT_ATTRIBUTES, &devkey);
+	if (!NT_SUCCESS(status)) {
+		TraceEvents(TRACE_LEVEL_ERROR, DBG_PNP, "WdfDeviceOpenRegistryKey failed %!STATUS!", status);
+		return status;
+	}
+
+	status = WdfRegistryAssignULong(devkey, &key_str, value);
+	if (!NT_SUCCESS(status)) {
+		TraceEvents(TRACE_LEVEL_ERROR, DBG_PNP, "WdfRegistryAssignULong failed %!STATUS!", status);
+		return status;
+	}
+
+	WdfRegistryClose(devkey);
+
+	return status;
 }

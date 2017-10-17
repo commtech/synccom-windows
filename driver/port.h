@@ -70,4 +70,7 @@ NTSTATUS		synccom_port_execute_TRES(struct synccom_port *port);
 unsigned		synccom_port_is_streaming(struct synccom_port *port);
 unsigned		synccom_port_has_incoming_data(struct synccom_port *port);
 UINT32			synccom_port_get_firmware_rev(struct synccom_port *port);
+
+NTSTATUS		synccom_port_get_port_num(struct synccom_port *port, unsigned *port_num);
+NTSTATUS		synccom_port_set_port_num(struct synccom_port *port, unsigned value);
 #endif
