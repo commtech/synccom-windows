@@ -529,7 +529,7 @@ void register_completion(_In_ WDFREQUEST Request, _In_ WDFIOTARGET Target, _In_ 
 
 	bytes_read = usb_completion_params->Parameters.PipeRead.Length;
 	if (bytes_read != 6) {
-		TraceEvents(TRACE_LEVEL_WARNING, DBG_WRITE, "%s: Wrong number of bytes! Expected 6, got %d!\n", __FUNCTION__, (int)bytes_read);
+		TraceEvents(TRACE_LEVEL_ERROR, DBG_WRITE, "%s: Wrong number of bytes! Expected 6, got %d!\n", __FUNCTION__, (int)bytes_read);
 		WdfObjectDelete(Request);
 		return;
 	}
