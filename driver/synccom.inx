@@ -21,7 +21,7 @@
 [Version]
 Signature="$WINDOWS NT$"
 Class=CommtechUSB
-ClassGuid={E85C65CC-B33B-40D4-815E-3657C2D05017}
+ClassGuid={26B3A33A-DF97-466F-8F51-F8D62D3DEA45}
 Provider=%ManufacturerName%
 CatalogFile=synccom.cat
 
@@ -130,4 +130,4 @@ synccom.SvcDesc="Sync Com Service"
 ClassName = "Commtech USB Devices"
 SPSVCINST_ASSOCSERVICE= 0x00000002
 synccom.GUID="{AE18AA60-7F6A-11d4-97DD-00010229B959}"
-commtech.GUID="{E85C65CC-B33B-40D4-815E-3657C2D05017}"
+commtech.GUID="{26B3A33A-DF97-466F-8F51-F8D62D3DEA45}"

@@ -1,5 +1,11 @@
 # ChangeLog
 
+## [1.2.4](https://github.com/commtech/synccom-windows/releases/tag/v1.2.4) (10/20/2017)
+- Changed the custom class GUID to a new GUID.
+- Added a class installer to rename ports with their port number.
+- Enabled the drivers to 'remember' what number a port is set to.
+- Added a tool to allow a user to find a physical device associated with a port number.
+
 ## [1.2.3](https://github.com/commtech/synccom-windows/releases/tag/v1.2.3) (08/02/2017)
 - Updated driver project files for specific Windows 10 releases.
 
