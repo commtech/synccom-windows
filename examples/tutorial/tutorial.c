@@ -10,8 +10,7 @@ int main(void)
 	char idata[20];
 
 	/* Open port 0 in a blocking IO mode */
-	h = CreateFile(L"\\\\.\\SYNCCOM0", GENERIC_READ | GENERIC_WRITE, 0, NULL,
-		OPEN_EXISTING, 0, NULL);
+	h = CreateFile("\\\\.\\SYNCCOM0", GENERIC_READ | GENERIC_WRITE, 0, NULL, OPEN_EXISTING, 0, NULL);
 
 	if (h == INVALID_HANDLE_VALUE) {
 		fprintf(stderr, "CreateFile failed with %d\n", GetLastError());

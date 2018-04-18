@@ -113,7 +113,6 @@ int set_port(HANDLE h, int mode, int clock_mode)
         break;
     }
     regs.CCR0 = regs.CCR0 | (clock_mode << 2);
-    printf("CCR0: 0x%8.8x\n", regs.CCR0);
     ret_val = DeviceIoControl(h, SYNCCOM_SET_REGISTERS, &regs, sizeof(regs), NULL, 0, &tmp, (LPOVERLAPPED)NULL);
 
     return ret_val;
@@ -134,7 +133,7 @@ int loop_test(HANDLE h, int max_size, int num_loops)
 
         // Now we write and verify we wrote the correct amount.
         WriteFile(h, odata, write_size, &bytes_written, NULL);
-        if (bytes_written != write_size) printf("%d: Failed to write the total frame! Attmpted to write %d, wrote %d.\n", write_size, bytes_written);
+        if (bytes_written != write_size) printf("%d: Failed to write the total frame! Attmpted to write %d, wrote %d.\n", i, write_size, bytes_written);
 
         // Read the data and verify that it's correct.
         ReadFile(h, idata, sizeof(idata), &bytes_read, NULL);
