@@ -212,7 +212,7 @@
       <PreprocessorDefinitions>%(PreprocessorDefinitions);EVENT_TRACING</PreprocessorDefinitions>
     </ResourceCompile>
     <ClCompile>
-      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories);..\inc;"SDK Path\Include"</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories);..\lib\raw;"SDK Path\Include"</AdditionalIncludeDirectories>
       <TreatWarningAsError>true</TreatWarningAsError>
       <WarningLevel>Level4</WarningLevel>
       <PreprocessorDefinitions>%(PreprocessorDefinitions);EVENT_TRACING</PreprocessorDefinitions>
@@ -231,7 +231,7 @@
       <PreprocessorDefinitions>%(PreprocessorDefinitions);EVENT_TRACING</PreprocessorDefinitions>
     </ResourceCompile>
     <ClCompile>
-      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories);..\inc;"SDK Path\Include"</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories);..\lib\raw;"SDK Path\Include"</AdditionalIncludeDirectories>
       <TreatWarningAsError>true</TreatWarningAsError>
       <WarningLevel>Level4</WarningLevel>
       <PreprocessorDefinitions>%(PreprocessorDefinitions);EVENT_TRACING;POOL_NX_OPTIN=1</PreprocessorDefinitions>
@@ -250,7 +250,7 @@
       <PreprocessorDefinitions>%(PreprocessorDefinitions);EVENT_TRACING</PreprocessorDefinitions>
     </ResourceCompile>
     <ClCompile>
-      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories);..\inc</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories);..\lib\raw;</AdditionalIncludeDirectories>
       <TreatWarningAsError>true</TreatWarningAsError>
       <WarningLevel>Level4</WarningLevel>
       <PreprocessorDefinitions>%(PreprocessorDefinitions);EVENT_TRACING</PreprocessorDefinitions>
@@ -269,7 +269,7 @@
       <PreprocessorDefinitions>%(PreprocessorDefinitions);EVENT_TRACING</PreprocessorDefinitions>
     </ResourceCompile>
     <ClCompile>
-      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories);..\inc</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories);..\lib\raw;</AdditionalIncludeDirectories>
       <TreatWarningAsError>true</TreatWarningAsError>
       <WarningLevel>Level4</WarningLevel>
       <PreprocessorDefinitions>%(PreprocessorDefinitions);EVENT_TRACING</PreprocessorDefinitions>
@@ -288,7 +288,7 @@
       <PreprocessorDefinitions>%(PreprocessorDefinitions);EVENT_TRACING</PreprocessorDefinitions>
     </ResourceCompile>
     <ClCompile>
-      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories);..\inc;"SDK Path\Include"</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories);..\lib\raw;"SDK Path\Include"</AdditionalIncludeDirectories>
       <TreatWarningAsError>true</TreatWarningAsError>
       <WarningLevel>Level4</WarningLevel>
       <PreprocessorDefinitions>%(PreprocessorDefinitions);EVENT_TRACING</PreprocessorDefinitions>
@@ -307,7 +307,7 @@
       <PreprocessorDefinitions>%(PreprocessorDefinitions);EVENT_TRACING</PreprocessorDefinitions>
     </ResourceCompile>
     <ClCompile>
-      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories);..\inc;"SDK Path\Include"</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories);..\lib\raw;"SDK Path\Include"</AdditionalIncludeDirectories>
       <TreatWarningAsError>true</TreatWarningAsError>
       <WarningLevel>Level4</WarningLevel>
       <PreprocessorDefinitions>%(PreprocessorDefinitions);EVENT_TRACING;POOL_NX_OPTIN=1</PreprocessorDefinitions>
@@ -326,7 +326,7 @@
       <PreprocessorDefinitions>%(PreprocessorDefinitions);EVENT_TRACING</PreprocessorDefinitions>
     </ResourceCompile>
     <ClCompile>
-      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories);..\inc</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories);..\lib\raw;</AdditionalIncludeDirectories>
       <TreatWarningAsError>true</TreatWarningAsError>
       <WarningLevel>Level4</WarningLevel>
       <PreprocessorDefinitions>%(PreprocessorDefinitions);EVENT_TRACING</PreprocessorDefinitions>
@@ -345,7 +345,7 @@
       <PreprocessorDefinitions>%(PreprocessorDefinitions);EVENT_TRACING</PreprocessorDefinitions>
     </ResourceCompile>
     <ClCompile>
-      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories);..\inc</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories);..\lib\raw;</AdditionalIncludeDirectories>
       <TreatWarningAsError>true</TreatWarningAsError>
       <WarningLevel>Level4</WarningLevel>
       <PreprocessorDefinitions>%(PreprocessorDefinitions);EVENT_TRACING</PreprocessorDefinitions>
@@ -514,7 +514,7 @@
     <None Include="*.asmx" Exclude="@(None)" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\inc\synccom.h" />
+    <ClInclude Include="..\lib\raw\synccom.h" />
     <ClInclude Include="defines.h" />
     <ClInclude Include="device.h" />
     <ClInclude Include="flist.h" />

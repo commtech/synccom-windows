@@ -18,15 +18,15 @@
     <ClCompile Include="loopback-test.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\inc\calculate_clock_bits.c">
+    <ClCompile Include="..\..\lib\raw\calculate-clock-bits.c">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\inc\calculate_clock_bits.h">
+    <ClInclude Include="..\..\lib\raw\calculate-clock-bits.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\inc\synccom.h">
+    <ClInclude Include="..\..\lib\raw\synccom.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

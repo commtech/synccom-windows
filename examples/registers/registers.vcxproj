@@ -83,7 +83,7 @@
     <ClCompile Include="registers.c" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\inc\synccom.h" />
+    <ClInclude Include="..\..\lib\raw\synccom.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

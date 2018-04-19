@@ -80,12 +80,12 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\inc\calculate_clock_bits.c" />
+    <ClCompile Include="..\..\lib\raw\calculate-clock-bits.c" />
     <ClCompile Include="clock-frequency.c" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\inc\calculate_clock_bits.h" />
-    <ClInclude Include="..\..\inc\synccom.h" />
+    <ClInclude Include="..\..\lib\raw\calculate-clock-bits.h" />
+    <ClInclude Include="..\..\lib\raw\synccom.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

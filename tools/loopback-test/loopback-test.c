@@ -2,8 +2,8 @@
 #include <stdlib.h>
 #include <Windows.h>
 #include <time.h>
-#include "../../inc/synccom.h"
-#include "../../inc/calculate_clock_bits.h"
+#include "synccom.h"
+#include "calculate-clock-bits.h"
 
 #define MAX_BUFFER_SIZE 5000
 

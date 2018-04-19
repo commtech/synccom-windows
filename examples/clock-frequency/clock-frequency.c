@@ -1,6 +1,6 @@
 #include <Windows.h>
-#include "../../inc/synccom.h"
-#include "../../inc/calculate_clock_bits.h"
+#include "synccom.h"
+#include "calculate-clock-bits.h"
 
 int main(void)
 {

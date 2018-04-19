@@ -20,7 +20,7 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\inc\synccom.h">
+    <ClInclude Include="..\..\lib\raw\synccom.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
