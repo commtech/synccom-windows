@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "devioctl.h"
-#include "../../inc/synccom.h"
+#include "synccom.h"
 
 int main()
 {

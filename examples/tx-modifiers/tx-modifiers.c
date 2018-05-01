@@ -1,5 +1,5 @@
 #include <Windows.h>
-#include "../../inc/synccom.h"
+#include "synccom.h"
 
 /*
 This is a simple example showing how to change the transmit type for each

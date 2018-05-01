@@ -1,5 +1,5 @@
 #include <Windows.h>
-#include "../../inc/synccom.h"
+#include "synccom.h"
 
 int main(void)
 {

@@ -1,6 +1,6 @@
 #include <windows.h>
 #include <stdio.h>
-#include "../../inc/synccom.h"
+#include "synccom.h"
 
 int main(void)
 {
