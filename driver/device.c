@@ -546,7 +546,6 @@ NTSTATUS SyncComEvtDevicePrepareHardware(WDFDEVICE Device, WDFCMRESLIST Resource
 	port->pending_oframe = 0;
 
 	SYNCCOM_REGISTERS_INIT(port->register_storage);
-	synccom_port_set_clock_bits(port, clock_bits);
 
 	port->register_storage.FIFOT = DEFAULT_FIFOT_VALUE;
 	port->register_storage.CCR0 = DEFAULT_CCR0_VALUE;
@@ -566,6 +565,8 @@ NTSTATUS SyncComEvtDevicePrepareHardware(WDFDEVICE Device, WDFCMRESLIST Resource
 	port->register_storage.FCR = DEFAULT_FCR_VALUE;
 
 	synccom_port_set_registers(port, &port->register_storage);
+
+	synccom_port_set_clock_bits(port, clock_bits);
 
 	synccom_port_purge_rx(port);
 	synccom_port_purge_tx(port);
