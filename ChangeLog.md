@@ -1,5 +1,12 @@
 # ChangeLog
 
+## [1.2.5](https://github.com/commtech/synccom-windows/releases/tag/v1.2.5) (06/05/2018)
+- Modified the includes directory location to match other Commtech repositories.
+- Updated examples for includes changes.
+- Fixed the FCR not being read correctly.
+- Fixed TXEXT accidentally sending XREP instead of TXEXT.
+- Fixed FCR getting overwritten when updating the clock.
+
 ## [1.2.4](https://github.com/commtech/synccom-windows/releases/tag/v1.2.4) (10/20/2017)
 - Changed the custom class GUID to a new GUID.
 - Added a class installer to rename ports with their port number.
