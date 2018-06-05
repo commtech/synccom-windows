@@ -352,7 +352,6 @@ void synccom_port_set_clock_bits(_In_ struct synccom_port *port, unsigned char *
 
 	WdfSpinLockAcquire(port->board_settings_spinlock);
 	orig_fcr_value = (UINT32)port->register_storage.FCR;
-	orig_fcr_value = 0x303;
 	data[data_index++] = new_fcr_value = orig_fcr_value & 0xfffff0f0;
 	for (i = 19; i >= 0; i--) {
 		for (j = 7; j >= 0; j--) {
@@ -1038,8 +1037,6 @@ NTSTATUS synccom_port_get_port_num(struct synccom_port *port, unsigned *port_num
 
 	return status;
 }
-
-
 
 NTSTATUS synccom_port_set_port_num(struct synccom_port *port, unsigned value)
 {
