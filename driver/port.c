@@ -443,7 +443,8 @@ NTSTATUS synccom_port_set_registers(_In_ struct synccom_port *port, const struct
 		if (is_read_only_register(register_offset) || ((synccom_register *)regs)[i] < 0) continue;
 		if (register_offset > MAX_OFFSET) synccom_port_set_register_async(port, FPGA_UPPER_ADDRESS, FCR_OFFSET, (UINT32)(((synccom_register *)regs)[i]), basic_completion);
 		else synccom_port_set_register_async(port, FPGA_UPPER_ADDRESS + SYNCCOM_UPPER_OFFSET, register_offset, (UINT32)(((synccom_register *)regs)[i]), basic_completion);
-		if (!is_write_only_register(register_offset)) synccom_port_get_register_async(port, FPGA_UPPER_ADDRESS + SYNCCOM_UPPER_OFFSET, register_offset, register_completion, port);
+		if (!is_write_only_register(register_offset) && register_offset > MAX_OFFSET)  synccom_port_get_register_async(port, FPGA_UPPER_ADDRESS, FCR_OFFSET, register_completion, port);
+		else if (!is_write_only_register(register_offset)) synccom_port_get_register_async(port, FPGA_UPPER_ADDRESS + SYNCCOM_UPPER_OFFSET, register_offset, register_completion, port);
 	}
 
 	return STATUS_SUCCESS;
