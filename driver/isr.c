@@ -237,7 +237,7 @@ void synccom_port_execute_transmit(struct synccom_port *port)
 	command_value = 0x01000000;
 	if (port->tx_modifiers & XREP) command_value |= 0x02000000;
 	if (port->tx_modifiers & TXT) command_value |= 0x10000000;
-	if (port->tx_modifiers & TXEXT) command_value |= 0x2000000;
+	if (port->tx_modifiers & TXEXT) command_value |= 0x20000000;
 	synccom_port_set_register_async(port, FPGA_UPPER_ADDRESS + SYNCCOM_UPPER_OFFSET, CMDR_OFFSET, command_value, basic_completion);
 }
 
