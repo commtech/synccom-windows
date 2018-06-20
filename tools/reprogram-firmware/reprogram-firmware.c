@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <Windows.h>
-#include "../../inc/synccom.h"
+#include "synccom.h"
 
 // Just for reference, I'll keep this here.
 #define CURRENT_FIRMWARE_FILE "sfscc2usb_Rev_0119_sync.s19"

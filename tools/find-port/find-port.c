@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <Windows.h>
 #include <time.h>
-#include "../../inc/synccom.h"
+#include "synccom.h"
 
 #define MAX_BUFFER_SIZE 5000
 
