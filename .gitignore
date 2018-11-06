@@ -1,9 +1,9 @@
 tmp/
 examples/*/Release/
 tools/*/Release/
-tools/*/Win10*/
 debugging/
 bin/
+ipch/
 *.pdf
 *.obj
 *.lib
@@ -27,6 +27,7 @@ examples/*.exe
 
 Win7*/
 Win8*/
+Win10*/
 *.*sdf
 *.filters
 *.user
