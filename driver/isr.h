@@ -26,7 +26,6 @@
 #include "trace.h"
 
 EVT_WDF_DPC		oframe_worker;
-EVT_WDF_DPC		clear_oframe_worker;
 EVT_WDF_DPC		iframe_worker;
 EVT_WDF_DPC		SynccomProcessRead;
 
