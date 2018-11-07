@@ -53,9 +53,6 @@ BOOLEAN			synccom_port_get_ignore_timeout(struct synccom_port *port);
 void			synccom_port_set_rx_multiple(struct synccom_port *port, BOOLEAN rx_multiple);
 BOOLEAN			synccom_port_get_rx_multiple(struct synccom_port *port);
 
-void			synccom_port_set_wait_on_write(struct synccom_port *port, BOOLEAN wait_on_write);
-BOOLEAN			synccom_port_get_wait_on_write(struct synccom_port *port);
-
 NTSTATUS		synccom_port_set_tx_modifiers(struct synccom_port *port, int value);
 unsigned		synccom_port_get_tx_modifiers(struct synccom_port *port);
 

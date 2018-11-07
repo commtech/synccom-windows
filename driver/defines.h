@@ -156,7 +156,6 @@ typedef struct synccom_port {
 	BOOLEAN append_timestamp;
 	BOOLEAN ignore_timeout;
 	BOOLEAN rx_multiple;
-	BOOLEAN wait_on_write;
 	int valid_frame_size;
 	int tx_modifiers;
 	struct synccom_memory_cap memory_cap;
@@ -190,7 +189,6 @@ typedef struct synccom_port {
 	struct synccom_frame *pending_oframe; // Frame being put in the FIFO 
 
 	WDFDPC oframe_dpc;
-	WDFDPC clear_oframe_dpc;
 	WDFDPC iframe_dpc;
 	WDFDPC process_read_dpc;
 
@@ -213,7 +211,6 @@ WDF_DECLARE_CONTEXT_TYPE_WITH_NAME(SYNCCOM_PORT, GetPortContext)
 #define DEFAULT_IGNORE_TIMEOUT_VALUE 0
 #define DEFAULT_TX_MODIFIERS_VALUE XF
 #define DEFAULT_RX_MULTIPLE_VALUE 0
-#define DEFAULT_WAIT_ON_WRITE_VALUE 0
 
 #define DEFAULT_FIFOT_VALUE 0x00040004
 #define DEFAULT_CCR0_VALUE 0x0011201c

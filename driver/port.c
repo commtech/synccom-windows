@@ -236,23 +236,13 @@ VOID SyncComEvtIoDeviceControl(_In_ WDFQUEUE Queue, _In_ WDFREQUEST Request, _In
 	}
 		break;
 	case SYNCCOM_GET_WAIT_ON_WRITE: {
-		BOOLEAN *wait_on_write = 0;
-
-		status = WdfRequestRetrieveOutputBuffer(Request, sizeof(*wait_on_write), (PVOID *)&wait_on_write, NULL);
-		if (!NT_SUCCESS(status)) {
-			TraceEvents(TRACE_LEVEL_WARNING, DBG_IOCTL, "%s: WdfRequestRetrieveOutputBuffer failed %!STATUS!", __FUNCTION__, status);
-			break;
-		}
-
-		*wait_on_write = synccom_port_get_wait_on_write(port);
-		bytes_returned = sizeof(*wait_on_write);
-	}
+		status = STATUS_NOT_SUPPORTED;
 		break;
 	case SYNCCOM_ENABLE_WAIT_ON_WRITE:
-		synccom_port_set_wait_on_write(port, TRUE);
+		status = STATUS_NOT_SUPPORTED;
 		break;
 	case SYNCCOM_DISABLE_WAIT_ON_WRITE:
-		synccom_port_set_wait_on_write(port, FALSE);
+		status = STATUS_NOT_SUPPORTED;
 		break;
 	case SYNCCOM_GET_MEM_USAGE: {
 		struct synccom_memory_cap *memcap = 0;
@@ -766,27 +756,6 @@ BOOLEAN synccom_port_get_rx_multiple(struct synccom_port *port)
 	return_val_if_untrue(port, 0);
 
 	return port->rx_multiple;
-}
-
-void synccom_port_set_wait_on_write(struct synccom_port *port, BOOLEAN value)
-{
-	return_if_untrue(port);
-
-	if (port->wait_on_write != value) {
-		TraceEvents(TRACE_LEVEL_INFORMATION, DBG_PNP, "Wait on Write %i => %i", port->wait_on_write, value);
-	}
-	else {
-		TraceEvents(TRACE_LEVEL_VERBOSE, DBG_PNP, "Wait on Write = %i", value);
-	}
-
-	port->wait_on_write = (value) ? 1 : 0;
-}
-
-BOOLEAN synccom_port_get_wait_on_write(struct synccom_port *port)
-{
-	return_val_if_untrue(port, 0);
-
-	return port->wait_on_write;
 }
 
 unsigned synccom_port_is_streaming(struct synccom_port *port)

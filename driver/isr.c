@@ -91,17 +91,7 @@ VOID SyncComEvtIoWrite(_In_ WDFQUEUE Queue, _In_ WDFREQUEST Request, _In_ size_t
 	synccom_flist_add_frame(&port->queued_oframes, frame);
 	WdfSpinLockRelease(port->queued_oframes_spinlock);
 
-	if (port->wait_on_write) {
-		status = WdfRequestForwardToIoQueue(Request, port->write_queue2);
-		if (!NT_SUCCESS(status)) {
-			TraceEvents(TRACE_LEVEL_ERROR, DBG_WRITE, "%s: WdfRequestForwardToIoQueue failed %!STATUS!", __FUNCTION__, status);
-			WdfRequestComplete(Request, status);
-			return;
-		}
-	}
-	else {
-		WdfRequestCompleteWithInformation(Request, STATUS_SUCCESS, Length);
-	}
+	WdfRequestCompleteWithInformation(Request, STATUS_SUCCESS, Length);
 	WdfDpcEnqueue(port->oframe_dpc);
 }
 
@@ -399,29 +389,6 @@ void oframe_worker(WDFDPC Dpc)
 	WdfSpinLockRelease(port->board_tx_spinlock);
 	if (result != 0) {
 		WdfDpcEnqueue(port->oframe_dpc);
-	}
-}
-
-void clear_oframe_worker(WDFDPC Dpc)
-{
-	struct synccom_port *port = 0;
-	struct synccom_frame *frame = 0;
-
-	port = GetPortContext(WdfDpcGetParentObject(Dpc));
-	return_if_untrue(port);
-
-	if (port->wait_on_write) {
-		NTSTATUS status = STATUS_SUCCESS;
-		WDFREQUEST request;
-		WDF_REQUEST_PARAMETERS params;
-		unsigned length = 0;
-
-		status = WdfIoQueueRetrieveNextRequest(port->write_queue2, &request);
-		if (!NT_SUCCESS(status)) return;
-		WDF_REQUEST_PARAMETERS_INIT(&params);
-		WdfRequestGetParameters(request, &params);
-		length = (unsigned)params.Parameters.Write.Length;
-		WdfRequestCompleteWithInformation(request, status, length);
 	}
 }
 

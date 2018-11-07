@@ -424,16 +424,6 @@ NTSTATUS setup_dpc(_In_ struct synccom_port *port)
 		return status;
 	}
 
-	WDF_DPC_CONFIG_INIT(&dpcConfig, &clear_oframe_worker);
-	dpcConfig.AutomaticSerialization = TRUE;
-
-	status = WdfDpcCreate(&dpcConfig, &dpcAttributes, &port->clear_oframe_dpc);
-	if (!NT_SUCCESS(status)) {
-		WdfObjectDelete(port->device);
-		TraceEvents(TRACE_LEVEL_ERROR, DBG_PNP, "%s: process_read_dpc failed %!STATUS!", __FUNCTION__, status);
-		return status;
-	}
-
 	return STATUS_SUCCESS;
 }
 
@@ -527,7 +517,6 @@ NTSTATUS SyncComEvtDevicePrepareHardware(WDFDEVICE Device, WDFCMRESLIST Resource
 	synccom_port_set_ignore_timeout(port, DEFAULT_IGNORE_TIMEOUT_VALUE);
 	synccom_port_set_tx_modifiers(port, DEFAULT_TX_MODIFIERS_VALUE);
 	synccom_port_set_rx_multiple(port, DEFAULT_RX_MULTIPLE_VALUE);
-	synccom_port_set_wait_on_write(port, DEFAULT_WAIT_ON_WRITE_VALUE);
 	port->valid_frame_size = 0;
 
 	memory_cap.input = DEFAULT_INPUT_MEMORY_CAP_VALUE;
