@@ -268,7 +268,6 @@ struct synccom_port *synccom_port_new(WDFDRIVER Driver, IN PWDFDEVICE_INIT Devic
     }
 
 	synccom_flist_init(&port->queued_oframes);
-	synccom_flist_init(&port->sent_oframes);
 	synccom_flist_init(&port->queued_iframes);
 	synccom_flist_init(&port->pending_iframes);
 
@@ -340,13 +339,6 @@ NTSTATUS setup_spinlocks(_In_ struct synccom_port *port)
 	}
 
 	status = WdfSpinLockCreate(&attributes, &port->pending_oframe_spinlock);
-	if (!NT_SUCCESS(status)) {
-		WdfObjectDelete(port->device);
-		TraceEvents(TRACE_LEVEL_ERROR, DBG_PNP, "WdfSpinLockCreate failed %!STATUS!", status);
-		return status;
-	}
-
-	status = WdfSpinLockCreate(&attributes, &port->sent_oframes_spinlock);
 	if (!NT_SUCCESS(status)) {
 		WdfObjectDelete(port->device);
 		TraceEvents(TRACE_LEVEL_ERROR, DBG_PNP, "WdfSpinLockCreate failed %!STATUS!", status);
@@ -606,10 +598,6 @@ NTSTATUS SyncComEvtDeviceReleaseHardware(WDFDEVICE Device, WDFCMRESLIST Resource
 	WdfSpinLockAcquire(port->queued_oframes_spinlock);
 	synccom_flist_delete(&port->queued_oframes);
 	WdfSpinLockRelease(port->queued_oframes_spinlock);
-
-	WdfSpinLockAcquire(port->sent_oframes_spinlock);
-	synccom_flist_delete(&port->sent_oframes);
-	WdfSpinLockRelease(port->sent_oframes_spinlock);
 
 	return status;
 }

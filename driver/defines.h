@@ -180,9 +180,6 @@ typedef struct synccom_port {
 	WDFSPINLOCK queued_oframes_spinlock;
 	struct synccom_flist queued_oframes; // Frames not yet in the FIFO yet 
 
-	WDFSPINLOCK sent_oframes_spinlock;
-	struct synccom_flist sent_oframes; // Frames sent but not yet cleared
-
 	WDFSPINLOCK istream_spinlock;
 	struct synccom_frame *istream; // Transparent stream 
 

@@ -392,10 +392,7 @@ void oframe_worker(WDFDPC Dpc)
 	result = synccom_port_transmit_frame(port, port->pending_oframe);
 
 	if (result == 2) {
-		WdfSpinLockAcquire(port->sent_oframes_spinlock);
-		synccom_flist_add_frame(&port->sent_oframes, port->pending_oframe);
-		WdfSpinLockRelease(port->sent_oframes_spinlock);
-
+		synccom_frame_delete(port->pending_oframe);
 		port->pending_oframe = 0;
 	}
 	WdfSpinLockRelease(port->pending_oframe_spinlock);
@@ -412,48 +409,20 @@ void clear_oframe_worker(WDFDPC Dpc)
 
 	port = GetPortContext(WdfDpcGetParentObject(Dpc));
 	return_if_untrue(port);
-	WdfSpinLockAcquire(port->sent_oframes_spinlock);
 
-	frame = synccom_flist_peak_front(&port->sent_oframes);
+	if (port->wait_on_write) {
+		NTSTATUS status = STATUS_SUCCESS;
+		WDFREQUEST request;
+		WDF_REQUEST_PARAMETERS params;
+		unsigned length = 0;
 
-	if (!frame) {
-		WdfSpinLockRelease(port->sent_oframes_spinlock);
-		return;
+		status = WdfIoQueueRetrieveNextRequest(port->write_queue2, &request);
+		if (!NT_SUCCESS(status)) return;
+		WDF_REQUEST_PARAMETERS_INIT(&params);
+		WdfRequestGetParameters(request, &params);
+		length = (unsigned)params.Parameters.Write.Length;
+		WdfRequestCompleteWithInformation(request, status, length);
 	}
-
-
-	synccom_flist_remove_frame(&port->sent_oframes);
-	synccom_frame_delete(frame);
-
-		if (!synccom_flist_is_empty(&port->sent_oframes))
-        WdfDpcEnqueue(port->clear_oframe_dpc);
-
-		if (port->wait_on_write) {
-			NTSTATUS status = STATUS_SUCCESS;
-			WDFREQUEST request;
-			WDF_REQUEST_PARAMETERS params;
-			unsigned length = 0;
-
-			status = WdfIoQueueRetrieveNextRequest(port->write_queue2, &request);
-			if (!NT_SUCCESS(status)) {
-				if (status != STATUS_NO_MORE_ENTRIES) {
-					TraceEvents(TRACE_LEVEL_ERROR, DBG_IOCTL,
-						"WdfIoQueueRetrieveNextRequest failed %!STATUS!",
-						status);
-				}
-
-				WdfSpinLockRelease(port->sent_oframes_spinlock);
-				return;
-			}
-
-			WDF_REQUEST_PARAMETERS_INIT(&params);
-			WdfRequestGetParameters(request, &params);
-			length = (unsigned)params.Parameters.Write.Length;
-
-			WdfRequestCompleteWithInformation(request, status, length);
-	}
-
-	WdfSpinLockRelease(port->sent_oframes_spinlock);
 }
 
 void iframe_worker(WDFDPC Dpc) {

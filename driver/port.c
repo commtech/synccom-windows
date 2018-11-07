@@ -843,10 +843,6 @@ NTSTATUS synccom_port_purge_tx(struct synccom_port *port)
 	synccom_flist_clear(&port->queued_oframes);
 	WdfSpinLockRelease(port->queued_oframes_spinlock);
 
-	WdfSpinLockAcquire(port->sent_oframes_spinlock);
-	synccom_flist_clear(&port->sent_oframes);
-	WdfSpinLockRelease(port->sent_oframes_spinlock);
-
 	WdfSpinLockAcquire(port->pending_oframe_spinlock);
 	if (port->pending_oframe) {
 		synccom_frame_delete(port->pending_oframe);
