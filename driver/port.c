@@ -238,12 +238,15 @@ VOID SyncComEvtIoDeviceControl(_In_ WDFQUEUE Queue, _In_ WDFREQUEST Request, _In
 	case SYNCCOM_GET_WAIT_ON_WRITE: {
 		status = STATUS_NOT_SUPPORTED;
 		break;
-	case SYNCCOM_ENABLE_WAIT_ON_WRITE:
+	}
+	case SYNCCOM_ENABLE_WAIT_ON_WRITE: {
 		status = STATUS_NOT_SUPPORTED;
 		break;
-	case SYNCCOM_DISABLE_WAIT_ON_WRITE:
+	}
+	case SYNCCOM_DISABLE_WAIT_ON_WRITE: {
 		status = STATUS_NOT_SUPPORTED;
 		break;
+	}
 	case SYNCCOM_GET_MEM_USAGE: {
 		struct synccom_memory_cap *memcap = 0;
 
