@@ -112,7 +112,7 @@ CopyFiles=synccom_coinstaller_copyfiles
 KmdfService = synccom, synccom_wdfsect
 
 [synccom_coinstaller_addreg]
-HKR,,CoInstaller32,0x00010000,"WdfCoInstaller$KMDFCOINSTALLERVERSION$.dll,WdfCoInstaller"
+HKR,,CoInstallers32,0x00010000,"WdfCoInstaller$KMDFCOINSTALLERVERSION$.dll,WdfCoInstaller"
 
 [synccom_coinstaller_copyfiles]
 WdfCoInstaller$KMDFCOINSTALLERVERSION$.dll
