@@ -1,5 +1,11 @@
 # ChangeLog
 
+## [1.2.6](https://github.com/commtech/synccom-windows/releases/tag/v1.2.6) (01/07/2019)
+- Updated copyright years.
+- Removed WAIT_ON_WRITE. The USB format doesn't support this. As it was never officially implemented, this does not require a major version change.
+- Removed the tracking of sent data. This was not used and sometimes caused considerable delays.
+- Updated some header file locations.
+
 ## [1.2.5](https://github.com/commtech/synccom-windows/releases/tag/v1.2.5) (06/05/2018)
 - Modified the includes directory location to match other Commtech repositories.
 - Updated examples for includes changes.
