@@ -59,6 +59,7 @@
     <PlatformToolset>WindowsKernelModeDriver10.0</PlatformToolset>
     <ConfigurationType>Driver</ConfigurationType>
     <DriverTargetPlatform>Desktop</DriverTargetPlatform>
+    <KMDF_VERSION_MINOR>11</KMDF_VERSION_MINOR>
   </PropertyGroup>
   <PropertyGroup Label="Configuration" Condition="'$(Configuration)|$(Platform)'=='Win7Debug|x64'">
     <TargetVersion>Win7</TargetVersion>
@@ -89,6 +90,7 @@
     <PlatformToolset>WindowsKernelModeDriver10.0</PlatformToolset>
     <ConfigurationType>Driver</ConfigurationType>
     <DriverTargetPlatform>Desktop</DriverTargetPlatform>
+    <KMDF_VERSION_MINOR>11</KMDF_VERSION_MINOR>
   </PropertyGroup>
   <PropertyGroup Label="Configuration" Condition="'$(Configuration)|$(Platform)'=='Win7Debug|Win32'">
     <TargetVersion>Win7</TargetVersion>
@@ -366,6 +368,8 @@
     <ALLOW_DATE_TIME>1</ALLOW_DATE_TIME>
     <IntDir>$(ConfigurationName)\</IntDir>
     <EnableInf2cat>false</EnableInf2cat>
+    <LibraryPath>$(DDK_LibraryPath_DDKPlatform);$(LibraryPath)</LibraryPath>
+    <IncludePath>$(ProjectDir);$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Win7Debug|x64'">
     <ALLOW_DATE_TIME>1</ALLOW_DATE_TIME>
@@ -381,6 +385,8 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Win10Release|Win32'">
     <ALLOW_DATE_TIME>1</ALLOW_DATE_TIME>
     <EnableInf2cat>false</EnableInf2cat>
+    <LibraryPath>$(DDK_LibraryPath_DDKPlatform);$(LibraryPath)</LibraryPath>
+    <IncludePath>$(ProjectDir);$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Win7Debug|Win32'">
     <ALLOW_DATE_TIME>1</ALLOW_DATE_TIME>
