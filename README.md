@@ -207,7 +207,7 @@ We follow [Semantic Versioning](http://semver.org/) when creating releases.
 
 ## License
 
-Copyright (C) 2016 [Commtech, Inc.](http://fastcomproducts.com)
+Copyright (C) 2019 [Commtech, Inc.](https://fastcomproducts.com/)
 
-Licensed under the [GNU General Public License v3](http://www.gnu.org/licenses/gpl.txt).
+Licensed under the [MIT license](https://opensource.org/licenses/MIT).
 
