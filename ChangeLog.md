@@ -1,9 +1,12 @@
 # ChangeLog
 
+## [1.2.8](https://github.com/commtech/synccom-windows/releases/tag/v1.2.7) (05/28/2019)
+- Fixed a bug with port numbering.
+
 ## [1.2.7](https://github.com/commtech/synccom-windows/releases/tag/v1.2.7) (04/04/2019)
 - Updated the license to the MIT license.
 
-## [1.2.6](https://github.com/commtech/synccom-windows/releases/tag/v1.2.6) (01/07/2019)
+## [1.2.6](Unreleased)(01/07/2019)
 - Updated copyright years.
 - Removed WAIT_ON_WRITE. The USB format doesn't support this. As it was never officially implemented, this does not require a major version change.
 - Removed the tracking of sent data. This was not used and sometimes caused considerable delays.

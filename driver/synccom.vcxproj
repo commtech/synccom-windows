@@ -405,7 +405,7 @@
     </ClCompile>
     <Inf>
       <CatalogFileName>synccom.cat</CatalogFileName>
-      <TimeStamp>1.2.6</TimeStamp>
+      <TimeStamp>1.2.8</TimeStamp>
     </Inf>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Win10Release|x64'">
@@ -416,7 +416,7 @@
     </ClCompile>
     <Inf>
       <CatalogFileName>synccom.cat</CatalogFileName>
-      <TimeStamp>1.2.6</TimeStamp>
+      <TimeStamp>1.2.8</TimeStamp>
     </Inf>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Win7Debug|x64'">
@@ -427,7 +427,7 @@
       <WppMinimalRebuildFromTracking>true</WppMinimalRebuildFromTracking>
     </ClCompile>
     <Inf>
-      <TimeStamp>1.2.6</TimeStamp>
+      <TimeStamp>1.2.8</TimeStamp>
       <CatalogFileName>synccom.cat</CatalogFileName>
     </Inf>
   </ItemDefinitionGroup>
@@ -439,7 +439,7 @@
       <WppMinimalRebuildFromTracking>true</WppMinimalRebuildFromTracking>
     </ClCompile>
     <Inf>
-      <TimeStamp>1.2.6</TimeStamp>
+      <TimeStamp>1.2.8</TimeStamp>
       <CatalogFileName>synccom.cat</CatalogFileName>
     </Inf>
   </ItemDefinitionGroup>
@@ -450,7 +450,7 @@
     </ClCompile>
     <Inf>
       <CatalogFileName>synccom.cat</CatalogFileName>
-      <TimeStamp>1.2.6</TimeStamp>
+      <TimeStamp>1.2.8</TimeStamp>
     </Inf>
     <Link>
       <EntryPointSymbol>FxDriverEntry</EntryPointSymbol>
@@ -463,7 +463,7 @@
     </ClCompile>
     <Inf>
       <CatalogFileName>synccom.cat</CatalogFileName>
-      <TimeStamp>1.2.6</TimeStamp>
+      <TimeStamp>1.2.8</TimeStamp>
     </Inf>
     <Link>
       <EntryPointSymbol>FxDriverEntry</EntryPointSymbol>
@@ -476,7 +476,7 @@
     </ClCompile>
     <Inf>
       <CatalogFileName>synccom.cat</CatalogFileName>
-      <TimeStamp>1.2.6</TimeStamp>
+      <TimeStamp>1.2.8</TimeStamp>
     </Inf>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Win10Debug|Win32'">
@@ -486,7 +486,7 @@
     </ClCompile>
     <Inf>
       <CatalogFileName>synccom.cat</CatalogFileName>
-      <TimeStamp>1.2.6</TimeStamp>
+      <TimeStamp>1.2.8</TimeStamp>
     </Inf>
   </ItemDefinitionGroup>
   <ItemGroup>

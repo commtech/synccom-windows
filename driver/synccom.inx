@@ -41,6 +41,7 @@ ExcludeFromSelect = *
 
 [synccom_classinstaller_copyfiles]
 synccom.dll
+WdfCoInstaller$KMDFCOINSTALLERVERSION$.dll
 
 [DestinationDirs]
 DefaultDestDir = 12
@@ -100,6 +101,8 @@ LoadOrderGroup = Base
 
 [synccom_install.Files.Ext]
 synccom.sys
+synccom.dll
+WdfCoInstaller$KMDFCOINSTALLERVERSION$.dll
 
 [synccom_install.AddReg.Guid]
 HKR,,DriverGUID,,%synccom.GUID%

@@ -94,7 +94,7 @@ struct synccom_port *synccom_port_new(WDFDRIVER Driver, IN PWDFDEVICE_INIT Devic
 		TraceEvents(TRACE_LEVEL_ERROR, DBG_PNP, "%s: WdfDeviceInitAssignName failed %!STATUS!", __FUNCTION__, status);
 		return 0;
 	}
-	
+	TraceEvents(TRACE_LEVEL_INFORMATION, DBG_PNP, "%s: Device has been named with WdfDeviceInitAssignName: %wZ!", __FUNCTION__, &device_name);
 	// https://msdn.microsoft.com/en-us/library/windows/hardware/ff563667(v=vs.85).aspx
 	// Note: When using SDDL for device objects, your driver must link against Wdmsec.lib.
 	status = WdfDeviceInitAssignSDDLString(DeviceInit, &SDDL_DEVOBJ_SYS_ALL_ADM_RWX_WORLD_RWX_RES_RWX);
@@ -133,19 +133,11 @@ struct synccom_port *synccom_port_new(WDFDRIVER Driver, IN PWDFDEVICE_INIT Devic
 	WDF_DEVICE_STATE_INIT(&device_state);
 	device_state.DontDisplayInUI = WdfFalse;
 	WdfDeviceSetDeviceState(port->device, &device_state);
-
-	status = synccom_port_get_port_num(port, &port_num);
-	if (status == STATUS_OBJECT_NAME_NOT_FOUND) {
-		status = synccom_port_set_port_num(port, port_num);
-		if (!NT_SUCCESS(status)) {
-			WdfObjectDelete(port->device);
-			TraceEvents(TRACE_LEVEL_ERROR, DBG_PNP, "synccom_port_set_port_num failed %!STATUS!", status);
-			return 0;
-		}
-	}
-	else if (!NT_SUCCESS(status)) {
+	
+	status = synccom_port_set_port_num(port, port_num);
+	if (!NT_SUCCESS(status)) {
 		WdfObjectDelete(port->device);
-		TraceEvents(TRACE_LEVEL_ERROR, DBG_PNP, "synccom_port_get_port_num failed %!STATUS!", status);
+		TraceEvents(TRACE_LEVEL_ERROR, DBG_PNP, "synccom_port_set_port_num failed %!STATUS!", status);
 		return 0;
 	}
 
@@ -231,14 +223,14 @@ struct synccom_port *synccom_port_new(WDFDRIVER Driver, IN PWDFDEVICE_INIT Devic
 		TraceEvents(TRACE_LEVEL_ERROR, DBG_PNP, "%s: RtlUnicodeStringPrintf failed %!STATUS!", __FUNCTION__, status);
 		return 0;
 	}
-
+	
 	status = WdfDeviceCreateSymbolicLink(port->device, &dos_name);
 	if (!NT_SUCCESS(status)) {
 		WdfObjectDelete(port->device);
 		TraceEvents(TRACE_LEVEL_WARNING, DBG_PNP, "%s: WdfDeviceCreateSymbolicLink failed %!STATUS!", __FUNCTION__, status);
 		return 0;
 	}
-	TraceEvents(TRACE_LEVEL_INFORMATION, DBG_PNP, "%s: device name %wZ!", __FUNCTION__, &dos_name);
+	TraceEvents(TRACE_LEVEL_INFORMATION, DBG_PNP, "%s: Device has a symbolic link with WdfDeviceCreateSymbolicLink: %wZ!", __FUNCTION__, &dos_name);
 
 	status = setup_spinlocks(port);
 	if (!NT_SUCCESS(status)) {
