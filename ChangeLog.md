@@ -1,6 +1,6 @@
 # ChangeLog
 
-## [1.2.8](https://github.com/commtech/synccom-windows/releases/tag/v1.2.7) (05/28/2019)
+## [1.2.8](https://github.com/commtech/synccom-windows/releases/tag/v1.2.8) (05/28/2019)
 - Fixed a bug with port numbering.
 
 ## [1.2.7](https://github.com/commtech/synccom-windows/releases/tag/v1.2.7) (04/04/2019)
