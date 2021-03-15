@@ -1,5 +1,8 @@
 # ChangeLog
 
+## [1.2.9](https://github.com/commtech/synccom-windows/releases/tag/v1.2.9) (03/15/2021)
+- Fixed the INF files so that the wrong version (x86 vs x64) won't get picked.
+
 ## [1.2.8](https://github.com/commtech/synccom-windows/releases/tag/v1.2.8) (05/28/2019)
 - Fixed a bug with port numbering.
 

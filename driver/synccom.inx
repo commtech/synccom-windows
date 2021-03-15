@@ -61,28 +61,22 @@ WdfCoInstaller$KMDFCOINSTALLERVERSION$.dll = 1
 ; ================= Device section =====================
 
 [Manufacturer]
-%ManufacturerName%=synccom,NT,NTx86,NTamd64
+%ManufacturerName%=synccom,NT$ARCH$
 
-[synccom.NT]
-%synccom.DeviceDesc%=synccom_install, USB\VID_2eb0&PID_0030
-
-[synccom.NTx86]
-%synccom.DeviceDesc%=synccom_install, USB\VID_2eb0&PID_0030
-
-[synccom.NTamd64]
+[synccom.NT$ARCH$]
 %synccom.DeviceDesc%=synccom_install, USB\VID_2eb0&PID_0030
 
 ; ================ Install section ======================
 
 
-[synccom_install.NT]
+[synccom_install.NT$ARCH$]
 CopyFiles=synccom_install.Files.Ext
 AddReg=synccom_install.AddReg
 
-[synccom_install.NT.HW]
+[synccom_install.NT$ARCH$.HW]
 AddReg=synccom_install.AddReg.Guid
 
-[synccom_install.NT.Services]
+[synccom_install.NT$ARCH$.Services]
 AddService = synccom,%SPSVCINST_ASSOCSERVICE%,synccom_install.AddService
 
 [synccom_install.AddReg]
@@ -109,11 +103,11 @@ HKR,,DriverGUID,,%synccom.GUID%
 
 ; ================ ClassInstaller section ======================
 
-[synccom_install.NT.CoInstallers]
+[synccom_install.NT$ARCH$.CoInstallers]
 AddReg=synccom_coinstaller_addreg
 CopyFiles=synccom_coinstaller_copyfiles
 
-[synccom_install.NT.Wdf]
+[synccom_install.NT$ARCH$.Wdf]
 KmdfService = synccom, synccom_wdfsect
 
 [synccom_coinstaller_addreg]
