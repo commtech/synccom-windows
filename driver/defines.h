@@ -159,7 +159,7 @@ typedef struct synccom_port {
 	BOOLEAN append_timestamp;
 	BOOLEAN ignore_timeout;
 	BOOLEAN rx_multiple;
-	int valid_frame_size;
+    int pending_frame_size_reads;
 	int tx_modifiers;
 	struct synccom_memory_cap memory_cap;
 

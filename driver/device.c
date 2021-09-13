@@ -512,7 +512,7 @@ NTSTATUS SyncComEvtDevicePrepareHardware(WDFDEVICE Device, WDFCMRESLIST Resource
 	synccom_port_set_ignore_timeout(port, DEFAULT_IGNORE_TIMEOUT_VALUE);
 	synccom_port_set_tx_modifiers(port, DEFAULT_TX_MODIFIERS_VALUE);
 	synccom_port_set_rx_multiple(port, DEFAULT_RX_MULTIPLE_VALUE);
-	port->valid_frame_size = 0;
+	port->pending_frame_size_reads = 0;
 
 	memory_cap.input = DEFAULT_INPUT_MEMORY_CAP_VALUE;
 	memory_cap.output = DEFAULT_OUTPUT_MEMORY_CAP_VALUE;

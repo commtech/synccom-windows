@@ -260,7 +260,7 @@ int prepare_frame_for_fifo(struct synccom_port *port, struct synccom_frame *fram
 
 	/* If this is the first time we add data to the FIFO for this frame we tell the port how much data is in this frame. */
 	if (current_length == frame_size) synccom_port_set_register_async(port, FPGA_UPPER_ADDRESS + SYNCCOM_UPPER_OFFSET, BC_FIFO_L_OFFSET, frame_size, basic_completion);
-	TraceEvents(TRACE_LEVEL_INFORMATION, DBG_IOCTL, "%s: setting oframe_size: %d.", __FUNCTION__, frame_size);
+	TraceEvents(TRACE_LEVEL_VERBOSE, DBG_IOCTL, "%s: setting oframe_size: %d.", __FUNCTION__, frame_size);
 	synccom_port_get_register_async(port, FPGA_UPPER_ADDRESS + SYNCCOM_UPPER_OFFSET, FIFO_BC_OFFSET, register_completion, port);
 
 	/* We still have more data to send. */
@@ -302,7 +302,6 @@ NTSTATUS synccom_port_data_write(struct synccom_port *port, const unsigned char 
 	status = WdfRequestCreate(&attributes, WdfUsbTargetPipeGetIoTarget(pipe), &write_request);
 	if (!NT_SUCCESS(status)) {
 		TraceEvents(TRACE_LEVEL_ERROR, DBG_IOCTL, "%s: Cannot create new request.\n", __FUNCTION__);
-		WdfObjectDelete(write_request);
 		return status;
 	}
 	attributes.ParentObject = write_request;
@@ -346,7 +345,7 @@ unsigned synccom_port_transmit_frame(struct synccom_port *port, struct synccom_f
 
 	if (result) {
 		synccom_port_execute_transmit(port);
-		TraceEvents(TRACE_LEVEL_INFORMATION, DBG_PNP,
+		TraceEvents(TRACE_LEVEL_VERBOSE, DBG_PNP,
 			"F#%i => %i byte%s%s",
 			frame->number, frame->frame_size,
 			(frame->frame_size == 1) ? " " : "s",
@@ -426,7 +425,7 @@ void iframe_worker(WDFDPC Dpc) {
 			finished_frame->frame_size = synccom_frame_get_frame_size(frame);
 			synccom_frame_copy_data(finished_frame, frame);
 			KeQuerySystemTime(&finished_frame->timestamp);
-			TraceEvents(TRACE_LEVEL_INFORMATION, DBG_PNP, "F#%i <= %i byte%s", finished_frame->number, finished_frame->frame_size, (finished_frame->frame_size == 1) ? " " : "s");
+			TraceEvents(TRACE_LEVEL_VERBOSE, DBG_PNP, "F#%i <= %i byte%s", finished_frame->number, finished_frame->frame_size, (finished_frame->frame_size == 1) ? " " : "s");
 			WdfSpinLockAcquire(port->queued_iframes_spinlock);
 			synccom_flist_add_frame(&port->queued_iframes, finished_frame);
 			WdfSpinLockRelease(port->queued_iframes_spinlock);
@@ -448,7 +447,7 @@ void register_completion(_In_ WDFREQUEST Request, _In_ WDFIOTARGET Target, _In_ 
 	struct synccom_port *port = 0;
 	PWDF_USB_REQUEST_COMPLETION_PARAMS usb_completion_params;
 	unsigned char *read_buffer = 0, address = 0;
-	ULONG value;
+    ULONG value;
 
 	UNREFERENCED_PARAMETER(Target);
 
@@ -483,7 +482,7 @@ void register_completion(_In_ WDFREQUEST Request, _In_ WDFIOTARGET Target, _In_ 
 #endif
 	if (address == 0x00) port->firmware_rev = value;
 	if ((address == 0x00) && (read_buffer[0] == 0x00)) TraceEvents(TRACE_LEVEL_WARNING, DBG_WRITE, "%s: Sync Com firmware: 0x%8.8x\n", __FUNCTION__, value);
-	if((unsigned int)((synccom_register *)&port->register_storage)[(address / 4)] != value) TraceEvents(TRACE_LEVEL_INFORMATION, DBG_WRITE, "%s: Updating register storage: 0x%2.2X%2.2X 0x%8.8X -> 0x%2.2X%2.2X 0x%8.8X.\n", __FUNCTION__, read_buffer[0], address, (unsigned int)((synccom_register *)&port->register_storage)[(address / 4)], read_buffer[0], address, (UINT32)value);
+	TraceEvents(TRACE_LEVEL_VERBOSE, DBG_WRITE, "%s: Updating register storage: 0x%2.2X%2.2X 0x%8.8X -> 0x%2.2X%2.2X 0x%8.8X.\n", __FUNCTION__, read_buffer[0], address, (unsigned int)((synccom_register *)&port->register_storage)[(address / 4)], read_buffer[0], address, (UINT32)value);
 	WdfSpinLockAcquire(port->board_settings_spinlock);
 	if ((address < MAX_OFFSET) && (read_buffer[0] == 0x80)) ((synccom_register *)&port->register_storage)[(address / 4)] = value;
 	if ((address == FCR_OFFSET) && (read_buffer[0] == 0x00)) port->register_storage.FCR = value;
@@ -492,33 +491,47 @@ void register_completion(_In_ WDFREQUEST Request, _In_ WDFIOTARGET Target, _In_ 
 	switch (address)
 	{
 	case FIFO_FC_OFFSET:
-		if (value & 0x3ff)
-		{
-			TraceEvents(TRACE_LEVEL_INFORMATION, DBG_WRITE, "%s: More than 0 pending frame sizes: %d frames!\n", __FUNCTION__, value & 0x3ff);
-			WdfSpinLockAcquire(port->frame_size_spinlock);
-			port->valid_frame_size = value & 0x3ff;
-			synccom_port_get_register_async(port, FPGA_UPPER_ADDRESS + SYNCCOM_UPPER_OFFSET, BC_FIFO_L_OFFSET, register_completion, port);
-			WdfSpinLockRelease(port->frame_size_spinlock);
+        if (value & 0x3ff)
+        {
+            int remaining_frames, i;
+            // Race conditions - Here we get the number of valid frame sizes we have
+            // and we compare it to how many pending 'frame size reads' we have.
+            // If there are more frame sizes, we read that many. Otherwise we move on.
+            // This is because if you over-read the 'frame size' register, you get 
+            // invalid and dummy data, which can throw all of our processing off.
+            WdfSpinLockAcquire(port->frame_size_spinlock);
+            remaining_frames = (value & 0x3ff) - port->pending_frame_size_reads;
+            TraceEvents(TRACE_LEVEL_INFORMATION, DBG_WRITE, "%s: %d pending frame sizes, pending %d frame size reads, %d new frame size reads\n", __FUNCTION__, value & 0x3ff, port->pending_frame_size_reads, remaining_frames);
+            for (i = 0; i < remaining_frames; i++)
+            {
+                synccom_port_get_register_async(port, FPGA_UPPER_ADDRESS + SYNCCOM_UPPER_OFFSET, BC_FIFO_L_OFFSET, register_completion, port);
+                port->pending_frame_size_reads++;
+            }
+            WdfSpinLockRelease(port->frame_size_spinlock);
 		}
 		break;
 	case BC_FIFO_L_OFFSET:
+        // Race conditions - we need to make sure we haven't gotten bad data
+        // from over-reading the 'frame size' register. To do this we keep track
+        // of how many valid frames there are and how many pending reads to the 
+        // 'frame size' register we've sent. If the number of reads exceeds the
+        // valid number of frames, we should discard that data.
 		WdfSpinLockAcquire(port->frame_size_spinlock);
-		if (port->valid_frame_size > 0)
+        int current_read_value = port->pending_frame_size_reads;
+        if(port->pending_frame_size_reads > 0) port->pending_frame_size_reads--;
+        WdfSpinLockRelease(port->frame_size_spinlock);
+
+		if (value > 0 && current_read_value > 0)
 		{
-			if (value > 0)
-			{
-				struct synccom_frame *frame = 0;
-				WdfSpinLockAcquire(port->pending_iframes_spinlock);
-				frame = synccom_frame_new(port);
-				frame->frame_size = value;
-				synccom_flist_add_frame(&port->pending_iframes, frame);
-				WdfSpinLockRelease(port->pending_iframes_spinlock);
-				TraceEvents(TRACE_LEVEL_INFORMATION, DBG_WRITE, "%s: New incoming frame: %d bytes!\n", __FUNCTION__, value);
-			}
-			port->valid_frame_size--;
-			if(port->valid_frame_size > 0) synccom_port_get_register_async(port, FPGA_UPPER_ADDRESS + SYNCCOM_UPPER_OFFSET, BC_FIFO_L_OFFSET, register_completion, port);
+			struct synccom_frame *frame = 0;
+			frame = synccom_frame_new(port);
+			frame->frame_size = value;
+            WdfSpinLockAcquire(port->pending_iframes_spinlock);
+			synccom_flist_add_frame(&port->pending_iframes, frame);
+			WdfSpinLockRelease(port->pending_iframes_spinlock);
+			TraceEvents(TRACE_LEVEL_INFORMATION, DBG_WRITE, "%s: New incoming frame: %d bytes!\n", __FUNCTION__, value);
 		}
-		WdfSpinLockRelease(port->frame_size_spinlock);
+        synccom_port_get_register_async(port, FPGA_UPPER_ADDRESS + SYNCCOM_UPPER_OFFSET, FIFO_FC_OFFSET, register_completion, port);
 		WdfDpcEnqueue(port->iframe_dpc);
 		break;
 	case STAR_OFFSET:
@@ -574,24 +587,11 @@ void port_received_data(__in  WDFUSBPIPE Pipe, __in  WDFMEMORY Buffer, __in  siz
 
 	payload_size = (size_t)read_buffer[0];
 	payload_size = (payload_size << 8) | (size_t)read_buffer[1];
-
-	current_memory = synccom_port_get_input_memory_usage(port);
-	memory_cap = synccom_port_get_input_memory_cap(port);
-
-	if (current_memory >= memory_cap)
-	{
-		struct synccom_frame *frame = 0;
-		if (rejected_last_stream == 0) {
-			TraceEvents(TRACE_LEVEL_WARNING, DBG_WRITE, "%s: Rejecting data (memory constraint), lost %d bytes.", __FUNCTION__, payload_size);
-			rejected_last_stream = 1;
-		}
-		if (!synccom_port_is_streaming(port))
-		{
-			frame = synccom_flist_peak_back(&port->pending_iframes);
-			if (frame) frame->lost_bytes += payload_size;
-		}
-		return;
-	}
+    if (payload_size > receive_length - 2)
+    {
+        TraceEvents(TRACE_LEVEL_WARNING, DBG_WRITE, "%s: Payload larger than buffer-2: Payload: %d, Receive Length: %d.", __FUNCTION__, payload_size, receive_length);
+        return;
+    }
 
 #ifdef __BIG_ENDIAN
 #else
@@ -606,28 +606,29 @@ void port_received_data(__in  WDFUSBPIPE Pipe, __in  WDFMEMORY Buffer, __in  siz
 		}
 	}
 #endif
+
 	synccom_port_get_register_async(port, FPGA_UPPER_ADDRESS + SYNCCOM_UPPER_OFFSET, FIFO_FC_OFFSET, register_completion, port);
 
-	if (payload_size + current_memory > memory_cap) {
+    current_memory = synccom_port_get_input_memory_usage(port);
+    memory_cap = synccom_port_get_input_memory_cap(port);
+	if (payload_size + current_memory > memory_cap) 
+    {
 		unsigned bytes_lost = payload_size + current_memory - memory_cap;
 		struct synccom_frame *frame = 0;
 
+        if (bytes_lost > payload_size) bytes_lost = payload_size;
+        payload_size = memory_cap - current_memory;
 		if (!synccom_port_is_streaming(port))
 		{
 			frame = synccom_flist_peak_back(&port->pending_iframes);
 			if (frame) frame->lost_bytes += bytes_lost;
 		}
-		payload_size = memory_cap - current_memory;
 		TraceEvents(TRACE_LEVEL_WARNING, DBG_WRITE, "%s: Payload too large, new payload size: %d.", __FUNCTION__, payload_size);
-	}
-	if (payload_size < receive_length - 1) memmove(read_buffer, read_buffer + 2, payload_size);
-	else {
-		TraceEvents(TRACE_LEVEL_WARNING, DBG_WRITE, "%s: Payload larger than buffer: Payload: %d, Receive Length: %d.", __FUNCTION__, payload_size, receive_length);
-		return;
+        if (payload_size < 1) return;
 	}
 
 	WdfSpinLockAcquire(port->istream_spinlock);
-	status = synccom_frame_add_data(port->istream, read_buffer, (unsigned)payload_size);
+	status = synccom_frame_add_data(port->istream, read_buffer+2, (unsigned)payload_size);
 	WdfSpinLockRelease(port->istream_spinlock);
 
 	if (status == FALSE) TraceEvents(TRACE_LEVEL_WARNING, DBG_WRITE, "%s: Failed to add data to istream.", __FUNCTION__);
@@ -639,11 +640,9 @@ void port_received_data(__in  WDFUSBPIPE Pipe, __in  WDFMEMORY Buffer, __in  siz
 
 BOOLEAN FX3EvtReadFailed(WDFUSBPIPE Pipe, NTSTATUS Status, USBD_STATUS UsbdStatus)
 {
-	UNREFERENCED_PARAMETER(Status);
-	UNREFERENCED_PARAMETER(UsbdStatus);
 	UNREFERENCED_PARAMETER(Pipe);
 
-	TraceEvents(TRACE_LEVEL_ERROR, DBG_WRITE, "%s: Data ContinuousReader failed - did you unplug?", __FUNCTION__ );
+	TraceEvents(TRACE_LEVEL_ERROR, DBG_WRITE, "%s: Data ContinuousReader failed - did you unplug? STATUS: 0x%x, USBD_STATUS: 0x%x", __FUNCTION__, Status, UsbdStatus );
 	return TRUE;
 }
 
