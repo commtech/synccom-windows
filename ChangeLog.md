@@ -1,5 +1,9 @@
 # ChangeLog
 
+## [1.2.10.0](https://github.com/commtech/synccom-windows/releases/tag/v1.2.10.0) (09/13/2021)
+- Fixed an issue with over/underreading the frame size list when doing many short frames.
+- Fixed a BSOD with deleting objects that were never successfully created.
+
 ## [1.2.9](https://github.com/commtech/synccom-windows/releases/tag/v1.2.9) (03/15/2021)
 - Fixed the INF files so that the wrong version (x86 vs x64) won't get picked.
 
