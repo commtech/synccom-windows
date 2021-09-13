@@ -394,7 +394,6 @@ NTSTATUS synccom_port_program_firmware(_In_ struct synccom_port *port, unsigned 
 	status = WdfRequestCreate(&attributes, WdfUsbTargetPipeGetIoTarget(write_pipe), &firmware_request);
 	if (!NT_SUCCESS(status)) {
 		TraceEvents(TRACE_LEVEL_ERROR, DBG_IOCTL, "%s: Cannot create new request.\n", __FUNCTION__);
-		WdfObjectDelete(firmware_request);
 		return status;
 	}
 	attributes.ParentObject = firmware_request;
@@ -463,7 +462,6 @@ NTSTATUS synccom_port_set_register_async(struct synccom_port *port, unsigned cha
 	status = WdfRequestCreate(&attributes, WdfUsbTargetPipeGetIoTarget(write_pipe), &write_request);
 	if (!NT_SUCCESS(status)) {
 		TraceEvents(TRACE_LEVEL_ERROR, DBG_IOCTL, "%s: Cannot create new write request.\n", __FUNCTION__);
-		WdfObjectDelete(write_request);
 		return status;
 	}
 	attributes.ParentObject = write_request;
@@ -547,7 +545,6 @@ synccom_register synccom_port_get_register_async(struct synccom_port *port, unsi
 	status = WdfRequestCreate(&attributes, WdfUsbTargetPipeGetIoTarget(read_pipe), &read_request);
 	if (!NT_SUCCESS(status)) {
 		TraceEvents(TRACE_LEVEL_ERROR, DBG_IOCTL, "%s: Cannot create new read request.\n", __FUNCTION__);
-		WdfObjectDelete(read_request);
 		return status;
 	}
 	
@@ -556,7 +553,6 @@ synccom_register synccom_port_get_register_async(struct synccom_port *port, unsi
 	if (!NT_SUCCESS(status)) {
 		TraceEvents(TRACE_LEVEL_ERROR, DBG_IOCTL, "%s: Cannot create new write request.\n", __FUNCTION__);
 		WdfObjectDelete(read_request);
-		WdfObjectDelete(write_request);
 		return status;
 	}
 	attributes.ParentObject = write_request;
