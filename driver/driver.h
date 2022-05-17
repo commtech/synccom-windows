@@ -46,5 +46,6 @@ extern ULONG DebugLevel;
 
 DRIVER_INITIALIZE DriverEntry;
 EVT_WDF_OBJECT_CONTEXT_CLEANUP OsrFxEvtDriverContextCleanup;
+WDFSPINLOCK port_num_spinlock;
 
 #endif

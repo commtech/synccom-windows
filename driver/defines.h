@@ -46,6 +46,8 @@ DEFINE_GUID(GUID_DEVINTERFACE_SYNCCOM, 0x36fc9e60, 0xc465, 0x11cf, 0x80, 0x56, 0
 
 // These are defined in the firmware, so shouldn't be changed unless you are 100% sure
 // you know what you are doing.
+#define SYNCCOM_READ_FX2_FIRMWARE            0x02 // write: 0x02
+                                                 // read : (value - 4B)
 #define SYNCCOM_WRITE_REGISTER				0x6A // write: 0x6A (address - 2B) (value - 4B)
 #define SYNCCOM_READ_REGISTER				0x6B // write: 0x6B (address - 2B)
 												 // read : (value - 4B)
@@ -53,6 +55,9 @@ DEFINE_GUID(GUID_DEVINTERFACE_SYNCCOM, 0x36fc9e60, 0xc465, 0x11cf, 0x80, 0x56, 0
 												 // read : (address - 2B) (value - 4B)
 #define SYNCCOM_READ_WAIT_HIGH_VAL  		0x6D // write: 0x6D (address - 2B) (timeout - 1B) (mask - 4B)
 												 // read : (address - 2B) (value - 4B)
+#define SYNCCOM_WRITE_NONVOLATILE           0x6E // write: 0x6E (value - 4B)
+#define SYNCCOM_READ_NONVOLATILE            0x6F // write: 0x6F
+                                                 // read : (value - 4B)
 
 #define SYNCCOM_GET_STATUS					0xFE
 
@@ -151,7 +156,9 @@ typedef struct synccom_port {
 	WDFUSBPIPE                      data_write_pipe;
 	WDFUSBPIPE						register_write_pipe;
 	WDFUSBPIPE						register_read_pipe;
-	UINT32							firmware_rev;
+    UINT32                          fx2_firmware_rev;
+	UINT32							fpga_firmware_rev;
+    UINT32                          nonvolatile_reg;
 
 	unsigned port_number;
 	struct synccom_registers register_storage;

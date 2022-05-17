@@ -447,7 +447,7 @@ void register_completion(_In_ WDFREQUEST Request, _In_ WDFIOTARGET Target, _In_ 
 	struct synccom_port *port = 0;
 	PWDF_USB_REQUEST_COMPLETION_PARAMS usb_completion_params;
 	unsigned char *read_buffer = 0, address = 0;
-    ULONG value;
+    ULONG value = 0;
 
 	UNREFERENCED_PARAMETER(Target);
 
@@ -466,23 +466,31 @@ void register_completion(_In_ WDFREQUEST Request, _In_ WDFIOTARGET Target, _In_ 
 	}
 
 	bytes_read = usb_completion_params->Parameters.PipeRead.Length;
+    read_buffer = WdfMemoryGetBuffer(usb_completion_params->Parameters.PipeRead.Buffer, NULL);
+    if(bytes_read > 3) memcpy(&value, &read_buffer[bytes_read - 4], 4);
+#ifdef __BIG_ENDIAN
+#else
+    value = _byteswap_ulong(value);
+#endif
 	if (bytes_read != 6) {
-		TraceEvents(TRACE_LEVEL_ERROR, DBG_WRITE, "%s: Wrong number of bytes! Expected 6, got %d!\n", __FUNCTION__, (int)bytes_read);
+        if (bytes_read == 4) {
+            TraceEvents(TRACE_LEVEL_INFORMATION, DBG_WRITE, "%s: New non-volatile register value: 0x%8.8x\n", __FUNCTION__, value);
+            port->nonvolatile_reg = value;
+        }
+        if (bytes_read == 2) {
+            port->fx2_firmware_rev = read_buffer[0];
+            port->fx2_firmware_rev = (port->fx2_firmware_rev << 8) | read_buffer[1];
+            TraceEvents(TRACE_LEVEL_INFORMATION, DBG_WRITE, "%s: New firmware register read: 0x%8.8x", __FUNCTION__, port->fx2_firmware_rev);
+        }
 		WdfObjectDelete(Request);
 		return;
 	}
 
-	read_buffer = WdfMemoryGetBuffer(usb_completion_params->Parameters.PipeRead.Buffer, NULL);
 	address = read_buffer[1] >> 1;
-	memcpy(&value, &read_buffer[bytes_read - 4], 4);
 
-#ifdef __BIG_ENDIAN
-#else
-	value = _byteswap_ulong(value);
-#endif
-	if (address == 0x00) port->firmware_rev = value;
+	if (address == 0x00) port->fpga_firmware_rev = value;
 	if ((address == 0x00) && (read_buffer[0] == 0x00)) TraceEvents(TRACE_LEVEL_WARNING, DBG_WRITE, "%s: Sync Com firmware: 0x%8.8x\n", __FUNCTION__, value);
-	TraceEvents(TRACE_LEVEL_VERBOSE, DBG_WRITE, "%s: Updating register storage: 0x%2.2X%2.2X 0x%8.8X -> 0x%2.2X%2.2X 0x%8.8X.\n", __FUNCTION__, read_buffer[0], address, (unsigned int)((synccom_register *)&port->register_storage)[(address / 4)], read_buffer[0], address, (UINT32)value);
+	TraceEvents(TRACE_LEVEL_INFORMATION, DBG_WRITE, "%s: Read register: 0x%2.2X%2.2X 0x%8.8X -> 0x%2.2X%2.2X 0x%8.8X.\n", __FUNCTION__, read_buffer[0], address, (unsigned int)((synccom_register *)&port->register_storage)[(address / 4)], read_buffer[0], address, (UINT32)value);
 	WdfSpinLockAcquire(port->board_settings_spinlock);
 	if ((address < MAX_OFFSET) && (read_buffer[0] == 0x80)) ((synccom_register *)&port->register_storage)[(address / 4)] = value;
 	if ((address == FCR_OFFSET) && (read_buffer[0] == 0x00)) port->register_storage.FCR = value;
@@ -538,9 +546,6 @@ void register_completion(_In_ WDFREQUEST Request, _In_ WDFIOTARGET Target, _In_ 
 		break;
 	case FIFO_BC_OFFSET:
 		WdfDpcEnqueue(port->oframe_dpc);
-		break;
-	case VSTR_OFFSET:
-		TraceEvents(TRACE_LEVEL_INFORMATION, DBG_WRITE, "%s: VSTR: 0x%8.8x", __FUNCTION__, value);
 		break;
 	}
 	WdfObjectDelete(Request);

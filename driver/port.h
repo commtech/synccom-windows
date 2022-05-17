@@ -36,7 +36,10 @@ void			synccom_port_set_register_rep(_In_ struct synccom_port *port, unsigned ch
 NTSTATUS		synccom_port_set_register_async(struct synccom_port *port, unsigned char offset, unsigned char address, UINT32 value, EVT_WDF_REQUEST_COMPLETION_ROUTINE write_return);
 
 void			synccom_port_get_registers(_In_ struct synccom_port *port, struct synccom_registers *regs);
-synccom_register	synccom_port_get_register_async(struct synccom_port *port, unsigned char offset, unsigned char address, EVT_WDF_REQUEST_COMPLETION_ROUTINE read_return, WDFCONTEXT Context);
+NTSTATUS        synccom_port_get_register_async(struct synccom_port *port, unsigned char offset, unsigned char address, EVT_WDF_REQUEST_COMPLETION_ROUTINE read_return, WDFCONTEXT Context);
+NTSTATUS        synccom_port_get_nonvolatile(struct synccom_port *port, EVT_WDF_REQUEST_COMPLETION_ROUTINE read_return, WDFCONTEXT Context);
+NTSTATUS        synccom_port_set_nonvolatile(struct synccom_port *port, UINT32 value, EVT_WDF_REQUEST_COMPLETION_ROUTINE write_return);
+NTSTATUS        synccom_port_get_fx2_firmware(struct synccom_port *port, EVT_WDF_REQUEST_COMPLETION_ROUTINE read_return, WDFCONTEXT Context);
 
 void			synccom_port_set_clock_bits(_In_ struct synccom_port *port, unsigned char *clock_data);
 NTSTATUS		synccom_port_program_firmware(_In_ struct synccom_port *port, unsigned char *firmware_line, size_t data_size);
@@ -73,4 +76,7 @@ UINT32			synccom_port_get_firmware_rev(struct synccom_port *port);
 
 NTSTATUS		synccom_port_get_port_num(struct synccom_port *port, unsigned *port_num);
 NTSTATUS		synccom_port_set_port_num(struct synccom_port *port, unsigned value);
+
+unsigned        synccom_port_can_support_nonvolatile(struct synccom_port *port);
+
 #endif

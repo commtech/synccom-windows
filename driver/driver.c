@@ -45,7 +45,7 @@ NTSTATUS DriverEntry(PDRIVER_OBJECT DriverObject, PUNICODE_STRING RegistryPath)
     WPP_INIT_TRACING( DriverObject, RegistryPath );
     TraceEvents(TRACE_LEVEL_INFORMATION, DBG_INIT, "Sync Com Driver\n");
     TraceEvents(TRACE_LEVEL_INFORMATION, DBG_INIT, "Built %s %s\n", __DATE__, __TIME__);
-	TraceEvents(TRACE_LEVEL_INFORMATION, DBG_INIT, "Copyright (c) 2016, Fastcom.");
+	TraceEvents(TRACE_LEVEL_INFORMATION, DBG_INIT, "Copyright (c) 2022, Fastcom.");
   
 	WDF_DRIVER_CONFIG_INIT(&config, SyncComEvtDeviceAdd);
 
@@ -56,6 +56,14 @@ NTSTATUS DriverEntry(PDRIVER_OBJECT DriverObject, PUNICODE_STRING RegistryPath)
     if (!NT_SUCCESS(status)) {
         TraceEvents(TRACE_LEVEL_ERROR, DBG_INIT, "WdfDriverCreate failed with status 0x%x\n", status);
         WPP_CLEANUP(DriverObject);
+        return status;
+    }
+
+    status = WdfSpinLockCreate(WDF_NO_OBJECT_ATTRIBUTES, &port_num_spinlock);
+    if (!NT_SUCCESS(status)) {
+        TraceEvents(TRACE_LEVEL_ERROR, DBG_PNP, "WdfSpinLockCreate in DriverEntry failed %!STATUS!", status);
+        WPP_CLEANUP(DriverObject);
+        return status;
     }
 
     return status;

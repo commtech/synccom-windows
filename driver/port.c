@@ -306,6 +306,56 @@ VOID SyncComEvtIoDeviceControl(_In_ WDFQUEUE Queue, _In_ WDFREQUEST Request, _In
 			bytes_returned = sizeof(*firmware_revision);
 		}
 		break;
+
+    case SYNCCOM_GET_FX2_FIRMWARE: {
+        UINT32 *fx2_rev = 0;
+        status = WdfRequestRetrieveOutputBuffer(Request, sizeof(*fx2_rev), (PVOID *)&fx2_rev, NULL);
+        if (!NT_SUCCESS(status)) {
+            TraceEvents(TRACE_LEVEL_WARNING, DBG_IOCTL, "%s: WdfRequestRetrieveOutputBuffer failed %!STATUS!", __FUNCTION__, status);
+            break;
+        }
+        *fx2_rev = port->fx2_firmware_rev;
+        bytes_returned = sizeof(*fx2_rev);
+        break;
+    }
+    case SYNCCOM_SET_NONVOLATILE: {
+        UINT32 *nonvolatile = 0;
+
+        if (!synccom_port_can_support_nonvolatile(port)) {
+            status = STATUS_NOT_SUPPORTED;
+            break;
+        }
+        status = WdfRequestRetrieveInputBuffer(Request, sizeof(*nonvolatile), (PVOID *)&nonvolatile, NULL);
+        if (!NT_SUCCESS(status)) {
+            TraceEvents(TRACE_LEVEL_WARNING, DBG_IOCTL, "%s: WdfRequestRetrieveInputBuffer failed %!STATUS!", __FUNCTION__, status);
+            break;
+        }
+
+        status = synccom_port_set_nonvolatile(port, *nonvolatile, basic_completion);
+        if (!NT_SUCCESS(status)) {
+            TraceEvents(TRACE_LEVEL_WARNING, DBG_IOCTL, "%s: synccom_port_set_nonvolatile failed %!STATUS!", __FUNCTION__, status);
+            break;
+        }
+        port->nonvolatile_reg = *nonvolatile;
+    }
+    break;
+    case SYNCCOM_GET_NONVOLATILE: {
+        UINT32 *nonvolatile = 0;
+
+        if (!synccom_port_can_support_nonvolatile(port)) {
+            status = STATUS_NOT_SUPPORTED;
+            break;
+        }
+        status = WdfRequestRetrieveOutputBuffer(Request, sizeof(*nonvolatile), (PVOID *)&nonvolatile, NULL);
+        if (!NT_SUCCESS(status)) {
+            TraceEvents(TRACE_LEVEL_WARNING, DBG_IOCTL, "%s: WdfRequestRetrieveOutputBuffer failed %!STATUS!", __FUNCTION__, status);
+            break;
+        }
+        synccom_port_get_nonvolatile(port, register_completion, port);
+        *nonvolatile = port->nonvolatile_reg;
+        bytes_returned = sizeof(*nonvolatile);
+    }
+    break;
 	default: {
 		TraceEvents(TRACE_LEVEL_INFORMATION, DBG_IOCTL, "%s: Default?\n", __FUNCTION__);
 		status = STATUS_INVALID_DEVICE_REQUEST;
@@ -444,6 +494,223 @@ NTSTATUS synccom_port_set_registers(_In_ struct synccom_port *port, const struct
 	return STATUS_SUCCESS;
 }
 
+NTSTATUS synccom_port_set_nonvolatile(struct synccom_port *port, UINT32 value, EVT_WDF_REQUEST_COMPLETION_ROUTINE write_return)
+{
+    WDFREQUEST write_request;
+    WDFMEMORY write_memory;
+    WDF_OBJECT_ATTRIBUTES  attributes;
+    NTSTATUS status;
+    WDFUSBPIPE write_pipe;
+    unsigned char *write_buffer = 0;
+
+    UNUSED(write_return);
+
+    write_pipe = port->register_write_pipe;
+
+    WDF_OBJECT_ATTRIBUTES_INIT(&attributes);
+    attributes.ParentObject = write_pipe;
+    status = WdfRequestCreate(&attributes, WdfUsbTargetPipeGetIoTarget(write_pipe), &write_request);
+    if (!NT_SUCCESS(status)) {
+        TraceEvents(TRACE_LEVEL_ERROR, DBG_IOCTL, "%s: Cannot create new write request.\n", __FUNCTION__);
+        return status;
+    }
+    attributes.ParentObject = write_request;
+    status = WdfMemoryCreate(&attributes, NonPagedPool, 0, 5, &write_memory, &write_buffer);
+    if (!NT_SUCCESS(status)) {
+        TraceEvents(TRACE_LEVEL_ERROR, DBG_IOCTL, "%s: WdfMemoryCreate failed! status: 0x%x\n", __FUNCTION__, status);
+        return status;
+    }
+    write_buffer[0] = SYNCCOM_WRITE_NONVOLATILE;
+
+#ifdef __BIG_ENDIAN
+#else
+    TraceEvents(TRACE_LEVEL_VERBOSE, DBG_IOCTL, "%s: Swapping endianness! Little endian!", __FUNCTION__);
+    value = _BYTESWAP_UINT32(value);
+#endif
+    memcpy(&write_buffer[1], &value, sizeof(UINT32));
+    status = WdfUsbTargetPipeFormatRequestForWrite(write_pipe, write_request, write_memory, NULL);
+    if (!NT_SUCCESS(status)) {
+        TraceEvents(TRACE_LEVEL_ERROR, DBG_IOCTL, "%s: Cannot format request for write.\n", __FUNCTION__);
+        WdfObjectDelete(write_request);
+        return status;
+    }
+    WdfRequestSetCompletionRoutine(write_request, write_return, write_pipe);
+    WdfSpinLockAcquire(port->request_spinlock);
+    if (WdfRequestSend(write_request, WdfUsbTargetPipeGetIoTarget(write_pipe), WDF_NO_SEND_OPTIONS) == FALSE) {
+        WdfSpinLockRelease(port->request_spinlock);
+        status = WdfRequestGetStatus(write_request);
+        WdfObjectDelete(write_request);
+        return status;
+    }
+    WdfSpinLockRelease(port->request_spinlock);
+
+    return status;
+}
+
+NTSTATUS synccom_port_get_nonvolatile(struct synccom_port *port, EVT_WDF_REQUEST_COMPLETION_ROUTINE read_return, WDFCONTEXT Context)
+{
+    WDFMEMORY write_memory, read_memory;
+    NTSTATUS status = STATUS_SUCCESS;
+    WDFUSBPIPE write_pipe, read_pipe;
+    unsigned char *write_buffer = NULL;
+    WDF_OBJECT_ATTRIBUTES  attributes;
+    WDFREQUEST write_request, read_request;
+
+    write_pipe = port->register_write_pipe;
+    read_pipe = port->register_read_pipe;
+
+    WDF_OBJECT_ATTRIBUTES_INIT(&attributes);
+    attributes.ParentObject = read_pipe;
+    status = WdfRequestCreate(&attributes, WdfUsbTargetPipeGetIoTarget(read_pipe), &read_request);
+    if (!NT_SUCCESS(status)) {
+        TraceEvents(TRACE_LEVEL_ERROR, DBG_IOCTL, "%s: Cannot create new read request.\n", __FUNCTION__);
+        return status;
+    }
+
+    attributes.ParentObject = write_pipe;
+    status = WdfRequestCreate(&attributes, WdfUsbTargetPipeGetIoTarget(write_pipe), &write_request);
+    if (!NT_SUCCESS(status)) {
+        TraceEvents(TRACE_LEVEL_ERROR, DBG_IOCTL, "%s: Cannot create new write request.\n", __FUNCTION__);
+        WdfObjectDelete(read_request);
+        return status;
+    }
+    attributes.ParentObject = write_request;
+    status = WdfMemoryCreate(&attributes, NonPagedPool, 0, 1, &write_memory, &write_buffer);
+    if (!NT_SUCCESS(status)) {
+        TraceEvents(TRACE_LEVEL_ERROR, DBG_IOCTL, "%s: WdfMemoryCreate failed! status: 0x%x\n", __FUNCTION__, status);
+        return status;
+    }
+
+    attributes.ParentObject = read_request;
+    status = WdfMemoryCreate(&attributes, NonPagedPool, 0, 4, &read_memory, NULL);
+    if (!NT_SUCCESS(status)) {
+        TraceEvents(TRACE_LEVEL_ERROR, DBG_IOCTL, "%s: WdfMemoryCreate failed! status: 0x%x\n", __FUNCTION__, status);
+        return status;
+    }
+
+    write_buffer[0] = SYNCCOM_READ_NONVOLATILE;
+
+    status = WdfUsbTargetPipeFormatRequestForWrite(write_pipe, write_request, write_memory, NULL);
+    if (!NT_SUCCESS(status)) {
+        TraceEvents(TRACE_LEVEL_ERROR, DBG_IOCTL, "%s: Cannot format request for write.\n", __FUNCTION__);
+        WdfObjectDelete(write_request);
+        WdfObjectDelete(read_request);
+        return status;
+    }
+
+    status = WdfUsbTargetPipeFormatRequestForRead(read_pipe, read_request, read_memory, NULL);
+    if (!NT_SUCCESS(status)) {
+        TraceEvents(TRACE_LEVEL_ERROR, DBG_IOCTL, "%s: Cannot format request for read.\n", __FUNCTION__);
+        WdfObjectDelete(write_request);
+        WdfObjectDelete(read_request);
+        return status;
+    }
+
+    WdfRequestSetCompletionRoutine(write_request, basic_completion, write_pipe);
+    WdfSpinLockAcquire(port->request_spinlock);
+    if (WdfRequestSend(write_request, WdfUsbTargetPipeGetIoTarget(write_pipe), WDF_NO_SEND_OPTIONS) == FALSE) {
+        WdfSpinLockRelease(port->request_spinlock);
+        status = WdfRequestGetStatus(write_request);
+        WdfObjectDelete(write_request);
+        WdfObjectDelete(read_request);
+        return status;
+    }
+    WdfSpinLockRelease(port->request_spinlock);
+
+    WdfSpinLockAcquire(port->request_spinlock);
+    WdfRequestSetCompletionRoutine(read_request, read_return, Context);
+    if (WdfRequestSend(read_request, WdfUsbTargetPipeGetIoTarget(read_pipe), WDF_NO_SEND_OPTIONS) == FALSE) {
+        WdfSpinLockRelease(port->request_spinlock);
+        status = WdfRequestGetStatus(read_request);
+        status = WdfRequestGetStatus(write_request);
+        WdfObjectDelete(write_request);
+        WdfObjectDelete(read_request);
+        return status;
+    }
+    WdfSpinLockRelease(port->request_spinlock);
+
+    return status;
+}
+
+NTSTATUS synccom_port_get_fx2_firmware(struct synccom_port *port, EVT_WDF_REQUEST_COMPLETION_ROUTINE read_return, WDFCONTEXT Context)
+{
+    WDFMEMORY write_memory, read_memory;
+    NTSTATUS status = STATUS_SUCCESS;
+    WDFUSBPIPE write_pipe, read_pipe;
+    unsigned char *write_buffer = NULL;
+    WDF_OBJECT_ATTRIBUTES  attributes;
+    WDFREQUEST write_request, read_request;
+
+    write_pipe = port->register_write_pipe;
+    read_pipe = port->register_read_pipe;
+
+    WDF_OBJECT_ATTRIBUTES_INIT(&attributes);
+    attributes.ParentObject = read_pipe;
+    status = WdfRequestCreate(&attributes, WdfUsbTargetPipeGetIoTarget(read_pipe), &read_request);
+    if (!NT_SUCCESS(status)) {
+        TraceEvents(TRACE_LEVEL_ERROR, DBG_IOCTL, "%s: Cannot create new read request.\n", __FUNCTION__);
+        return status;
+    }
+
+    attributes.ParentObject = write_pipe;
+    status = WdfRequestCreate(&attributes, WdfUsbTargetPipeGetIoTarget(write_pipe), &write_request);
+    if (!NT_SUCCESS(status)) {
+        TraceEvents(TRACE_LEVEL_ERROR, DBG_IOCTL, "%s: Cannot create new write request.\n", __FUNCTION__);
+        WdfObjectDelete(read_request);
+        return status;
+    }
+    attributes.ParentObject = write_request;
+    status = WdfMemoryCreate(&attributes, NonPagedPool, 0, 1, &write_memory, &write_buffer);
+    if (!NT_SUCCESS(status)) {
+        TraceEvents(TRACE_LEVEL_ERROR, DBG_IOCTL, "%s: WdfMemoryCreate failed! status: 0x%x\n", __FUNCTION__, status);
+        return status;
+    }
+
+    attributes.ParentObject = read_request;
+    status = WdfMemoryCreate(&attributes, NonPagedPool, 0, 2, &read_memory, NULL);
+    if (!NT_SUCCESS(status)) {
+        TraceEvents(TRACE_LEVEL_ERROR, DBG_IOCTL, "%s: WdfMemoryCreate failed! status: 0x%x\n", __FUNCTION__, status);
+        return status;
+    }
+
+    write_buffer[0] = SYNCCOM_READ_FX2_FIRMWARE;
+
+    status = WdfUsbTargetPipeFormatRequestForWrite(write_pipe, write_request, write_memory, NULL);
+    if (!NT_SUCCESS(status)) {
+        TraceEvents(TRACE_LEVEL_ERROR, DBG_IOCTL, "%s: Cannot format request for write.\n", __FUNCTION__);
+        WdfObjectDelete(write_request);
+        WdfObjectDelete(read_request);
+        return status;
+    }
+
+    status = WdfUsbTargetPipeFormatRequestForRead(read_pipe, read_request, read_memory, NULL);
+    if (!NT_SUCCESS(status)) {
+        TraceEvents(TRACE_LEVEL_ERROR, DBG_IOCTL, "%s: Cannot format request for read.\n", __FUNCTION__);
+        WdfObjectDelete(write_request);
+        WdfObjectDelete(read_request);
+        return status;
+    }
+
+    WdfRequestSetCompletionRoutine(write_request, basic_completion, write_pipe);
+    if (WdfRequestSend(write_request, WdfUsbTargetPipeGetIoTarget(write_pipe), WDF_NO_SEND_OPTIONS) == FALSE) {
+        status = WdfRequestGetStatus(write_request);
+        WdfObjectDelete(write_request);
+        WdfObjectDelete(read_request);
+        return status;
+    }
+
+    WdfRequestSetCompletionRoutine(read_request, read_return, Context);
+    if (WdfRequestSend(read_request, WdfUsbTargetPipeGetIoTarget(read_pipe), WDF_NO_SEND_OPTIONS) == FALSE) {
+        status = WdfRequestGetStatus(read_request);
+        status = WdfRequestGetStatus(write_request);
+        WdfObjectDelete(write_request);
+        WdfObjectDelete(read_request);
+        return status;
+    }
+
+    return status;
+}
+
 NTSTATUS synccom_port_set_register_async(struct synccom_port *port, unsigned char offset, unsigned char address, UINT32 value, EVT_WDF_REQUEST_COMPLETION_ROUTINE write_return)
 {
 	WDFREQUEST write_request;
@@ -496,6 +763,7 @@ NTSTATUS synccom_port_set_register_async(struct synccom_port *port, unsigned cha
 	}
 	WdfSpinLockRelease(port->request_spinlock);
 
+    TraceEvents(TRACE_LEVEL_INFORMATION, DBG_IOCTL, "%s: Wrote register: 0x%2.2X%2.2X  0x%8.8X .\n", __FUNCTION__, offset, address, value);
 	return status;
 }
 
@@ -528,7 +796,7 @@ void synccom_port_get_registers(struct synccom_port *port, struct synccom_regist
 	}
 }
 
-synccom_register synccom_port_get_register_async(struct synccom_port *port, unsigned char offset, unsigned char address, EVT_WDF_REQUEST_COMPLETION_ROUTINE read_return, WDFCONTEXT Context)
+NTSTATUS synccom_port_get_register_async(struct synccom_port *port, unsigned char offset, unsigned char address, EVT_WDF_REQUEST_COMPLETION_ROUTINE read_return, WDFCONTEXT Context)
 {
 	WDFMEMORY write_memory, read_memory;
 	NTSTATUS status = STATUS_SUCCESS;
@@ -736,7 +1004,7 @@ BOOLEAN synccom_port_get_ignore_timeout(struct synccom_port *port)
 UINT32 synccom_port_get_firmware_rev(struct synccom_port *port)
 {
 	return_val_if_untrue(port, 0);
-	return port->firmware_rev;
+	return port->fpga_firmware_rev;
 }
 
 void synccom_port_set_rx_multiple(struct synccom_port *port, BOOLEAN value)
@@ -1028,4 +1296,10 @@ NTSTATUS synccom_port_set_port_num(struct synccom_port *port, unsigned value)
 	WdfRegistryClose(devkey);
 
 	return status;
+}
+
+unsigned synccom_port_can_support_nonvolatile(struct synccom_port *port)
+{
+    if (port->fx2_firmware_rev >= FIRST_NONVOLATILE_VERSION) return 1;
+    return 0;
 }
