@@ -37,7 +37,7 @@ struct synccom_frame *synccom_flist_remove_frame_if_lte(struct synccom_flist *fl
 void synccom_flist_clear(struct synccom_flist *flist);
 BOOLEAN synccom_flist_is_empty(struct synccom_flist *flist);
 unsigned synccom_flist_calculate_memory_usage(struct synccom_flist *flist);
-struct synccom_frame *synccom_flist_peak_front(struct synccom_flist *flist);
-struct synccom_frame *synccom_flist_peak_back(struct synccom_flist *flist);
+struct synccom_frame *synccom_flist_peek_front(struct synccom_flist *flist);
+struct synccom_frame *synccom_flist_peek_back(struct synccom_flist *flist);
 
 #endif

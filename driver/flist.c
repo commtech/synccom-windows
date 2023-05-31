@@ -50,7 +50,7 @@ void synccom_flist_add_frame(struct synccom_flist *flist, struct synccom_frame *
 	flist->estimated_memory_usage += synccom_frame_get_length(frame);
 }
 
-struct synccom_frame *synccom_flist_peak_front(struct synccom_flist *flist)
+struct synccom_frame *synccom_flist_peek_front(struct synccom_flist *flist)
 {
 	if (IsListEmpty(&flist->frames))
 		return 0;
@@ -58,7 +58,7 @@ struct synccom_frame *synccom_flist_peak_front(struct synccom_flist *flist)
 	return CONTAINING_RECORD(flist->frames.Flink, synccom_FRAME, list);
 }
 
-struct synccom_frame *synccom_flist_peak_back(struct synccom_flist *flist)
+struct synccom_frame *synccom_flist_peek_back(struct synccom_flist *flist)
 {
 	if (IsListEmpty(&flist->frames))
 		return 0;
