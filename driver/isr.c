@@ -410,7 +410,7 @@ void iframe_worker(WDFDPC Dpc) {
         if (!port->istream) break;
 		if (!(port->istream->data_length > 0)) break;
 		if (synccom_flist_is_empty(&port->pending_iframes)) break;
-		frame = synccom_flist_peak_front(&port->pending_iframes);
+		frame = synccom_flist_peek_front(&port->pending_iframes);
 		if (!frame) break;
 		if (!(frame->frame_size > 0)) {
 			frame = synccom_flist_remove_frame(&port->pending_iframes);
@@ -625,7 +625,7 @@ void port_received_data(__in  WDFUSBPIPE Pipe, __in  WDFMEMORY Buffer, __in  siz
         payload_size = memory_cap - current_memory;
 		if (!synccom_port_is_streaming(port))
 		{
-			frame = synccom_flist_peak_back(&port->pending_iframes);
+			frame = synccom_flist_peek_back(&port->pending_iframes);
 			if (frame) frame->lost_bytes += bytes_lost;
 		}
 		TraceEvents(TRACE_LEVEL_WARNING, DBG_WRITE, "%s: Payload too large, new payload size: %d.", __FUNCTION__, payload_size);
