@@ -20,6 +20,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 
+#ifndef SYNCCOM_TRACE_H
+#define SYNCCOM_TRACE_H
 #include <evntrace.h> // For TRACE_LEVEL definitions
 
 #if !defined(EVENT_TRACING)
@@ -55,16 +57,6 @@ THE SOFTWARE.
 #define DBG_WRITE               0x00000040
 #define DBG_READ                0x00000080
 
-
-VOID
-TraceEvents    (
-    _In_ ULONG   DebugPrintLevel,
-    _In_ ULONG   DebugPrintFlag,
-    _Printf_format_string_
-    _In_ PCSTR   DebugMessage,
-    ...
-    );
-
 #define WPP_INIT_TRACING(DriverObject, RegistryPath)
 #define WPP_CLEANUP(DriverObject)
 
@@ -91,5 +83,5 @@ TraceEvents    (
 
 #endif
 
-
+#endif
 

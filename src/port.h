@@ -23,11 +23,9 @@ THE SOFTWARE.
 #ifndef SYNCCOM_PORT_H
 #define SYNCCOM_PORT_H
 
-#include <ntddk.h>
-#include <wdf.h>
-#include <defines.h>
-#include "trace.h"
-#include "fx2Events.h"
+#include "precomp.h"
+#include "defines.h"
+#include "debug.h"
 
 EVT_WDF_IO_QUEUE_IO_DEVICE_CONTROL SyncComEvtIoDeviceControl;
 

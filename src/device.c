@@ -20,14 +20,15 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 
-#include <driver.h>
-#include <devpkey.h>
+#include "driver.h"
 #include "utils.h"
 #include "isr.h"
-#include <port.h>
-#include <flist.h>
-#include <frame.h>
-#include <device.h>
+#include "port.h"
+#include "flist.h"
+#include "frame.h"
+#include "device.h"
+
+#include <devpkey.h>
 
 #if defined(EVENT_TRACING)
 #include "device.tmh"
@@ -42,6 +43,7 @@ THE SOFTWARE.
 #endif
 
 NTSTATUS SetupUsb(_In_ struct synccom_port *port);
+NTSTATUS synccom_port_set_friendly_name(_In_ WDFDEVICE Device, unsigned portnum);
 
 NTSTATUS SyncComEvtDeviceAdd(WDFDRIVER Driver, PWDFDEVICE_INIT DeviceInit)
 {
@@ -126,7 +128,7 @@ struct synccom_port *synccom_port_new(WDFDRIVER Driver, IN PWDFDEVICE_INIT Devic
 	WDF_OBJECT_ATTRIBUTES_INIT_CONTEXT_TYPE(&attributes, SYNCCOM_PORT);
 	status = WdfDeviceCreate(&DeviceInit, &attributes, &device);
 	if (!NT_SUCCESS(status)) {
-		TraceEvents(TRACE_LEVEL_ERROR, DBG_PNP, "%s: WdfDeviceCreate failed with Status code %!STATUS!\n", __FUNCTION__, status);
+		TraceEvents(TRACE_LEVEL_ERROR, DBG_PNP, "%s: WdfDeviceCreate failed with Status code %X\n", __FUNCTION__, status);
 		return 0;
 	}
 
@@ -141,7 +143,7 @@ struct synccom_port *synccom_port_new(WDFDRIVER Driver, IN PWDFDEVICE_INIT Devic
     status = SetupUsb(port);
     if (!NT_SUCCESS(status)) {
         WdfObjectDelete(port->device);
-        TraceEvents(TRACE_LEVEL_ERROR, DBG_PNP, "SetupUsb failed %!STATUS!", status);
+        TraceEvents(TRACE_LEVEL_ERROR, DBG_PNP, "SetupUsb failed %X\n", status);
         return 0;
     }
     port->fx2_firmware_rev = 0;
@@ -151,9 +153,11 @@ struct synccom_port *synccom_port_new(WDFDRIVER Driver, IN PWDFDEVICE_INIT Devic
 	status = synccom_port_set_port_num(port, port_num);
 	if (!NT_SUCCESS(status)) {
 		WdfObjectDelete(port->device);
-		TraceEvents(TRACE_LEVEL_ERROR, DBG_PNP, "synccom_port_set_port_num failed %!STATUS!", status);
+		TraceEvents(TRACE_LEVEL_ERROR, DBG_PNP, "synccom_port_set_port_num failed %X\n", status);
 		return 0;
 	}
+	port->port_number = port_num;
+
 
 	WDF_DEVICE_PNP_CAPABILITIES_INIT(&pnpCaps);
 	pnpCaps.SurpriseRemovalOK = WdfTrue;
@@ -162,6 +166,7 @@ struct synccom_port *synccom_port_new(WDFDRIVER Driver, IN PWDFDEVICE_INIT Devic
 	WdfDeviceSetPnpCapabilities(port->device, &pnpCaps);
 
 ///////
+	/*
     RtlInitEmptyUnicodeString(&dos_name, dos_name_buffer, sizeof(dos_name_buffer));
     status = RtlUnicodeStringPrintf(&dos_name, L"\\DosDevices\\SYNCCOM%i", port_num);
     if (!NT_SUCCESS(status)) {
@@ -177,8 +182,12 @@ struct synccom_port *synccom_port_new(WDFDRIVER Driver, IN PWDFDEVICE_INIT Devic
         return 0;
     }
     TraceEvents(TRACE_LEVEL_INFORMATION, DBG_PNP, "%s: Device has a symbolic link with WdfDeviceCreateSymbolicLink: %wZ!", __FUNCTION__, &dos_name);
-////////
+	*/
 
+	status = synccom_port_set_friendly_name(port->device, port->port_number);
+	if (!NT_SUCCESS(status)) {
+		TraceEvents(TRACE_LEVEL_ERROR, DBG_PNP, "synccom_port_set_friendly_name failed 0x%X\n", status);
+	}
 
 	WDF_IO_QUEUE_CONFIG_INIT(&queue_config, WdfIoQueueDispatchSequential);
 	queue_config.EvtIoDeviceControl = SyncComEvtIoDeviceControl;
@@ -248,7 +257,7 @@ struct synccom_port *synccom_port_new(WDFDRIVER Driver, IN PWDFDEVICE_INIT Devic
 		TraceEvents(TRACE_LEVEL_ERROR, DBG_PNP, "%s: WdfDeviceCreateDeviceInterface failed  %!STATUS!\n", __FUNCTION__, status);
 		return 0;
 	}
-    /*
+    
 	RtlInitEmptyUnicodeString(&dos_name, dos_name_buffer, sizeof(dos_name_buffer));
 	status = RtlUnicodeStringPrintf(&dos_name, L"\\DosDevices\\SYNCCOM%i", port_num);
 	if (!NT_SUCCESS(status)) {
@@ -264,7 +273,7 @@ struct synccom_port *synccom_port_new(WDFDRIVER Driver, IN PWDFDEVICE_INIT Devic
 		return 0;
 	}
 	TraceEvents(TRACE_LEVEL_INFORMATION, DBG_PNP, "%s: Device has a symbolic link with WdfDeviceCreateSymbolicLink: %wZ!", __FUNCTION__, &dos_name);
-    */
+    
 	status = setup_spinlocks(port);
 	if (!NT_SUCCESS(status)) {
 		TraceEvents(TRACE_LEVEL_ERROR, DBG_PNP, "%s: Failed to set up spinlocks!  %!STATUS!", __FUNCTION__, status);
@@ -756,4 +765,31 @@ NTSTATUS SetupUsb(_In_ struct synccom_port *port)
         }
     }
     return STATUS_SUCCESS;
+}
+
+
+#define FRIENDLYNAME_SIZE 256
+NTSTATUS synccom_port_set_friendly_name(_In_ WDFDEVICE Device, unsigned portnum)
+{
+	NTSTATUS status;
+	WDF_DEVICE_PROPERTY_DATA dpd;
+	WCHAR friendlyName[FRIENDLYNAME_SIZE] = { 0 };
+	int characters_written = 0;
+
+	WDF_DEVICE_PROPERTY_DATA_INIT(&dpd, &DEVPKEY_Device_FriendlyName);
+	dpd.Lcid = LOCALE_NEUTRAL;
+	dpd.Flags = PLUGPLAY_PROPERTY_PERSISTENT;
+	characters_written = swprintf_s(friendlyName, FRIENDLYNAME_SIZE, L"SYNCCOM Port (SYNCCOM%i)", portnum);
+	if (characters_written < 0) {
+		TraceEvents(TRACE_LEVEL_ERROR, DBG_IOCTL, "swprintf_s failed with %d\n", characters_written);
+		return STATUS_INVALID_PARAMETER;
+	}
+
+	status = WdfDeviceAssignProperty(Device, &dpd, DEVPROP_TYPE_STRING, (characters_written + 1)*sizeof(WCHAR), (PVOID)&friendlyName);
+	if (!NT_SUCCESS(status)) {
+		TraceEvents(TRACE_LEVEL_ERROR, DBG_IOCTL, "WdfDeviceAssignProperty failed 0x%X\n", status);
+		return status;
+	}
+
+	return status;
 }

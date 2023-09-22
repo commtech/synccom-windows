@@ -20,33 +20,23 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 
-#ifndef SYNCCOM_DEVICE_H
-#define SYNCCOM_DEVICE_H
-#include <ntddk.h>
-#include <wdf.h>
-#include <defines.h>
+#ifndef SYNCCOM_FLIST_H
+#define SYNCCOM_FLIST_H
+
+#include "precomp.h"
+#include "defines.h"
+
 #include "trace.h"
 
-struct synccom_port *synccom_port_new(WDFDRIVER Driver, IN PWDFDEVICE_INIT DeviceInit);
-
-EVT_WDF_DRIVER_DEVICE_ADD SyncComEvtDeviceAdd;
-EVT_WDF_DEVICE_D0_ENTRY SyncComEvtDeviceD0Entry;
-EVT_WDF_DEVICE_D0_EXIT SyncComEvtDeviceD0Exit;
-EVT_WDF_DEVICE_PREPARE_HARDWARE SyncComEvtDevicePrepareHardware;
-EVT_WDF_DEVICE_RELEASE_HARDWARE SyncComEvtDeviceReleaseHardware;
-EVT_WDF_IO_QUEUE_IO_WRITE SyncComEvtIoWrite;
-EVT_WDF_IO_QUEUE_IO_READ SyncComEvtIoRead;
-
-NTSTATUS setup_spinlocks(_In_ struct synccom_port *port);
-NTSTATUS setup_dpc(_In_ struct synccom_port *port);
-NTSTATUS setup_memory(_In_ struct synccom_port *port);
-NTSTATUS setup_request(_In_ struct synccom_port *port);
-NTSTATUS setup_timer(_In_ struct synccom_port *port);
-
-_IRQL_requires_(PASSIVE_LEVEL)
-NTSTATUS SelectInterfaces(_In_ struct synccom_port *port);
-_IRQL_requires_(PASSIVE_LEVEL)
-NTSTATUS OsrFxSetPowerPolicy(_In_ struct synccom_port *port);
-
+void synccom_flist_init(struct synccom_flist *flist);
+void synccom_flist_delete(struct synccom_flist *flist);
+void synccom_flist_add_frame(struct synccom_flist *flist, struct synccom_frame *frame);
+struct synccom_frame *synccom_flist_remove_frame(struct synccom_flist *flist);
+struct synccom_frame *synccom_flist_remove_frame_if_lte(struct synccom_flist *flist, unsigned size);
+void synccom_flist_clear(struct synccom_flist *flist);
+BOOLEAN synccom_flist_is_empty(struct synccom_flist *flist);
+unsigned synccom_flist_calculate_memory_usage(struct synccom_flist *flist);
+struct synccom_frame *synccom_flist_peek_front(struct synccom_flist *flist);
+struct synccom_frame *synccom_flist_peek_back(struct synccom_flist *flist);
 
 #endif

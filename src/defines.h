@@ -23,10 +23,8 @@ THE SOFTWARE.
 #ifndef SYNCCOM_DEFINES_H
 #define SYNCCOM_DEFINES_H
 
-#include <ntddk.h>
-#include <wdf.h>
-#include <synccom.h>
-#define DEBUG
+#include "precomp.h"
+#include "synccom.h"
 
 // {1F67CDC8-3E4C-42C6-980C-A79E79C728BC}
 static const GUID SYNCCOM_GUID = { 0x1f67cdc8, 0x3e4c, 0x42c6, { 0x98, 0xc, 0xa7, 0x9e, 0x79, 0xc7, 0x28, 0xbc } };

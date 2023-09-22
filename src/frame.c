@@ -22,13 +22,13 @@ THE SOFTWARE.
 
 #include "frame.h"
 #include "utils.h" /* return_{val_}if_true */
-#include <driver.h>
+#include "driver.h"
 
 
 #include "trace.h"
-//#if defined(EVENT_TRACING)
-//#include "frame.tmh"
-//#endif
+#if defined(EVENT_TRACING)
+#include "frame.tmh"
+#endif
 
 #pragma warning(disable:4267)
 
@@ -38,7 +38,7 @@ struct synccom_frame *synccom_frame_new(struct synccom_port *port)
 {
 	struct synccom_frame *frame = 0;
 
-	frame = (struct synccom_frame *)ExAllocatePoolWithTag(NonPagedPool, sizeof(*frame), 'marF');
+	frame = (struct synccom_frame *)ExAllocatePool2(POOL_FLAG_NON_PAGED, sizeof(*frame), 'marF');
 
 	if (frame == NULL)
 		return 0;
@@ -117,7 +117,7 @@ int synccom_frame_update_buffer_size(struct synccom_frame *frame, unsigned size)
 		return TRUE;
 	}
 	four_aligned = ((size % 4) == 0) ? size : size + (4 - (size % 4));
-	new_buffer = (unsigned char *)ExAllocatePoolWithTag(NonPagedPool, four_aligned, 'ataD');
+	new_buffer = (unsigned char *)ExAllocatePool2(POOL_FLAG_NON_PAGED, four_aligned, 'ataD');
 
 	if (new_buffer == NULL) {
 		return FALSE;
@@ -172,7 +172,7 @@ int synccom_frame_copy_data(struct synccom_frame *destination, struct synccom_fr
 	amount_to_move = min(synccom_frame_get_length(source), synccom_frame_get_frame_size(destination) - (synccom_frame_get_length(destination) + destination->lost_bytes));
 	return_val_if_untrue(amount_to_move > 0, FALSE);
 
-	new_buffer = (unsigned char *)ExAllocatePoolWithTag(NonPagedPool, amount_to_move, 'ataD');
+	new_buffer = (unsigned char *)ExAllocatePool2(POOL_FLAG_NON_PAGED, amount_to_move, 'ataD');
 	amount_removed = synccom_frame_remove_data(source, new_buffer, amount_to_move);
 	synccom_frame_add_data(destination, new_buffer, amount_removed);
 	ExFreePoolWithTag(new_buffer, 'ataD');

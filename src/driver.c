@@ -20,14 +20,11 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 
-#include <driver.h>
-#include <device.h>
+#include "driver.h"
+#include "device.h"
 
 #if defined(EVENT_TRACING)
 #include "driver.tmh"
-#else
-ULONG DebugLevel = TRACE_LEVEL_INFORMATION;
-ULONG DebugFlag = 0xff;
 #endif
 
 
@@ -44,8 +41,8 @@ NTSTATUS DriverEntry(PDRIVER_OBJECT DriverObject, PUNICODE_STRING RegistryPath)
 
     WPP_INIT_TRACING( DriverObject, RegistryPath );
     TraceEvents(TRACE_LEVEL_INFORMATION, DBG_INIT, "Sync Com Driver\n");
-    TraceEvents(TRACE_LEVEL_INFORMATION, DBG_INIT, "Built %s %s\n", __DATE__, __TIME__);
-	TraceEvents(TRACE_LEVEL_INFORMATION, DBG_INIT, "Copyright (c) 2022, Fastcom.");
+    //TraceEvents(TRACE_LEVEL_INFORMATION, DBG_INIT, "Built %s %s\n", __DATE__, __TIME__);
+	TraceEvents(TRACE_LEVEL_INFORMATION, DBG_INIT, "Copyright (c) 2023, Fastcom.");
   
 	WDF_DRIVER_CONFIG_INIT(&config, SyncComEvtDeviceAdd);
 
@@ -79,79 +76,6 @@ VOID OsrFxEvtDriverContextCleanup(WDFOBJECT Driver)
     UNREFERENCED_PARAMETER(Driver);
 	TraceEvents(TRACE_LEVEL_VERBOSE, DBG_INIT, "%s: Exiting.\n", __FUNCTION__);
 }
-
-#if !defined(EVENT_TRACING)
-
-VOID
-TraceEvents (
-    _In_ ULONG DebugPrintLevel,
-    _In_ ULONG DebugPrintFlag,
-    _Printf_format_string_
-    _In_ PCSTR DebugMessage,
-    ...
-    )
-
-/*++
-
-Routine Description:
-
-    Debug print for the sample driver.
-
-Arguments:
-
-    DebugPrintLevel - print level between 0 and 3, with 3 the most verbose
-    DebugPrintFlag - message mask
-    DebugMessage - format string of the message to print
-    ... - values used by the format string
-
-Return Value:
-
-    None.
-
- --*/
- {
-#if DBG
-#define     TEMP_BUFFER_SIZE        1024
-    va_list    list;
-    CHAR       debugMessageBuffer[TEMP_BUFFER_SIZE];
-    NTSTATUS   status;
-
-    va_start(list, DebugMessage);
-
-    if (DebugMessage) {
-
-        //
-        // Using new safe string functions instead of _vsnprintf.
-        // This function takes care of NULL terminating if the message
-        // is longer than the buffer.
-        //
-        status = RtlStringCbVPrintfA( debugMessageBuffer,
-                                      sizeof(debugMessageBuffer),
-                                      DebugMessage,
-                                      list );
-        if(!NT_SUCCESS(status)) {
-
-            DbgPrint (_DRIVER_NAME_": RtlStringCbVPrintfA failed 0x%x\n", status);
-            return;
-        }
-        if (DebugPrintLevel <= TRACE_LEVEL_ERROR ||
-            (DebugPrintLevel <= DebugLevel &&
-             ((DebugPrintFlag & DebugFlag) == DebugPrintFlag))) {
-            DbgPrint("%s %s", _DRIVER_NAME_, debugMessageBuffer);
-        }
-    }
-    va_end(list);
-
-    return;
-#else
-    UNREFERENCED_PARAMETER(DebugPrintLevel);
-    UNREFERENCED_PARAMETER(DebugPrintFlag);
-    UNREFERENCED_PARAMETER(DebugMessage);
-#endif
-}
-
-#endif
-
 
 
 

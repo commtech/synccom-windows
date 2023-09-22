@@ -20,12 +20,13 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 
-#include <driver.h>
-#include <port.h>
-#include <utils.h>
-#include <flist.h>
-#include <frame.h>
-#include <isr.h>
+
+#include "driver.h"
+#include "port.h"
+#include "utils.h"
+#include "flist.h"
+#include "frame.h"
+#include "isr.h"
 
 #if defined(EVENT_TRACING)
 #include "port.tmh"
@@ -390,7 +391,7 @@ void synccom_port_set_clock_bits(_In_ struct synccom_port *port, unsigned char *
 	clock_data[15] |= 0x04;
 #endif
 
-	data = (UINT32 *)ExAllocatePoolWithTag(PagedPool, sizeof(UINT32)* 323, 'stiB');
+	data = (UINT32 *)ExAllocatePool2(POOL_FLAG_NON_PAGED, sizeof(UINT32)* 323, 'stiB');
 	if (data == NULL) {
 		TraceEvents(TRACE_LEVEL_ERROR, DBG_IOCTL, "%s: ExAllocatePoolWithTag failed.", __FUNCTION__);
 		return;
@@ -1248,8 +1249,10 @@ NTSTATUS synccom_port_get_port_num(struct synccom_port *port, unsigned *port_num
 	NTSTATUS status;
 	WDFKEY devkey;
 	UNICODE_STRING key_str;
-	ULONG port_num_long;
-
+    WDFSTRING friendlyname;
+    UNICODE_STRING str;
+	//ULONG port_num_long;
+    /*
 	RtlInitUnicodeString(&key_str, L"PortNumber");
 
 	status = WdfDeviceOpenRegistryKey(port->device, PLUGPLAY_REGKEY_DEVICE,
@@ -1269,6 +1272,38 @@ NTSTATUS synccom_port_get_port_num(struct synccom_port *port, unsigned *port_num
 	*port_num = (unsigned)port_num_long;
 
 	WdfRegistryClose(devkey);
+    */
+
+    *port_num = 1;
+
+    DbgPrint("About to try looking for the friendly name!\n");
+    RtlInitUnicodeString(&key_str, L"FriendlyName");
+
+    status = WdfDeviceOpenRegistryKey(port->device, PLUGPLAY_REGKEY_CURRENT_HWPROFILE,
+        KEY_READ | KEY_WRITE,
+        WDF_NO_OBJECT_ATTRIBUTES, &devkey);
+    if (!NT_SUCCESS(status)) {
+        TraceEvents(TRACE_LEVEL_ERROR, DBG_PNP, "WdfDeviceOpenRegistryKey part 2 failed %!STATUS!", status);
+        DbgPrint("WdfDeviceOpenRegistryKey part 2 failed %x\n", status);
+        return status;
+    }
+    status = WdfStringCreate(NULL, WDF_NO_OBJECT_ATTRIBUTES, &friendlyname);
+    if (NT_SUCCESS(status)) {
+        status = WdfRegistryQueryString(devkey, &key_str, friendlyname);
+        if (!NT_SUCCESS(status)) {
+            TraceEvents(TRACE_LEVEL_ERROR, DBG_PNP, "WdfRegistryQueryString failed %!STATUS!", status);
+            DbgPrint("WdfRegistryQueryString failed %x\n", status);
+            return status;
+        }
+        else {
+            WdfStringGetUnicodeString(friendlyname, &str);
+            TraceEvents(TRACE_LEVEL_ERROR, DBG_PNP, "FriendlyName %wZ\n", &str);
+            DbgPrint("\nFriendlyName: %wZ\n", &str);
+        }
+    }
+    DbgPrint("Finished looking for the friendly name! Did it work?\n");
+    WdfRegistryClose(devkey);
+
 
 	return status;
 }
@@ -1303,3 +1338,6 @@ unsigned synccom_port_can_support_nonvolatile(struct synccom_port *port)
     if (port->fx2_firmware_rev >= FIRST_NONVOLATILE_VERSION) return 1;
     return 0;
 }
+
+
+

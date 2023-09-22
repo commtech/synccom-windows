@@ -27,7 +27,7 @@ THE SOFTWARE.
 extern "C"
 {
 #endif
-#include <string.h>
+
 
 #define SYNCCOM_REGISTERS_INIT(registers) memset(&registers, -1, sizeof(registers))
 #define SYNCCOM_UPDATE_VALUE -2

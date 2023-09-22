@@ -24,9 +24,8 @@ THE SOFTWARE.
 #define SYNCCOM_FRAME_H
 
 //#include "descriptor.h" /* struct synccom_descriptor */
-#include <ntddk.h>
-#include <wdf.h>
-#include <defines.h>
+#include "precomp.h"
+#include "defines.h"
 
 
 struct synccom_frame *synccom_frame_new(struct synccom_port *port);

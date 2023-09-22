@@ -20,15 +20,32 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 
-#ifndef SYNCCOM_UTILS_H
-#define SYNCCOM_UTILS_H
-#include <ntddk.h>
-#include <wdf.h>
-#include <defines.h>
-#include "trace.h"
+#include "utils.h"
 
-UINT32 chars_to_u32(const unsigned char *data);
-unsigned is_read_only_register(unsigned offset);
-unsigned is_write_only_register(unsigned offset);
+UINT32 chars_to_u32(const unsigned char *data)
+{
+	return *((UINT32*)data);
+}
 
-#endif
+unsigned is_read_only_register(unsigned offset)
+{
+	switch (offset) {
+	case FIFO_BC_OFFSET:
+	case FIFO_FC_OFFSET:
+	case STAR_OFFSET:
+	case VSTR_OFFSET:
+	case ISR_OFFSET:
+		return 1;
+	}
+
+	return 0;
+}
+
+unsigned is_write_only_register(unsigned offset)
+{
+	switch (offset){
+	case CMDR_OFFSET:
+		return 1;
+	}
+	return 0;
+}

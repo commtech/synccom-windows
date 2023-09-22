@@ -20,11 +20,11 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 
-#include <driver.h>
-#include <port.h>
-#include <flist.h>
-#include <frame.h>
-#include <isr.h>
+#include "driver.h"
+#include "port.h"
+#include "flist.h"
+#include "frame.h"
+#include "isr.h"
 
 
 #if defined(EVENT_TRACING)

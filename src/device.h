@@ -19,32 +19,34 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN 
 THE SOFTWARE.
 */
-#include <utils.h>
 
-UINT32 chars_to_u32(const unsigned char *data)
-{
-	return *((UINT32*)data);
-}
+#ifndef SYNCCOM_DEVICE_H
+#define SYNCCOM_DEVICE_H
+#include "precomp.h"
+#include "defines.h"
+#include "trace.h"
+#include "debug.h"
 
-unsigned is_read_only_register(unsigned offset)
-{
-	switch (offset) {
-	case FIFO_BC_OFFSET:
-	case FIFO_FC_OFFSET:
-	case STAR_OFFSET:
-	case VSTR_OFFSET:
-	case ISR_OFFSET:
-		return 1;
-	}
+struct synccom_port *synccom_port_new(WDFDRIVER Driver, IN PWDFDEVICE_INIT DeviceInit);
 
-	return 0;
-}
+EVT_WDF_DRIVER_DEVICE_ADD SyncComEvtDeviceAdd;
+EVT_WDF_DEVICE_D0_ENTRY SyncComEvtDeviceD0Entry;
+EVT_WDF_DEVICE_D0_EXIT SyncComEvtDeviceD0Exit;
+EVT_WDF_DEVICE_PREPARE_HARDWARE SyncComEvtDevicePrepareHardware;
+EVT_WDF_DEVICE_RELEASE_HARDWARE SyncComEvtDeviceReleaseHardware;
+EVT_WDF_IO_QUEUE_IO_WRITE SyncComEvtIoWrite;
+EVT_WDF_IO_QUEUE_IO_READ SyncComEvtIoRead;
 
-unsigned is_write_only_register(unsigned offset)
-{
-	switch (offset){
-	case CMDR_OFFSET:
-		return 1;
-	}
-	return 0;
-}
+NTSTATUS setup_spinlocks(_In_ struct synccom_port *port);
+NTSTATUS setup_dpc(_In_ struct synccom_port *port);
+NTSTATUS setup_memory(_In_ struct synccom_port *port);
+NTSTATUS setup_request(_In_ struct synccom_port *port);
+NTSTATUS setup_timer(_In_ struct synccom_port *port);
+
+_IRQL_requires_(PASSIVE_LEVEL)
+NTSTATUS SelectInterfaces(_In_ struct synccom_port *port);
+_IRQL_requires_(PASSIVE_LEVEL)
+NTSTATUS OsrFxSetPowerPolicy(_In_ struct synccom_port *port);
+
+
+#endif
