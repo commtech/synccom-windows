@@ -1,5 +1,5 @@
 /*
-Copyright 2019 Commtech, Inc.
+Copyright 2023 Commtech, Inc.
 
 Permission is hereby granted, free of charge, to any person obtaining a copy 
 of this software and associated documentation files (the "Software"), to deal 
@@ -23,7 +23,6 @@ THE SOFTWARE.
 #ifndef SYNCCOM_FRAME_H
 #define SYNCCOM_FRAME_H
 
-//#include "descriptor.h" /* struct synccom_descriptor */
 #include "precomp.h"
 #include "defines.h"
 

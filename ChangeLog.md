@@ -1,5 +1,12 @@
 # ChangeLog
 
+## [2.0.0.0](https://github.com/commtech/synccom-windows/releases/tag/v2.0.0.0) (09/22/2023)
+- Updated code to support Windows Universal.
+- No longer supports anything before Windows 10.
+- Removed the co-installer.
+- Removed the class installer.
+- Because of the removal of co/class installers, it has changed categories in the device manager.
+
 ## [1.2.10.0](https://github.com/commtech/synccom-windows/releases/tag/v1.2.10.0) (09/13/2021)
 - Fixed an issue with over/underreading the frame size list when doing many short frames.
 - Fixed a BSOD with deleting objects that were never successfully created.

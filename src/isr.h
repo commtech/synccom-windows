@@ -1,5 +1,5 @@
 /*
-Copyright 2019 Commtech, Inc.
+Copyright 2023 Commtech, Inc.
 
 Permission is hereby granted, free of charge, to any person obtaining a copy 
 of this software and associated documentation files (the "Software"), to deal 
@@ -26,7 +26,6 @@ THE SOFTWARE.
 #include "precomp.h"
 #include "debug.h"
 
-//#include "trace.h"
 
 EVT_WDF_DPC		oframe_worker;
 EVT_WDF_DPC		iframe_worker;

@@ -1,5 +1,5 @@
 /*
-Copyright 2019 Commtech, Inc.
+Copyright 2023 Commtech, Inc.
 
 Permission is hereby granted, free of charge, to any person obtaining a copy 
 of this software and associated documentation files (the "Software"), to deal 
@@ -24,7 +24,7 @@ THE SOFTWARE.
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
-//#include "../fsccdrv.h"
+
 #define result_array_size 512
 
 struct ResultStruct {
