@@ -28,9 +28,8 @@ Provider=%ManufacturerName%
 CatalogFile=synccom.cat
 DriverVer=
 
-
 [DestinationDirs]
-DefaultDestDir = 12
+DefaultDestDir = 13
 
 ; ================= Class section =====================
 
@@ -50,37 +49,26 @@ synccom-windows.sys = 1
 
 ; ================ Install section ======================
 
-
 [synccom_install.NT$ARCH$]
-CopyFiles=Drivers_Dir
+CopyFiles=DriverFile
 AddReg=synccom_install.AddReg
 
-[Drivers_Dir]
+[DriverFile]
 synccom-windows.sys
 
-;[synccom_install.NT$ARCH$.HW]
-;AddReg=synccom_install.AddReg.Guid
-
 [synccom_install.NT$ARCH$.Services]
-AddService = synccom,%SPSVCINST_ASSOCSERVICE%,synccom_install.AddService
+AddService = synccom,0x00000002,synccom_install.AddService
 
 [synccom_install.AddReg]
 HKR,,FriendlyName,,%synccom.DeviceDesc%
-;HKR,,DriverBase,,synccom-windows.sys
-;HKR,"Parameters","MaximumTransferSize",0x10001,4096
-;HKR,"Parameters","DebugLevel",0x10001,2
 
 [synccom_install.AddService]
 DisplayName    = %synccom.SvcDesc%
 ServiceType    = 1                  ; SERVICE_KERNEL_DRIVER
 StartType      = 3                  ; SERVICE_DEMAND_START
 ErrorControl   = 1                  ; SERVICE_ERROR_NORMAL
-ServiceBinary  = %12%\synccom-windows.sys
+ServiceBinary  = %13%\synccom-windows.sys
 LoadOrderGroup = Base
-
-
-;[synccom_install.AddReg.Guid]
-;HKR,,DriverGUID,,%synccom.GUID%
 
 ;---------------------------------------------------------------;
 
@@ -89,5 +77,4 @@ ManufacturerName = "Commtech, Inc."
 Disk_Description="Sync Com Installation Disk"
 synccom.DeviceDesc="Sync Com Communications Port"
 synccom.SvcDesc="Sync Com Service"
-SPSVCINST_ASSOCSERVICE= 0x00000002
 synccom.GUID="{AE18AA60-7F6A-11d4-97DD-00010229B959}"
