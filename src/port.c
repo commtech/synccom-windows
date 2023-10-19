@@ -1,22 +1,22 @@
 /*
 Copyright 2023 Commtech, Inc.
 
-Permission is hereby granted, free of charge, to any person obtaining a copy 
-of this software and associated documentation files (the "Software"), to deal 
-in the Software without restriction, including without limitation the rights 
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell 
-copies of the Software, and to permit persons to whom the Software is 
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
 furnished to do so, subject to the following conditions:
 
-The above copyright notice and this permission notice shall be included in 
+The above copyright notice and this permission notice shall be included in
 all copies or substantial portions of the Software.
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE 
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER 
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, 
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN 
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 
@@ -36,26 +36,26 @@ THE SOFTWARE.
 
 VOID SyncComEvtIoDeviceControl(_In_ WDFQUEUE Queue, _In_ WDFREQUEST Request, _In_ size_t OutputBufferLength, _In_ size_t InputBufferLength, _In_ ULONG IoControlCode)
 {
-    WDFDEVICE           device;
-    BOOLEAN             request_pending = FALSE;
+	WDFDEVICE           device;
+	BOOLEAN             request_pending = FALSE;
 	NTSTATUS            status = STATUS_SUCCESS;
-	struct synccom_port	*port = 0;
+	struct synccom_port* port = 0;
 	size_t				bytes_returned = 0;
 
-    UNREFERENCED_PARAMETER(InputBufferLength);
-    UNREFERENCED_PARAMETER(OutputBufferLength);
+	UNREFERENCED_PARAMETER(InputBufferLength);
+	UNREFERENCED_PARAMETER(OutputBufferLength);
 
-    PAGED_CODE();
+	PAGED_CODE();
 
-    device = WdfIoQueueGetDevice(Queue);
+	device = WdfIoQueueGetDevice(Queue);
 	port = GetPortContext(device);
 
 	switch (IoControlCode) {
 
 	case SYNCCOM_SET_REGISTERS: {
-		struct synccom_registers *input_regs = 0;
+		struct synccom_registers* input_regs = 0;
 
-		status = WdfRequestRetrieveInputBuffer(Request, sizeof(*input_regs), (PVOID *)&input_regs, NULL);
+		status = WdfRequestRetrieveInputBuffer(Request, sizeof(*input_regs), (PVOID*)&input_regs, NULL);
 		if (!NT_SUCCESS(status)) {
 			TraceEvents(TRACE_LEVEL_ERROR, DBG_IOCTL, "%s: WdfRequestRetrieveInputBuffer failed %!STATUS!", __FUNCTION__, status);
 			break;
@@ -72,15 +72,15 @@ VOID SyncComEvtIoDeviceControl(_In_ WDFQUEUE Queue, _In_ WDFREQUEST Request, _In
 		break;
 	}
 	case SYNCCOM_GET_REGISTERS: {
-		struct synccom_registers *input_regs = 0;
-		struct synccom_registers *output_regs = 0;
+		struct synccom_registers* input_regs = 0;
+		struct synccom_registers* output_regs = 0;
 
-		status = WdfRequestRetrieveInputBuffer(Request, sizeof(*input_regs), (PVOID *)&input_regs, NULL);
+		status = WdfRequestRetrieveInputBuffer(Request, sizeof(*input_regs), (PVOID*)&input_regs, NULL);
 		if (!NT_SUCCESS(status)) {
 			TraceEvents(TRACE_LEVEL_ERROR, DBG_IOCTL, "%s: WdfRequestRetrieveInputBuffer failed %!STATUS!", __FUNCTION__, status);
 			break;
 		}
-		status = WdfRequestRetrieveOutputBuffer(Request, sizeof(*output_regs), (PVOID *)&output_regs, NULL);
+		status = WdfRequestRetrieveOutputBuffer(Request, sizeof(*output_regs), (PVOID*)&output_regs, NULL);
 		if (!NT_SUCCESS(status)) {
 			TraceEvents(TRACE_LEVEL_WARNING, DBG_IOCTL, "%s: WdfRequestRetrieveOutputBuffer failed %!STATUS!", __FUNCTION__, status);
 			break;
@@ -117,9 +117,9 @@ VOID SyncComEvtIoDeviceControl(_In_ WDFQUEUE Queue, _In_ WDFREQUEST Request, _In
 		break;
 	}
 	case SYNCCOM_GET_APPEND_STATUS: {
-		BOOLEAN *append_status = 0;
+		BOOLEAN* append_status = 0;
 
-		status = WdfRequestRetrieveOutputBuffer(Request, sizeof(*append_status), (PVOID *)&append_status, NULL);
+		status = WdfRequestRetrieveOutputBuffer(Request, sizeof(*append_status), (PVOID*)&append_status, NULL);
 		if (!NT_SUCCESS(status)) {
 			TraceEvents(TRACE_LEVEL_WARNING, DBG_IOCTL, "%s: WdfRequestRetrieveOutputBuffer failed %!STATUS!", __FUNCTION__, status);
 			break;
@@ -138,9 +138,9 @@ VOID SyncComEvtIoDeviceControl(_In_ WDFQUEUE Queue, _In_ WDFREQUEST Request, _In
 		break;
 	}
 	case SYNCCOM_GET_APPEND_TIMESTAMP: {
-		BOOLEAN *append_timestamp = 0;
+		BOOLEAN* append_timestamp = 0;
 
-		status = WdfRequestRetrieveOutputBuffer(Request, sizeof(*append_timestamp), (PVOID *)&append_timestamp, NULL);
+		status = WdfRequestRetrieveOutputBuffer(Request, sizeof(*append_timestamp), (PVOID*)&append_timestamp, NULL);
 		if (!NT_SUCCESS(status)) {
 			TraceEvents(TRACE_LEVEL_WARNING, DBG_IOCTL, "%s: WdfRequestRetrieveOutputBuffer failed %!STATUS!", __FUNCTION__, status);
 			break;
@@ -159,9 +159,9 @@ VOID SyncComEvtIoDeviceControl(_In_ WDFQUEUE Queue, _In_ WDFREQUEST Request, _In
 		break;
 	}
 	case SYNCCOM_GET_RX_MULTIPLE: {
-		BOOLEAN *rx_multiple = 0;
+		BOOLEAN* rx_multiple = 0;
 
-		status = WdfRequestRetrieveOutputBuffer(Request, sizeof(*rx_multiple), (PVOID *)&rx_multiple, NULL);
+		status = WdfRequestRetrieveOutputBuffer(Request, sizeof(*rx_multiple), (PVOID*)&rx_multiple, NULL);
 		if (!NT_SUCCESS(status)) {
 			TraceEvents(TRACE_LEVEL_WARNING, DBG_IOCTL, "%s: WdfRequestRetrieveOutputBuffer failed %!STATUS!", __FUNCTION__, status);
 			break;
@@ -172,9 +172,9 @@ VOID SyncComEvtIoDeviceControl(_In_ WDFQUEUE Queue, _In_ WDFREQUEST Request, _In
 		break;
 	}
 	case SYNCCOM_SET_MEMORY_CAP: {
-		struct synccom_memory_cap *memcap = 0;
+		struct synccom_memory_cap* memcap = 0;
 
-		status = WdfRequestRetrieveInputBuffer(Request, sizeof(*memcap), (PVOID *)&memcap, NULL);
+		status = WdfRequestRetrieveInputBuffer(Request, sizeof(*memcap), (PVOID*)&memcap, NULL);
 		if (!NT_SUCCESS(status)) {
 			TraceEvents(TRACE_LEVEL_WARNING, DBG_IOCTL, "%s: WdfRequestRetrieveInputBuffer failed %!STATUS!", __FUNCTION__, status);
 			break;
@@ -184,9 +184,9 @@ VOID SyncComEvtIoDeviceControl(_In_ WDFQUEUE Queue, _In_ WDFREQUEST Request, _In
 		break;
 	}
 	case SYNCCOM_GET_MEMORY_CAP: {
-		struct synccom_memory_cap *memcap = 0;
+		struct synccom_memory_cap* memcap = 0;
 
-		status = WdfRequestRetrieveOutputBuffer(Request, sizeof(*memcap), (PVOID *)&memcap, NULL);
+		status = WdfRequestRetrieveOutputBuffer(Request, sizeof(*memcap), (PVOID*)&memcap, NULL);
 		if (!NT_SUCCESS(status)) {
 			TraceEvents(TRACE_LEVEL_WARNING, DBG_IOCTL, "%s: WdfRequestRetrieveInputBuffer failed %!STATUS!", __FUNCTION__, status);
 			break;
@@ -206,9 +206,9 @@ VOID SyncComEvtIoDeviceControl(_In_ WDFQUEUE Queue, _In_ WDFREQUEST Request, _In
 		break;
 	}
 	case SYNCCOM_GET_IGNORE_TIMEOUT: {
-		BOOLEAN *ignore_timeout = 0;
+		BOOLEAN* ignore_timeout = 0;
 
-		status = WdfRequestRetrieveOutputBuffer(Request, sizeof(*ignore_timeout), (PVOID *)&ignore_timeout, NULL);
+		status = WdfRequestRetrieveOutputBuffer(Request, sizeof(*ignore_timeout), (PVOID*)&ignore_timeout, NULL);
 		if (!NT_SUCCESS(status)) {
 			TraceEvents(TRACE_LEVEL_WARNING, DBG_IOCTL, "%s: WdfRequestRetrieveOutputBuffer failed %!STATUS!", __FUNCTION__, status);
 			break;
@@ -219,9 +219,9 @@ VOID SyncComEvtIoDeviceControl(_In_ WDFQUEUE Queue, _In_ WDFREQUEST Request, _In
 		break;
 	}
 	case SYNCCOM_SET_TX_MODIFIERS: {
-		int *tx_modifiers = 0;
+		int* tx_modifiers = 0;
 
-		status = WdfRequestRetrieveInputBuffer(Request, sizeof(*tx_modifiers), (PVOID *)&tx_modifiers, NULL);
+		status = WdfRequestRetrieveInputBuffer(Request, sizeof(*tx_modifiers), (PVOID*)&tx_modifiers, NULL);
 		if (!NT_SUCCESS(status)) {
 			TraceEvents(TRACE_LEVEL_WARNING, DBG_IOCTL, "%s: WdfRequestRetrieveInputBuffer failed %!STATUS!", __FUNCTION__, status);
 			break;
@@ -235,9 +235,9 @@ VOID SyncComEvtIoDeviceControl(_In_ WDFQUEUE Queue, _In_ WDFREQUEST Request, _In
 		break;
 	}
 	case SYNCCOM_GET_TX_MODIFIERS: {
-		unsigned *tx_modifiers = 0;
+		unsigned* tx_modifiers = 0;
 
-		status = WdfRequestRetrieveOutputBuffer(Request, sizeof(*tx_modifiers), (PVOID *)&tx_modifiers, NULL);
+		status = WdfRequestRetrieveOutputBuffer(Request, sizeof(*tx_modifiers), (PVOID*)&tx_modifiers, NULL);
 		if (!NT_SUCCESS(status)) {
 			TraceEvents(TRACE_LEVEL_WARNING, DBG_IOCTL, "%s: WdfRequestRetrieveOutputBuffer failed %!STATUS!", __FUNCTION__, status);
 			break;
@@ -260,9 +260,9 @@ VOID SyncComEvtIoDeviceControl(_In_ WDFQUEUE Queue, _In_ WDFREQUEST Request, _In
 		break;
 	}
 	case SYNCCOM_GET_MEM_USAGE: {
-		struct synccom_memory_cap *memcap = 0;
+		struct synccom_memory_cap* memcap = 0;
 
-		status = WdfRequestRetrieveOutputBuffer(Request, sizeof(*memcap), (PVOID *)&memcap, NULL);
+		status = WdfRequestRetrieveOutputBuffer(Request, sizeof(*memcap), (PVOID*)&memcap, NULL);
 		if (!NT_SUCCESS(status)) {
 			TraceEvents(TRACE_LEVEL_WARNING, DBG_IOCTL, "%s: WdfRequestRetrieveInputBuffer failed %!STATUS!", __FUNCTION__, status);
 			break;
@@ -275,9 +275,9 @@ VOID SyncComEvtIoDeviceControl(_In_ WDFQUEUE Queue, _In_ WDFREQUEST Request, _In
 		break;
 	}
 	case SYNCCOM_SET_CLOCK_BITS: {
-		unsigned char *clock_bits = 0;
+		unsigned char* clock_bits = 0;
 
-		status = WdfRequestRetrieveInputBuffer(Request, NUM_CLOCK_BYTES, (PVOID *)&clock_bits, NULL);
+		status = WdfRequestRetrieveInputBuffer(Request, NUM_CLOCK_BYTES, (PVOID*)&clock_bits, NULL);
 		if (!NT_SUCCESS(status)) {
 			TraceEvents(TRACE_LEVEL_WARNING, DBG_IOCTL, "WdfRequestRetrieveInputBuffer failed %!STATUS!", status);
 			break;
@@ -286,7 +286,7 @@ VOID SyncComEvtIoDeviceControl(_In_ WDFQUEUE Queue, _In_ WDFREQUEST Request, _In
 		break;
 	}
 	case SYNCCOM_REPROGRAM: {
-		unsigned char *firmware_line = 0;
+		unsigned char* firmware_line = 0;
 		size_t buffer_size = 0, data_size = 0;
 		status = WdfRequestRetrieveInputBuffer(Request, 1, &firmware_line, &buffer_size);
 		if (!NT_SUCCESS(status)) {
@@ -304,85 +304,85 @@ VOID SyncComEvtIoDeviceControl(_In_ WDFQUEUE Queue, _In_ WDFREQUEST Request, _In
 		break;
 	}
 	case SYNCCOM_GET_FIRMWARE: {
-			UINT32 *firmware_revision = 0;
+		UINT32* firmware_revision = 0;
 
-			status = WdfRequestRetrieveOutputBuffer(Request, sizeof(*firmware_revision), (PVOID *)&firmware_revision, NULL);
-			if (!NT_SUCCESS(status)) {
-				TraceEvents(TRACE_LEVEL_WARNING, DBG_IOCTL, "%s: WdfRequestRetrieveInputBuffer failed %!STATUS!", __FUNCTION__, status);
-				break;
-			}
-			*firmware_revision = synccom_port_get_firmware_rev(port);
-			bytes_returned = sizeof(*firmware_revision);
+		status = WdfRequestRetrieveOutputBuffer(Request, sizeof(*firmware_revision), (PVOID*)&firmware_revision, NULL);
+		if (!NT_SUCCESS(status)) {
+			TraceEvents(TRACE_LEVEL_WARNING, DBG_IOCTL, "%s: WdfRequestRetrieveInputBuffer failed %!STATUS!", __FUNCTION__, status);
+			break;
+		}
+		*firmware_revision = synccom_port_get_firmware_rev(port);
+		bytes_returned = sizeof(*firmware_revision);
+		break;
+	}
+
+	case SYNCCOM_GET_FX2_FIRMWARE: {
+		UINT32* fx2_rev = 0;
+		status = WdfRequestRetrieveOutputBuffer(Request, sizeof(*fx2_rev), (PVOID*)&fx2_rev, NULL);
+		if (!NT_SUCCESS(status)) {
+			TraceEvents(TRACE_LEVEL_WARNING, DBG_IOCTL, "%s: WdfRequestRetrieveOutputBuffer failed %!STATUS!", __FUNCTION__, status);
+			break;
+		}
+		*fx2_rev = port->fx2_firmware_rev;
+		bytes_returned = sizeof(*fx2_rev);
+		break;
+	}
+	case SYNCCOM_SET_NONVOLATILE: {
+		UINT32* nonvolatile = 0;
+
+		if (!synccom_port_can_support_nonvolatile(port)) {
+			status = STATUS_NOT_SUPPORTED;
+			break;
+		}
+		status = WdfRequestRetrieveInputBuffer(Request, sizeof(*nonvolatile), (PVOID*)&nonvolatile, NULL);
+		if (!NT_SUCCESS(status)) {
+			TraceEvents(TRACE_LEVEL_WARNING, DBG_IOCTL, "%s: WdfRequestRetrieveInputBuffer failed %!STATUS!", __FUNCTION__, status);
 			break;
 		}
 
-    case SYNCCOM_GET_FX2_FIRMWARE: {
-        UINT32 *fx2_rev = 0;
-        status = WdfRequestRetrieveOutputBuffer(Request, sizeof(*fx2_rev), (PVOID *)&fx2_rev, NULL);
-        if (!NT_SUCCESS(status)) {
-            TraceEvents(TRACE_LEVEL_WARNING, DBG_IOCTL, "%s: WdfRequestRetrieveOutputBuffer failed %!STATUS!", __FUNCTION__, status);
-            break;
-        }
-        *fx2_rev = port->fx2_firmware_rev;
-        bytes_returned = sizeof(*fx2_rev);
-        break;
-    }
-    case SYNCCOM_SET_NONVOLATILE: {
-        UINT32 *nonvolatile = 0;
-
-        if (!synccom_port_can_support_nonvolatile(port)) {
-            status = STATUS_NOT_SUPPORTED;
-            break;
-        }
-        status = WdfRequestRetrieveInputBuffer(Request, sizeof(*nonvolatile), (PVOID *)&nonvolatile, NULL);
-        if (!NT_SUCCESS(status)) {
-            TraceEvents(TRACE_LEVEL_WARNING, DBG_IOCTL, "%s: WdfRequestRetrieveInputBuffer failed %!STATUS!", __FUNCTION__, status);
-            break;
-        }
-
-        status = synccom_port_set_nonvolatile(port, *nonvolatile, basic_completion);
-        if (!NT_SUCCESS(status)) {
-            TraceEvents(TRACE_LEVEL_WARNING, DBG_IOCTL, "%s: synccom_port_set_nonvolatile failed %!STATUS!", __FUNCTION__, status);
-            break;
-        }
-        port->nonvolatile_reg = *nonvolatile;
+		status = synccom_port_set_nonvolatile(port, *nonvolatile, basic_completion);
+		if (!NT_SUCCESS(status)) {
+			TraceEvents(TRACE_LEVEL_WARNING, DBG_IOCTL, "%s: synccom_port_set_nonvolatile failed %!STATUS!", __FUNCTION__, status);
+			break;
+		}
+		port->nonvolatile_reg = *nonvolatile;
 		break;
-    }
-    case SYNCCOM_GET_NONVOLATILE: {
-        UINT32 *nonvolatile = 0;
+	}
+	case SYNCCOM_GET_NONVOLATILE: {
+		UINT32* nonvolatile = 0;
 
-        if (!synccom_port_can_support_nonvolatile(port)) {
-            status = STATUS_NOT_SUPPORTED;
-            break;
-        }
-        status = WdfRequestRetrieveOutputBuffer(Request, sizeof(*nonvolatile), (PVOID *)&nonvolatile, NULL);
-        if (!NT_SUCCESS(status)) {
-            TraceEvents(TRACE_LEVEL_WARNING, DBG_IOCTL, "%s: WdfRequestRetrieveOutputBuffer failed %!STATUS!", __FUNCTION__, status);
-            break;
-        }
-        synccom_port_get_nonvolatile(port, register_completion, port);
-        *nonvolatile = port->nonvolatile_reg;
-        bytes_returned = sizeof(*nonvolatile);
+		if (!synccom_port_can_support_nonvolatile(port)) {
+			status = STATUS_NOT_SUPPORTED;
+			break;
+		}
+		status = WdfRequestRetrieveOutputBuffer(Request, sizeof(*nonvolatile), (PVOID*)&nonvolatile, NULL);
+		if (!NT_SUCCESS(status)) {
+			TraceEvents(TRACE_LEVEL_WARNING, DBG_IOCTL, "%s: WdfRequestRetrieveOutputBuffer failed %!STATUS!", __FUNCTION__, status);
+			break;
+		}
+		synccom_port_get_nonvolatile(port, register_completion, port);
+		*nonvolatile = port->nonvolatile_reg;
+		bytes_returned = sizeof(*nonvolatile);
 		break;
-    }
+	}
 	default: {
 		TraceEvents(TRACE_LEVEL_INFORMATION, DBG_IOCTL, "%s: Default?\n", __FUNCTION__);
 		status = STATUS_INVALID_DEVICE_REQUEST;
 		break;
-		}
+	}
 	}
 
-    if (request_pending == FALSE) {
+	if (request_pending == FALSE) {
 		WdfRequestCompleteWithInformation(Request, status, bytes_returned);
-    }
+	}
 
-    return;
+	return;
 }
 
 #define STRB_BASE 0x00000008
 #define DTA_BASE 0x00000001
 #define CLK_BASE 0x00000002
-void synccom_port_set_clock_bits(_In_ struct synccom_port *port, unsigned char *clock_data)
+void synccom_port_set_clock_bits(_In_ struct synccom_port* port, unsigned char* clock_data)
 {
 	UINT32 orig_fcr_value = 0;
 	UINT32 new_fcr_value = 0;
@@ -391,7 +391,7 @@ void synccom_port_set_clock_bits(_In_ struct synccom_port *port, unsigned char *
 	unsigned strb_value = STRB_BASE;
 	unsigned dta_value = DTA_BASE;
 	unsigned clk_value = CLK_BASE;
-	UINT32 *data = 0;
+	UINT32* data = 0;
 	unsigned data_index = 0;
 
 #ifdef DISABLE_XTAL
@@ -400,7 +400,7 @@ void synccom_port_set_clock_bits(_In_ struct synccom_port *port, unsigned char *
 	clock_data[15] |= 0x04;
 #endif
 
-	data = (UINT32 *)ExAllocatePool2(POOL_FLAG_NON_PAGED, sizeof(UINT32)* 323, 'stiB');
+	data = (UINT32*)ExAllocatePool2(POOL_FLAG_NON_PAGED, sizeof(UINT32) * 323, 'stiB');
 	if (data == NULL) {
 		TraceEvents(TRACE_LEVEL_ERROR, DBG_IOCTL, "%s: ExAllocatePoolWithTag failed.", __FUNCTION__);
 		return;
@@ -437,13 +437,13 @@ void synccom_port_set_clock_bits(_In_ struct synccom_port *port, unsigned char *
 	ExFreePoolWithTag(data, 'stiB');
 }
 
-NTSTATUS synccom_port_program_firmware(_In_ struct synccom_port *port, unsigned char *firmware_line, size_t data_size)
+NTSTATUS synccom_port_program_firmware(_In_ struct synccom_port* port, unsigned char* firmware_line, size_t data_size)
 {
 	WDFUSBPIPE write_pipe;
 	WDFREQUEST firmware_request;
 	WDFMEMORY firmware_command;
 	WDF_OBJECT_ATTRIBUTES attributes;
-	unsigned char *firmware_buffer = 0;
+	unsigned char* firmware_buffer = 0;
 	NTSTATUS status = STATUS_SUCCESS;
 
 	UNUSED(firmware_line);
@@ -457,13 +457,13 @@ NTSTATUS synccom_port_program_firmware(_In_ struct synccom_port *port, unsigned 
 		return status;
 	}
 	attributes.ParentObject = firmware_request;
-	status = WdfMemoryCreate(&attributes, NonPagedPool, 0, data_size+1, &firmware_command, NULL);
+	status = WdfMemoryCreate(&attributes, NonPagedPool, 0, data_size + 1, &firmware_command, NULL);
 	if (!NT_SUCCESS(status)) {
 		TraceEvents(TRACE_LEVEL_ERROR, DBG_IOCTL, "%s: Cannot create new request.\n", __FUNCTION__);
 		WdfObjectDelete(firmware_request);
 		return status;
 	}
-	status = WdfMemoryCopyFromBuffer(firmware_command, 1, (void *)firmware_line, data_size);
+	status = WdfMemoryCopyFromBuffer(firmware_command, 1, (void*)firmware_line, data_size);
 	if (!NT_SUCCESS(status)) {
 		TraceEvents(TRACE_LEVEL_ERROR, DBG_IOCTL, "%s: Cannot copy buffer to memory.\n", __FUNCTION__);
 		WdfObjectDelete(firmware_request);
@@ -488,15 +488,15 @@ NTSTATUS synccom_port_program_firmware(_In_ struct synccom_port *port, unsigned 
 	return status;
 }
 
-NTSTATUS synccom_port_set_registers(_In_ struct synccom_port *port, const struct synccom_registers *regs)
+NTSTATUS synccom_port_set_registers(_In_ struct synccom_port* port, const struct synccom_registers* regs)
 {
 	unsigned i = 0;
 
 	for (i = 0; i < sizeof(*regs) / sizeof(synccom_register); i++) {
 		unsigned char register_offset = (unsigned char)i * 4;
-		if (is_read_only_register(register_offset) || ((synccom_register *)regs)[i] < 0) continue;
-		if (register_offset > MAX_OFFSET) synccom_port_set_register_async(port, FPGA_UPPER_ADDRESS, FCR_OFFSET, (UINT32)(((synccom_register *)regs)[i]), basic_completion);
-		else synccom_port_set_register_async(port, FPGA_UPPER_ADDRESS + SYNCCOM_UPPER_OFFSET, register_offset, (UINT32)(((synccom_register *)regs)[i]), basic_completion);
+		if (is_read_only_register(register_offset) || ((synccom_register*)regs)[i] < 0) continue;
+		if (register_offset > MAX_OFFSET) synccom_port_set_register_async(port, FPGA_UPPER_ADDRESS, FCR_OFFSET, (UINT32)(((synccom_register*)regs)[i]), basic_completion);
+		else synccom_port_set_register_async(port, FPGA_UPPER_ADDRESS + SYNCCOM_UPPER_OFFSET, register_offset, (UINT32)(((synccom_register*)regs)[i]), basic_completion);
 		if (!is_write_only_register(register_offset) && register_offset > MAX_OFFSET)  synccom_port_get_register_async(port, FPGA_UPPER_ADDRESS, FCR_OFFSET, register_completion, port);
 		else if (!is_write_only_register(register_offset)) synccom_port_get_register_async(port, FPGA_UPPER_ADDRESS + SYNCCOM_UPPER_OFFSET, register_offset, register_completion, port);
 	}
@@ -504,231 +504,231 @@ NTSTATUS synccom_port_set_registers(_In_ struct synccom_port *port, const struct
 	return STATUS_SUCCESS;
 }
 
-NTSTATUS synccom_port_set_nonvolatile(struct synccom_port *port, UINT32 value, EVT_WDF_REQUEST_COMPLETION_ROUTINE write_return)
-{
-    WDFREQUEST write_request;
-    WDFMEMORY write_memory;
-    WDF_OBJECT_ATTRIBUTES  attributes;
-    NTSTATUS status;
-    WDFUSBPIPE write_pipe;
-    unsigned char *write_buffer = 0;
-
-    UNUSED(write_return);
-
-    write_pipe = port->register_write_pipe;
-
-    WDF_OBJECT_ATTRIBUTES_INIT(&attributes);
-    attributes.ParentObject = write_pipe;
-    status = WdfRequestCreate(&attributes, WdfUsbTargetPipeGetIoTarget(write_pipe), &write_request);
-    if (!NT_SUCCESS(status)) {
-        TraceEvents(TRACE_LEVEL_ERROR, DBG_IOCTL, "%s: Cannot create new write request.\n", __FUNCTION__);
-        return status;
-    }
-    attributes.ParentObject = write_request;
-    status = WdfMemoryCreate(&attributes, NonPagedPool, 0, 5, &write_memory, &write_buffer);
-    if (!NT_SUCCESS(status)) {
-        TraceEvents(TRACE_LEVEL_ERROR, DBG_IOCTL, "%s: WdfMemoryCreate failed! status: 0x%x\n", __FUNCTION__, status);
-        return status;
-    }
-    write_buffer[0] = SYNCCOM_WRITE_NONVOLATILE;
-
-#ifdef __BIG_ENDIAN
-#else
-    TraceEvents(TRACE_LEVEL_VERBOSE, DBG_IOCTL, "%s: Swapping endianness! Little endian!", __FUNCTION__);
-    value = _BYTESWAP_UINT32(value);
-#endif
-    memcpy(&write_buffer[1], &value, sizeof(UINT32));
-    status = WdfUsbTargetPipeFormatRequestForWrite(write_pipe, write_request, write_memory, NULL);
-    if (!NT_SUCCESS(status)) {
-        TraceEvents(TRACE_LEVEL_ERROR, DBG_IOCTL, "%s: Cannot format request for write.\n", __FUNCTION__);
-        WdfObjectDelete(write_request);
-        return status;
-    }
-    WdfRequestSetCompletionRoutine(write_request, write_return, write_pipe);
-    WdfSpinLockAcquire(port->request_spinlock);
-    if (WdfRequestSend(write_request, WdfUsbTargetPipeGetIoTarget(write_pipe), WDF_NO_SEND_OPTIONS) == FALSE) {
-        WdfSpinLockRelease(port->request_spinlock);
-        status = WdfRequestGetStatus(write_request);
-        WdfObjectDelete(write_request);
-        return status;
-    }
-    WdfSpinLockRelease(port->request_spinlock);
-
-    return status;
-}
-
-NTSTATUS synccom_port_get_nonvolatile(struct synccom_port *port, EVT_WDF_REQUEST_COMPLETION_ROUTINE read_return, WDFCONTEXT Context)
-{
-    WDFMEMORY write_memory, read_memory;
-    NTSTATUS status = STATUS_SUCCESS;
-    WDFUSBPIPE write_pipe, read_pipe;
-    unsigned char *write_buffer = NULL;
-    WDF_OBJECT_ATTRIBUTES  attributes;
-    WDFREQUEST write_request, read_request;
-
-    write_pipe = port->register_write_pipe;
-    read_pipe = port->register_read_pipe;
-
-    WDF_OBJECT_ATTRIBUTES_INIT(&attributes);
-    attributes.ParentObject = read_pipe;
-    status = WdfRequestCreate(&attributes, WdfUsbTargetPipeGetIoTarget(read_pipe), &read_request);
-    if (!NT_SUCCESS(status)) {
-        TraceEvents(TRACE_LEVEL_ERROR, DBG_IOCTL, "%s: Cannot create new read request.\n", __FUNCTION__);
-        return status;
-    }
-
-    attributes.ParentObject = write_pipe;
-    status = WdfRequestCreate(&attributes, WdfUsbTargetPipeGetIoTarget(write_pipe), &write_request);
-    if (!NT_SUCCESS(status)) {
-        TraceEvents(TRACE_LEVEL_ERROR, DBG_IOCTL, "%s: Cannot create new write request.\n", __FUNCTION__);
-        WdfObjectDelete(read_request);
-        return status;
-    }
-    attributes.ParentObject = write_request;
-    status = WdfMemoryCreate(&attributes, NonPagedPool, 0, 1, &write_memory, &write_buffer);
-    if (!NT_SUCCESS(status)) {
-        TraceEvents(TRACE_LEVEL_ERROR, DBG_IOCTL, "%s: WdfMemoryCreate failed! status: 0x%x\n", __FUNCTION__, status);
-        return status;
-    }
-
-    attributes.ParentObject = read_request;
-    status = WdfMemoryCreate(&attributes, NonPagedPool, 0, 4, &read_memory, NULL);
-    if (!NT_SUCCESS(status)) {
-        TraceEvents(TRACE_LEVEL_ERROR, DBG_IOCTL, "%s: WdfMemoryCreate failed! status: 0x%x\n", __FUNCTION__, status);
-        return status;
-    }
-
-    write_buffer[0] = SYNCCOM_READ_NONVOLATILE;
-
-    status = WdfUsbTargetPipeFormatRequestForWrite(write_pipe, write_request, write_memory, NULL);
-    if (!NT_SUCCESS(status)) {
-        TraceEvents(TRACE_LEVEL_ERROR, DBG_IOCTL, "%s: Cannot format request for write.\n", __FUNCTION__);
-        WdfObjectDelete(write_request);
-        WdfObjectDelete(read_request);
-        return status;
-    }
-
-    status = WdfUsbTargetPipeFormatRequestForRead(read_pipe, read_request, read_memory, NULL);
-    if (!NT_SUCCESS(status)) {
-        TraceEvents(TRACE_LEVEL_ERROR, DBG_IOCTL, "%s: Cannot format request for read.\n", __FUNCTION__);
-        WdfObjectDelete(write_request);
-        WdfObjectDelete(read_request);
-        return status;
-    }
-
-    WdfRequestSetCompletionRoutine(write_request, basic_completion, write_pipe);
-    WdfSpinLockAcquire(port->request_spinlock);
-    if (WdfRequestSend(write_request, WdfUsbTargetPipeGetIoTarget(write_pipe), WDF_NO_SEND_OPTIONS) == FALSE) {
-        WdfSpinLockRelease(port->request_spinlock);
-        status = WdfRequestGetStatus(write_request);
-        WdfObjectDelete(write_request);
-        WdfObjectDelete(read_request);
-        return status;
-    }
-    WdfSpinLockRelease(port->request_spinlock);
-
-    WdfSpinLockAcquire(port->request_spinlock);
-    WdfRequestSetCompletionRoutine(read_request, read_return, Context);
-    if (WdfRequestSend(read_request, WdfUsbTargetPipeGetIoTarget(read_pipe), WDF_NO_SEND_OPTIONS) == FALSE) {
-        WdfSpinLockRelease(port->request_spinlock);
-        status = WdfRequestGetStatus(read_request);
-        status = WdfRequestGetStatus(write_request);
-        WdfObjectDelete(write_request);
-        WdfObjectDelete(read_request);
-        return status;
-    }
-    WdfSpinLockRelease(port->request_spinlock);
-
-    return status;
-}
-
-NTSTATUS synccom_port_get_fx2_firmware(struct synccom_port *port, EVT_WDF_REQUEST_COMPLETION_ROUTINE read_return, WDFCONTEXT Context)
-{
-    WDFMEMORY write_memory, read_memory;
-    NTSTATUS status = STATUS_SUCCESS;
-    WDFUSBPIPE write_pipe, read_pipe;
-    unsigned char *write_buffer = NULL;
-    WDF_OBJECT_ATTRIBUTES  attributes;
-    WDFREQUEST write_request, read_request;
-
-    write_pipe = port->register_write_pipe;
-    read_pipe = port->register_read_pipe;
-
-    WDF_OBJECT_ATTRIBUTES_INIT(&attributes);
-    attributes.ParentObject = read_pipe;
-    status = WdfRequestCreate(&attributes, WdfUsbTargetPipeGetIoTarget(read_pipe), &read_request);
-    if (!NT_SUCCESS(status)) {
-        TraceEvents(TRACE_LEVEL_ERROR, DBG_IOCTL, "%s: Cannot create new read request.\n", __FUNCTION__);
-        return status;
-    }
-
-    attributes.ParentObject = write_pipe;
-    status = WdfRequestCreate(&attributes, WdfUsbTargetPipeGetIoTarget(write_pipe), &write_request);
-    if (!NT_SUCCESS(status)) {
-        TraceEvents(TRACE_LEVEL_ERROR, DBG_IOCTL, "%s: Cannot create new write request.\n", __FUNCTION__);
-        WdfObjectDelete(read_request);
-        return status;
-    }
-    attributes.ParentObject = write_request;
-    status = WdfMemoryCreate(&attributes, NonPagedPool, 0, 1, &write_memory, &write_buffer);
-    if (!NT_SUCCESS(status)) {
-        TraceEvents(TRACE_LEVEL_ERROR, DBG_IOCTL, "%s: WdfMemoryCreate failed! status: 0x%x\n", __FUNCTION__, status);
-        return status;
-    }
-
-    attributes.ParentObject = read_request;
-    status = WdfMemoryCreate(&attributes, NonPagedPool, 0, 2, &read_memory, NULL);
-    if (!NT_SUCCESS(status)) {
-        TraceEvents(TRACE_LEVEL_ERROR, DBG_IOCTL, "%s: WdfMemoryCreate failed! status: 0x%x\n", __FUNCTION__, status);
-        return status;
-    }
-
-    write_buffer[0] = SYNCCOM_READ_FX2_FIRMWARE;
-
-    status = WdfUsbTargetPipeFormatRequestForWrite(write_pipe, write_request, write_memory, NULL);
-    if (!NT_SUCCESS(status)) {
-        TraceEvents(TRACE_LEVEL_ERROR, DBG_IOCTL, "%s: Cannot format request for write.\n", __FUNCTION__);
-        WdfObjectDelete(write_request);
-        WdfObjectDelete(read_request);
-        return status;
-    }
-
-    status = WdfUsbTargetPipeFormatRequestForRead(read_pipe, read_request, read_memory, NULL);
-    if (!NT_SUCCESS(status)) {
-        TraceEvents(TRACE_LEVEL_ERROR, DBG_IOCTL, "%s: Cannot format request for read.\n", __FUNCTION__);
-        WdfObjectDelete(write_request);
-        WdfObjectDelete(read_request);
-        return status;
-    }
-
-    WdfRequestSetCompletionRoutine(write_request, basic_completion, write_pipe);
-    if (WdfRequestSend(write_request, WdfUsbTargetPipeGetIoTarget(write_pipe), WDF_NO_SEND_OPTIONS) == FALSE) {
-        status = WdfRequestGetStatus(write_request);
-        WdfObjectDelete(write_request);
-        WdfObjectDelete(read_request);
-        return status;
-    }
-
-    WdfRequestSetCompletionRoutine(read_request, read_return, Context);
-    if (WdfRequestSend(read_request, WdfUsbTargetPipeGetIoTarget(read_pipe), WDF_NO_SEND_OPTIONS) == FALSE) {
-        status = WdfRequestGetStatus(read_request);
-        status = WdfRequestGetStatus(write_request);
-        WdfObjectDelete(write_request);
-        WdfObjectDelete(read_request);
-        return status;
-    }
-
-    return status;
-}
-
-NTSTATUS synccom_port_set_register_async(struct synccom_port *port, unsigned char offset, unsigned char address, UINT32 value, EVT_WDF_REQUEST_COMPLETION_ROUTINE write_return)
+NTSTATUS synccom_port_set_nonvolatile(struct synccom_port* port, UINT32 value, EVT_WDF_REQUEST_COMPLETION_ROUTINE write_return)
 {
 	WDFREQUEST write_request;
 	WDFMEMORY write_memory;
 	WDF_OBJECT_ATTRIBUTES  attributes;
 	NTSTATUS status;
 	WDFUSBPIPE write_pipe;
-	unsigned char *write_buffer = 0;
+	unsigned char* write_buffer = 0;
+
+	UNUSED(write_return);
+
+	write_pipe = port->register_write_pipe;
+
+	WDF_OBJECT_ATTRIBUTES_INIT(&attributes);
+	attributes.ParentObject = write_pipe;
+	status = WdfRequestCreate(&attributes, WdfUsbTargetPipeGetIoTarget(write_pipe), &write_request);
+	if (!NT_SUCCESS(status)) {
+		TraceEvents(TRACE_LEVEL_ERROR, DBG_IOCTL, "%s: Cannot create new write request.\n", __FUNCTION__);
+		return status;
+	}
+	attributes.ParentObject = write_request;
+	status = WdfMemoryCreate(&attributes, NonPagedPool, 0, 5, &write_memory, &write_buffer);
+	if (!NT_SUCCESS(status)) {
+		TraceEvents(TRACE_LEVEL_ERROR, DBG_IOCTL, "%s: WdfMemoryCreate failed! status: 0x%x\n", __FUNCTION__, status);
+		return status;
+	}
+	write_buffer[0] = SYNCCOM_WRITE_NONVOLATILE;
+
+#ifdef __BIG_ENDIAN
+#else
+	TraceEvents(TRACE_LEVEL_VERBOSE, DBG_IOCTL, "%s: Swapping endianness! Little endian!", __FUNCTION__);
+	value = _BYTESWAP_UINT32(value);
+#endif
+	memcpy(&write_buffer[1], &value, sizeof(UINT32));
+	status = WdfUsbTargetPipeFormatRequestForWrite(write_pipe, write_request, write_memory, NULL);
+	if (!NT_SUCCESS(status)) {
+		TraceEvents(TRACE_LEVEL_ERROR, DBG_IOCTL, "%s: Cannot format request for write.\n", __FUNCTION__);
+		WdfObjectDelete(write_request);
+		return status;
+	}
+	WdfRequestSetCompletionRoutine(write_request, write_return, write_pipe);
+	WdfSpinLockAcquire(port->request_spinlock);
+	if (WdfRequestSend(write_request, WdfUsbTargetPipeGetIoTarget(write_pipe), WDF_NO_SEND_OPTIONS) == FALSE) {
+		WdfSpinLockRelease(port->request_spinlock);
+		status = WdfRequestGetStatus(write_request);
+		WdfObjectDelete(write_request);
+		return status;
+	}
+	WdfSpinLockRelease(port->request_spinlock);
+
+	return status;
+}
+
+NTSTATUS synccom_port_get_nonvolatile(struct synccom_port* port, EVT_WDF_REQUEST_COMPLETION_ROUTINE read_return, WDFCONTEXT Context)
+{
+	WDFMEMORY write_memory, read_memory;
+	NTSTATUS status = STATUS_SUCCESS;
+	WDFUSBPIPE write_pipe, read_pipe;
+	unsigned char* write_buffer = NULL;
+	WDF_OBJECT_ATTRIBUTES  attributes;
+	WDFREQUEST write_request, read_request;
+
+	write_pipe = port->register_write_pipe;
+	read_pipe = port->register_read_pipe;
+
+	WDF_OBJECT_ATTRIBUTES_INIT(&attributes);
+	attributes.ParentObject = read_pipe;
+	status = WdfRequestCreate(&attributes, WdfUsbTargetPipeGetIoTarget(read_pipe), &read_request);
+	if (!NT_SUCCESS(status)) {
+		TraceEvents(TRACE_LEVEL_ERROR, DBG_IOCTL, "%s: Cannot create new read request.\n", __FUNCTION__);
+		return status;
+	}
+
+	attributes.ParentObject = write_pipe;
+	status = WdfRequestCreate(&attributes, WdfUsbTargetPipeGetIoTarget(write_pipe), &write_request);
+	if (!NT_SUCCESS(status)) {
+		TraceEvents(TRACE_LEVEL_ERROR, DBG_IOCTL, "%s: Cannot create new write request.\n", __FUNCTION__);
+		WdfObjectDelete(read_request);
+		return status;
+	}
+	attributes.ParentObject = write_request;
+	status = WdfMemoryCreate(&attributes, NonPagedPool, 0, 1, &write_memory, &write_buffer);
+	if (!NT_SUCCESS(status)) {
+		TraceEvents(TRACE_LEVEL_ERROR, DBG_IOCTL, "%s: WdfMemoryCreate failed! status: 0x%x\n", __FUNCTION__, status);
+		return status;
+	}
+
+	attributes.ParentObject = read_request;
+	status = WdfMemoryCreate(&attributes, NonPagedPool, 0, 4, &read_memory, NULL);
+	if (!NT_SUCCESS(status)) {
+		TraceEvents(TRACE_LEVEL_ERROR, DBG_IOCTL, "%s: WdfMemoryCreate failed! status: 0x%x\n", __FUNCTION__, status);
+		return status;
+	}
+
+	write_buffer[0] = SYNCCOM_READ_NONVOLATILE;
+
+	status = WdfUsbTargetPipeFormatRequestForWrite(write_pipe, write_request, write_memory, NULL);
+	if (!NT_SUCCESS(status)) {
+		TraceEvents(TRACE_LEVEL_ERROR, DBG_IOCTL, "%s: Cannot format request for write.\n", __FUNCTION__);
+		WdfObjectDelete(write_request);
+		WdfObjectDelete(read_request);
+		return status;
+	}
+
+	status = WdfUsbTargetPipeFormatRequestForRead(read_pipe, read_request, read_memory, NULL);
+	if (!NT_SUCCESS(status)) {
+		TraceEvents(TRACE_LEVEL_ERROR, DBG_IOCTL, "%s: Cannot format request for read.\n", __FUNCTION__);
+		WdfObjectDelete(write_request);
+		WdfObjectDelete(read_request);
+		return status;
+	}
+
+	WdfRequestSetCompletionRoutine(write_request, basic_completion, write_pipe);
+	WdfSpinLockAcquire(port->request_spinlock);
+	if (WdfRequestSend(write_request, WdfUsbTargetPipeGetIoTarget(write_pipe), WDF_NO_SEND_OPTIONS) == FALSE) {
+		WdfSpinLockRelease(port->request_spinlock);
+		status = WdfRequestGetStatus(write_request);
+		WdfObjectDelete(write_request);
+		WdfObjectDelete(read_request);
+		return status;
+	}
+	WdfSpinLockRelease(port->request_spinlock);
+
+	WdfSpinLockAcquire(port->request_spinlock);
+	WdfRequestSetCompletionRoutine(read_request, read_return, Context);
+	if (WdfRequestSend(read_request, WdfUsbTargetPipeGetIoTarget(read_pipe), WDF_NO_SEND_OPTIONS) == FALSE) {
+		WdfSpinLockRelease(port->request_spinlock);
+		status = WdfRequestGetStatus(read_request);
+		status = WdfRequestGetStatus(write_request);
+		WdfObjectDelete(write_request);
+		WdfObjectDelete(read_request);
+		return status;
+	}
+	WdfSpinLockRelease(port->request_spinlock);
+
+	return status;
+}
+
+NTSTATUS synccom_port_get_fx2_firmware(struct synccom_port* port, EVT_WDF_REQUEST_COMPLETION_ROUTINE read_return, WDFCONTEXT Context)
+{
+	WDFMEMORY write_memory, read_memory;
+	NTSTATUS status = STATUS_SUCCESS;
+	WDFUSBPIPE write_pipe, read_pipe;
+	unsigned char* write_buffer = NULL;
+	WDF_OBJECT_ATTRIBUTES  attributes;
+	WDFREQUEST write_request, read_request;
+
+	write_pipe = port->register_write_pipe;
+	read_pipe = port->register_read_pipe;
+
+	WDF_OBJECT_ATTRIBUTES_INIT(&attributes);
+	attributes.ParentObject = read_pipe;
+	status = WdfRequestCreate(&attributes, WdfUsbTargetPipeGetIoTarget(read_pipe), &read_request);
+	if (!NT_SUCCESS(status)) {
+		TraceEvents(TRACE_LEVEL_ERROR, DBG_IOCTL, "%s: Cannot create new read request.\n", __FUNCTION__);
+		return status;
+	}
+
+	attributes.ParentObject = write_pipe;
+	status = WdfRequestCreate(&attributes, WdfUsbTargetPipeGetIoTarget(write_pipe), &write_request);
+	if (!NT_SUCCESS(status)) {
+		TraceEvents(TRACE_LEVEL_ERROR, DBG_IOCTL, "%s: Cannot create new write request.\n", __FUNCTION__);
+		WdfObjectDelete(read_request);
+		return status;
+	}
+	attributes.ParentObject = write_request;
+	status = WdfMemoryCreate(&attributes, NonPagedPool, 0, 1, &write_memory, &write_buffer);
+	if (!NT_SUCCESS(status)) {
+		TraceEvents(TRACE_LEVEL_ERROR, DBG_IOCTL, "%s: WdfMemoryCreate failed! status: 0x%x\n", __FUNCTION__, status);
+		return status;
+	}
+
+	attributes.ParentObject = read_request;
+	status = WdfMemoryCreate(&attributes, NonPagedPool, 0, 2, &read_memory, NULL);
+	if (!NT_SUCCESS(status)) {
+		TraceEvents(TRACE_LEVEL_ERROR, DBG_IOCTL, "%s: WdfMemoryCreate failed! status: 0x%x\n", __FUNCTION__, status);
+		return status;
+	}
+
+	write_buffer[0] = SYNCCOM_READ_FX2_FIRMWARE;
+
+	status = WdfUsbTargetPipeFormatRequestForWrite(write_pipe, write_request, write_memory, NULL);
+	if (!NT_SUCCESS(status)) {
+		TraceEvents(TRACE_LEVEL_ERROR, DBG_IOCTL, "%s: Cannot format request for write.\n", __FUNCTION__);
+		WdfObjectDelete(write_request);
+		WdfObjectDelete(read_request);
+		return status;
+	}
+
+	status = WdfUsbTargetPipeFormatRequestForRead(read_pipe, read_request, read_memory, NULL);
+	if (!NT_SUCCESS(status)) {
+		TraceEvents(TRACE_LEVEL_ERROR, DBG_IOCTL, "%s: Cannot format request for read.\n", __FUNCTION__);
+		WdfObjectDelete(write_request);
+		WdfObjectDelete(read_request);
+		return status;
+	}
+
+	WdfRequestSetCompletionRoutine(write_request, basic_completion, write_pipe);
+	if (WdfRequestSend(write_request, WdfUsbTargetPipeGetIoTarget(write_pipe), WDF_NO_SEND_OPTIONS) == FALSE) {
+		status = WdfRequestGetStatus(write_request);
+		WdfObjectDelete(write_request);
+		WdfObjectDelete(read_request);
+		return status;
+	}
+
+	WdfRequestSetCompletionRoutine(read_request, read_return, Context);
+	if (WdfRequestSend(read_request, WdfUsbTargetPipeGetIoTarget(read_pipe), WDF_NO_SEND_OPTIONS) == FALSE) {
+		status = WdfRequestGetStatus(read_request);
+		status = WdfRequestGetStatus(write_request);
+		WdfObjectDelete(write_request);
+		WdfObjectDelete(read_request);
+		return status;
+	}
+
+	return status;
+}
+
+NTSTATUS synccom_port_set_register_async(struct synccom_port* port, unsigned char offset, unsigned char address, UINT32 value, EVT_WDF_REQUEST_COMPLETION_ROUTINE write_return)
+{
+	WDFREQUEST write_request;
+	WDFMEMORY write_memory;
+	WDF_OBJECT_ATTRIBUTES  attributes;
+	NTSTATUS status;
+	WDFUSBPIPE write_pipe;
+	unsigned char* write_buffer = 0;
 
 	UNUSED(write_return);
 
@@ -743,7 +743,7 @@ NTSTATUS synccom_port_set_register_async(struct synccom_port *port, unsigned cha
 	}
 	attributes.ParentObject = write_request;
 	status = WdfMemoryCreate(&attributes, NonPagedPool, 0, 7, &write_memory, &write_buffer);
-	if (!NT_SUCCESS(status)){
+	if (!NT_SUCCESS(status)) {
 		TraceEvents(TRACE_LEVEL_ERROR, DBG_IOCTL, "%s: WdfMemoryCreate failed! status: 0x%x\n", __FUNCTION__, status);
 		return status;
 	}
@@ -773,14 +773,14 @@ NTSTATUS synccom_port_set_register_async(struct synccom_port *port, unsigned cha
 	}
 	WdfSpinLockRelease(port->request_spinlock);
 
-    TraceEvents(TRACE_LEVEL_INFORMATION, DBG_IOCTL, "%s: Wrote register: 0x%2.2X%2.2X  0x%8.8X .\n", __FUNCTION__, offset, address, value);
+	TraceEvents(TRACE_LEVEL_INFORMATION, DBG_IOCTL, "%s: Wrote register: 0x%2.2X%2.2X  0x%8.8X .\n", __FUNCTION__, offset, address, value);
 	return status;
 }
 
-void synccom_port_set_register_rep(_In_ struct synccom_port *port, unsigned char offset, unsigned char address, const UINT32 *buf, unsigned write_count)
+void synccom_port_set_register_rep(_In_ struct synccom_port* port, unsigned char offset, unsigned char address, const UINT32* buf, unsigned write_count)
 {
 	unsigned i = 0;
-	const UINT32 *outgoing_data;
+	const UINT32* outgoing_data;
 	NTSTATUS status = STATUS_SUCCESS;
 
 	outgoing_data = buf;
@@ -792,32 +792,32 @@ void synccom_port_set_register_rep(_In_ struct synccom_port *port, unsigned char
 	}
 
 }
- 
-void synccom_port_get_registers(struct synccom_port *port, struct synccom_registers *regs)
+
+void synccom_port_get_registers(struct synccom_port* port, struct synccom_registers* regs)
 {
 	unsigned i = 0;
 
 	for (i = 0; i < sizeof(*regs) / sizeof(synccom_register); i++) {
 		unsigned char register_offset = (unsigned char)i * 4;
-		if (((synccom_register *)regs)[i] != SYNCCOM_UPDATE_VALUE) continue;
+		if (((synccom_register*)regs)[i] != SYNCCOM_UPDATE_VALUE) continue;
 		if (is_write_only_register((unsigned char)i * 4)) continue;
-		((synccom_register *)regs)[i] = ((synccom_register *)&port->register_storage)[i];
+		((synccom_register*)regs)[i] = ((synccom_register*)&port->register_storage)[i];
 		synccom_port_get_register_async(port, FPGA_UPPER_ADDRESS + SYNCCOM_UPPER_OFFSET, register_offset, register_completion, port);
 	}
 }
 
-NTSTATUS synccom_port_get_register_async(struct synccom_port *port, unsigned char offset, unsigned char address, EVT_WDF_REQUEST_COMPLETION_ROUTINE read_return, WDFCONTEXT Context)
+NTSTATUS synccom_port_get_register_async(struct synccom_port* port, unsigned char offset, unsigned char address, EVT_WDF_REQUEST_COMPLETION_ROUTINE read_return, WDFCONTEXT Context)
 {
 	WDFMEMORY write_memory, read_memory;
 	NTSTATUS status = STATUS_SUCCESS;
 	WDFUSBPIPE write_pipe, read_pipe;
-	unsigned char *write_buffer = NULL;
+	unsigned char* write_buffer = NULL;
 	WDF_OBJECT_ATTRIBUTES  attributes;
 	WDFREQUEST write_request, read_request;
 
 	write_pipe = port->register_write_pipe;
 	read_pipe = port->register_read_pipe;
-	
+
 	WDF_OBJECT_ATTRIBUTES_INIT(&attributes);
 	attributes.ParentObject = read_pipe;
 	status = WdfRequestCreate(&attributes, WdfUsbTargetPipeGetIoTarget(read_pipe), &read_request);
@@ -825,7 +825,7 @@ NTSTATUS synccom_port_get_register_async(struct synccom_port *port, unsigned cha
 		TraceEvents(TRACE_LEVEL_ERROR, DBG_IOCTL, "%s: Cannot create new read request.\n", __FUNCTION__);
 		return status;
 	}
-	
+
 	attributes.ParentObject = write_pipe;
 	status = WdfRequestCreate(&attributes, WdfUsbTargetPipeGetIoTarget(write_pipe), &write_request);
 	if (!NT_SUCCESS(status)) {
@@ -835,22 +835,22 @@ NTSTATUS synccom_port_get_register_async(struct synccom_port *port, unsigned cha
 	}
 	attributes.ParentObject = write_request;
 	status = WdfMemoryCreate(&attributes, NonPagedPool, 0, 3, &write_memory, &write_buffer);
-	if (!NT_SUCCESS(status)){
+	if (!NT_SUCCESS(status)) {
 		TraceEvents(TRACE_LEVEL_ERROR, DBG_IOCTL, "%s: WdfMemoryCreate failed! status: 0x%x\n", __FUNCTION__, status);
 		return status;
 	}
-	
+
 	attributes.ParentObject = read_request;
 	status = WdfMemoryCreate(&attributes, NonPagedPool, 0, 6, &read_memory, NULL);
 	if (!NT_SUCCESS(status)) {
 		TraceEvents(TRACE_LEVEL_ERROR, DBG_IOCTL, "%s: WdfMemoryCreate failed! status: 0x%x\n", __FUNCTION__, status);
 		return status;
 	}
-	
+
 	write_buffer[0] = SYNCCOM_READ_WITH_ADDRESS;
 	write_buffer[1] = offset;
 	write_buffer[2] = address << 1;
-	
+
 	status = WdfUsbTargetPipeFormatRequestForWrite(write_pipe, write_request, write_memory, NULL);
 	if (!NT_SUCCESS(status)) {
 		TraceEvents(TRACE_LEVEL_ERROR, DBG_IOCTL, "%s: Cannot format request for write.\n", __FUNCTION__);
@@ -858,7 +858,7 @@ NTSTATUS synccom_port_get_register_async(struct synccom_port *port, unsigned cha
 		WdfObjectDelete(read_request);
 		return status;
 	}
-	
+
 	status = WdfUsbTargetPipeFormatRequestForRead(read_pipe, read_request, read_memory, NULL);
 	if (!NT_SUCCESS(status)) {
 		TraceEvents(TRACE_LEVEL_ERROR, DBG_IOCTL, "%s: Cannot format request for read.\n", __FUNCTION__);
@@ -866,7 +866,7 @@ NTSTATUS synccom_port_get_register_async(struct synccom_port *port, unsigned cha
 		WdfObjectDelete(read_request);
 		return status;
 	}
-	
+
 	WdfRequestSetCompletionRoutine(write_request, basic_completion, write_pipe);
 	WdfSpinLockAcquire(port->request_spinlock);
 	if (WdfRequestSend(write_request, WdfUsbTargetPipeGetIoTarget(write_pipe), WDF_NO_SEND_OPTIONS) == FALSE) {
@@ -877,7 +877,7 @@ NTSTATUS synccom_port_get_register_async(struct synccom_port *port, unsigned cha
 		return status;
 	}
 	WdfSpinLockRelease(port->request_spinlock);
-	
+
 	WdfSpinLockAcquire(port->request_spinlock);
 	WdfRequestSetCompletionRoutine(read_request, read_return, Context);
 	if (WdfRequestSend(read_request, WdfUsbTargetPipeGetIoTarget(read_pipe), WDF_NO_SEND_OPTIONS) == FALSE) {
@@ -893,7 +893,7 @@ NTSTATUS synccom_port_get_register_async(struct synccom_port *port, unsigned cha
 	return status;
 }
 
-synccom_register synccom_port_read_data_async(struct synccom_port *port, EVT_WDF_REQUEST_COMPLETION_ROUTINE read_return, WDFCONTEXT Context)
+synccom_register synccom_port_read_data_async(struct synccom_port* port, EVT_WDF_REQUEST_COMPLETION_ROUTINE read_return, WDFCONTEXT Context)
 {
 	NTSTATUS status = STATUS_SUCCESS;
 	WDFUSBPIPE read_pipe;
@@ -920,7 +920,7 @@ synccom_register synccom_port_read_data_async(struct synccom_port *port, EVT_WDF
 	return status;
 }
 
-void synccom_port_set_memory_cap(struct synccom_port *port, struct synccom_memory_cap *value)
+void synccom_port_set_memory_cap(struct synccom_port* port, struct synccom_memory_cap* value)
 {
 	return_if_untrue(port);
 	return_if_untrue(value);
@@ -948,7 +948,7 @@ void synccom_port_set_memory_cap(struct synccom_port *port, struct synccom_memor
 	}
 }
 
-void synccom_port_set_append_status(struct synccom_port *port, BOOLEAN value)
+void synccom_port_set_append_status(struct synccom_port* port, BOOLEAN value)
 {
 	return_if_untrue(port);
 
@@ -962,14 +962,14 @@ void synccom_port_set_append_status(struct synccom_port *port, BOOLEAN value)
 	port->append_status = (value) ? 1 : 0;
 }
 
-BOOLEAN synccom_port_get_append_status(struct synccom_port *port)
+BOOLEAN synccom_port_get_append_status(struct synccom_port* port)
 {
 	return_val_if_untrue(port, 0);
 
 	return !synccom_port_is_streaming(port) && port->append_status;
 }
 
-void synccom_port_set_append_timestamp(struct synccom_port *port, BOOLEAN value)
+void synccom_port_set_append_timestamp(struct synccom_port* port, BOOLEAN value)
 {
 	return_if_untrue(port);
 
@@ -983,14 +983,14 @@ void synccom_port_set_append_timestamp(struct synccom_port *port, BOOLEAN value)
 	port->append_timestamp = (value) ? 1 : 0;
 }
 
-BOOLEAN synccom_port_get_append_timestamp(struct synccom_port *port)
+BOOLEAN synccom_port_get_append_timestamp(struct synccom_port* port)
 {
 	return_val_if_untrue(port, 0);
 
 	return !synccom_port_is_streaming(port) && port->append_timestamp;
 }
 
-void synccom_port_set_ignore_timeout(struct synccom_port *port, BOOLEAN value)
+void synccom_port_set_ignore_timeout(struct synccom_port* port, BOOLEAN value)
 {
 	return_if_untrue(port);
 
@@ -1004,20 +1004,20 @@ void synccom_port_set_ignore_timeout(struct synccom_port *port, BOOLEAN value)
 	port->ignore_timeout = (value) ? TRUE : FALSE;
 }
 
-BOOLEAN synccom_port_get_ignore_timeout(struct synccom_port *port)
+BOOLEAN synccom_port_get_ignore_timeout(struct synccom_port* port)
 {
 	return_val_if_untrue(port, 0);
 
 	return port->ignore_timeout;
 }
 
-UINT32 synccom_port_get_firmware_rev(struct synccom_port *port)
+UINT32 synccom_port_get_firmware_rev(struct synccom_port* port)
 {
 	return_val_if_untrue(port, 0);
 	return port->fpga_firmware_rev;
 }
 
-void synccom_port_set_rx_multiple(struct synccom_port *port, BOOLEAN value)
+void synccom_port_set_rx_multiple(struct synccom_port* port, BOOLEAN value)
 {
 	return_if_untrue(port);
 
@@ -1031,14 +1031,14 @@ void synccom_port_set_rx_multiple(struct synccom_port *port, BOOLEAN value)
 	port->rx_multiple = (value) ? 1 : 0;
 }
 
-BOOLEAN synccom_port_get_rx_multiple(struct synccom_port *port)
+BOOLEAN synccom_port_get_rx_multiple(struct synccom_port* port)
 {
 	return_val_if_untrue(port, 0);
 
 	return port->rx_multiple;
 }
 
-unsigned synccom_port_is_streaming(struct synccom_port *port)
+unsigned synccom_port_is_streaming(struct synccom_port* port)
 {
 	unsigned transparent_mode = 0;
 	unsigned xsync_mode = 0;
@@ -1057,7 +1057,7 @@ unsigned synccom_port_is_streaming(struct synccom_port *port)
 	return ((transparent_mode || xsync_mode) && !(rlc_mode || fsc_mode || ntb)) ? 1 : 0;
 }
 
-NTSTATUS synccom_port_execute_RRES(struct synccom_port *port)
+NTSTATUS synccom_port_execute_RRES(struct synccom_port* port)
 {
 	return_val_if_untrue(port, 0);
 
@@ -1065,7 +1065,7 @@ NTSTATUS synccom_port_execute_RRES(struct synccom_port *port)
 	return STATUS_SUCCESS;
 }
 
-NTSTATUS synccom_port_execute_TRES(struct synccom_port *port)
+NTSTATUS synccom_port_execute_TRES(struct synccom_port* port)
 {
 	return_val_if_untrue(port, 0);
 
@@ -1073,7 +1073,7 @@ NTSTATUS synccom_port_execute_TRES(struct synccom_port *port)
 	return STATUS_SUCCESS;
 }
 
-NTSTATUS synccom_port_purge_tx(struct synccom_port *port)
+NTSTATUS synccom_port_purge_tx(struct synccom_port* port)
 {
 	int error_code = 0;
 
@@ -1107,7 +1107,7 @@ NTSTATUS synccom_port_purge_tx(struct synccom_port *port)
 	return STATUS_SUCCESS;
 }
 
-NTSTATUS synccom_port_purge_rx(struct synccom_port *port)
+NTSTATUS synccom_port_purge_rx(struct synccom_port* port)
 
 {
 	NTSTATUS status;
@@ -1136,7 +1136,7 @@ NTSTATUS synccom_port_purge_rx(struct synccom_port *port)
 	WdfSpinLockAcquire(port->pending_iframes_spinlock);
 	synccom_flist_clear(&port->pending_iframes);
 	WdfSpinLockRelease(port->pending_iframes_spinlock);
-	
+
 	WdfIoQueuePurgeSynchronously(port->read_queue);
 	WdfIoQueuePurgeSynchronously(port->read_queue2);
 	WdfIoQueueStart(port->read_queue);
@@ -1145,7 +1145,7 @@ NTSTATUS synccom_port_purge_rx(struct synccom_port *port)
 	return STATUS_SUCCESS;
 }
 
-unsigned synccom_port_has_incoming_data(struct synccom_port *port)
+unsigned synccom_port_has_incoming_data(struct synccom_port* port)
 {
 	unsigned status = 0;
 
@@ -1163,21 +1163,21 @@ unsigned synccom_port_has_incoming_data(struct synccom_port *port)
 	return status;
 }
 
-unsigned synccom_port_get_input_memory_cap(struct synccom_port *port)
+unsigned synccom_port_get_input_memory_cap(struct synccom_port* port)
 {
 	return_val_if_untrue(port, 0);
 
 	return port->memory_cap.input;
 }
 
-unsigned synccom_port_get_output_memory_cap(struct synccom_port *port)
+unsigned synccom_port_get_output_memory_cap(struct synccom_port* port)
 {
 	return_val_if_untrue(port, 0);
 
 	return port->memory_cap.output;
 }
 
-unsigned synccom_port_get_output_memory_usage(struct synccom_port *port)
+unsigned synccom_port_get_output_memory_usage(struct synccom_port* port)
 {
 	unsigned value = 0;
 
@@ -1195,7 +1195,7 @@ unsigned synccom_port_get_output_memory_usage(struct synccom_port *port)
 	return value;
 }
 
-unsigned synccom_port_get_input_memory_usage(struct synccom_port *port)
+unsigned synccom_port_get_input_memory_usage(struct synccom_port* port)
 {
 	unsigned value = 0;
 
@@ -1208,7 +1208,7 @@ unsigned synccom_port_get_input_memory_usage(struct synccom_port *port)
 	WdfSpinLockAcquire(port->istream_spinlock);
 	value += synccom_frame_get_length(port->istream);
 	WdfSpinLockRelease(port->istream_spinlock);
-	
+
 	WdfSpinLockAcquire(port->pending_iframes_spinlock);
 	value += port->pending_iframes.estimated_memory_usage;
 	WdfSpinLockRelease(port->pending_iframes_spinlock);
@@ -1216,14 +1216,14 @@ unsigned synccom_port_get_input_memory_usage(struct synccom_port *port)
 	return value;
 }
 
-unsigned synccom_port_get_tx_modifiers(struct synccom_port *port)
+unsigned synccom_port_get_tx_modifiers(struct synccom_port* port)
 {
 	return_val_if_untrue(port, 0);
 
 	return port->tx_modifiers;
 }
 
-NTSTATUS synccom_port_set_tx_modifiers(struct synccom_port *port, int value)
+NTSTATUS synccom_port_set_tx_modifiers(struct synccom_port* port, int value)
 {
 	return_val_if_untrue(port, 0);
 
@@ -1253,49 +1253,49 @@ NTSTATUS synccom_port_set_tx_modifiers(struct synccom_port *port, int value)
 	return STATUS_SUCCESS;
 }
 
-NTSTATUS synccom_port_get_port_num(struct synccom_port *port, unsigned *port_num)
+NTSTATUS synccom_port_get_port_num(struct synccom_port* port, unsigned* port_num)
 {
 	NTSTATUS status;
 	WDFKEY devkey;
 	UNICODE_STRING key_str;
-    WDFSTRING friendlyname;
-    UNICODE_STRING str;
+	WDFSTRING friendlyname;
+	UNICODE_STRING str;
 
-    *port_num = 1;
+	*port_num = 1;
 
-    DbgPrint("About to try looking for the friendly name!\n");
-    RtlInitUnicodeString(&key_str, L"FriendlyName");
+	DbgPrint("About to try looking for the friendly name!\n");
+	RtlInitUnicodeString(&key_str, L"FriendlyName");
 
-    status = WdfDeviceOpenRegistryKey(port->device, PLUGPLAY_REGKEY_CURRENT_HWPROFILE,
-        KEY_READ | KEY_WRITE,
-        WDF_NO_OBJECT_ATTRIBUTES, &devkey);
-    if (!NT_SUCCESS(status)) {
-        TraceEvents(TRACE_LEVEL_ERROR, DBG_PNP, "WdfDeviceOpenRegistryKey part 2 failed %!STATUS!", status);
-        DbgPrint("WdfDeviceOpenRegistryKey part 2 failed %x\n", status);
-        return status;
-    }
-    status = WdfStringCreate(NULL, WDF_NO_OBJECT_ATTRIBUTES, &friendlyname);
-    if (NT_SUCCESS(status)) {
-        status = WdfRegistryQueryString(devkey, &key_str, friendlyname);
-        if (!NT_SUCCESS(status)) {
-            TraceEvents(TRACE_LEVEL_ERROR, DBG_PNP, "WdfRegistryQueryString failed %!STATUS!", status);
-            DbgPrint("WdfRegistryQueryString failed %x\n", status);
-            return status;
-        }
-        else {
-            WdfStringGetUnicodeString(friendlyname, &str);
-            TraceEvents(TRACE_LEVEL_ERROR, DBG_PNP, "FriendlyName %wZ\n", &str);
-            DbgPrint("\nFriendlyName: %wZ\n", &str);
-        }
-    }
-    DbgPrint("Finished looking for the friendly name! Did it work?\n");
-    WdfRegistryClose(devkey);
+	status = WdfDeviceOpenRegistryKey(port->device, PLUGPLAY_REGKEY_CURRENT_HWPROFILE,
+		KEY_READ | KEY_WRITE,
+		WDF_NO_OBJECT_ATTRIBUTES, &devkey);
+	if (!NT_SUCCESS(status)) {
+		TraceEvents(TRACE_LEVEL_ERROR, DBG_PNP, "WdfDeviceOpenRegistryKey part 2 failed %!STATUS!", status);
+		DbgPrint("WdfDeviceOpenRegistryKey part 2 failed %x\n", status);
+		return status;
+	}
+	status = WdfStringCreate(NULL, WDF_NO_OBJECT_ATTRIBUTES, &friendlyname);
+	if (NT_SUCCESS(status)) {
+		status = WdfRegistryQueryString(devkey, &key_str, friendlyname);
+		if (!NT_SUCCESS(status)) {
+			TraceEvents(TRACE_LEVEL_ERROR, DBG_PNP, "WdfRegistryQueryString failed %!STATUS!", status);
+			DbgPrint("WdfRegistryQueryString failed %x\n", status);
+			return status;
+		}
+		else {
+			WdfStringGetUnicodeString(friendlyname, &str);
+			TraceEvents(TRACE_LEVEL_ERROR, DBG_PNP, "FriendlyName %wZ\n", &str);
+			DbgPrint("\nFriendlyName: %wZ\n", &str);
+		}
+	}
+	DbgPrint("Finished looking for the friendly name! Did it work?\n");
+	WdfRegistryClose(devkey);
 
 
 	return status;
 }
 
-NTSTATUS synccom_port_set_port_num(struct synccom_port *port, unsigned value)
+NTSTATUS synccom_port_set_port_num(struct synccom_port* port, unsigned value)
 {
 	NTSTATUS status;
 	WDFKEY devkey;
@@ -1320,10 +1320,10 @@ NTSTATUS synccom_port_set_port_num(struct synccom_port *port, unsigned value)
 	return status;
 }
 
-unsigned synccom_port_can_support_nonvolatile(struct synccom_port *port)
+unsigned synccom_port_can_support_nonvolatile(struct synccom_port* port)
 {
-    if (port->fx2_firmware_rev >= FIRST_NONVOLATILE_VERSION) return 1;
-    return 0;
+	if (port->fx2_firmware_rev >= FIRST_NONVOLATILE_VERSION) return 1;
+	return 0;
 }
 
 

@@ -1,22 +1,22 @@
 /*
 Copyright 2023 Commtech, Inc.
 
-Permission is hereby granted, free of charge, to any person obtaining a copy 
-of this software and associated documentation files (the "Software"), to deal 
-in the Software without restriction, including without limitation the rights 
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell 
-copies of the Software, and to permit persons to whom the Software is 
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
 furnished to do so, subject to the following conditions:
 
-The above copyright notice and this permission notice shall be included in 
+The above copyright notice and this permission notice shall be included in
 all copies or substantial portions of the Software.
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE 
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER 
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, 
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN 
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 
@@ -42,12 +42,12 @@ THE SOFTWARE.
 #pragma alloc_text(PAGE, OsrFxSetPowerPolicy)
 #endif
 
-NTSTATUS SetupUsb(_In_ struct synccom_port *port);
+NTSTATUS SetupUsb(_In_ struct synccom_port* port);
 NTSTATUS synccom_port_set_friendly_name(_In_ WDFDEVICE Device, unsigned portnum);
 
 NTSTATUS SyncComEvtDeviceAdd(WDFDRIVER Driver, PWDFDEVICE_INIT DeviceInit)
 {
-	struct synccom_port *port = 0;
+	struct synccom_port* port = 0;
 
 	PAGED_CODE();
 
@@ -61,7 +61,7 @@ NTSTATUS SyncComEvtDeviceAdd(WDFDRIVER Driver, PWDFDEVICE_INIT DeviceInit)
 	return STATUS_SUCCESS;
 }
 
-struct synccom_port *synccom_port_new(WDFDRIVER Driver, IN PWDFDEVICE_INIT DeviceInit)
+struct synccom_port* synccom_port_new(WDFDRIVER Driver, IN PWDFDEVICE_INIT DeviceInit)
 {
 	NTSTATUS							status = STATUS_SUCCESS;
 	WDF_PNPPOWER_EVENT_CALLBACKS        pnpPowerCallbacks;
@@ -73,7 +73,7 @@ struct synccom_port *synccom_port_new(WDFDRIVER Driver, IN PWDFDEVICE_INIT Devic
 	WCHAR								dos_name_buffer[30];
 	UNICODE_STRING						dos_name;
 
-	struct synccom_port *port = 0;
+	struct synccom_port* port = 0;
 	static int instance = 0;
 	unsigned default_port_num = 0, port_num = 0;
 	WCHAR device_name_buffer[50];
@@ -83,10 +83,10 @@ struct synccom_port *synccom_port_new(WDFDRIVER Driver, IN PWDFDEVICE_INIT Devic
 
 	PAGED_CODE();
 
-    WdfSpinLockAcquire(port_num_spinlock);
+	WdfSpinLockAcquire(port_num_spinlock);
 	default_port_num = instance;
 	instance++;
-    WdfSpinLockRelease(port_num_spinlock);
+	WdfSpinLockRelease(port_num_spinlock);
 
 	RtlInitEmptyUnicodeString(&device_name, device_name_buffer, sizeof(device_name_buffer));
 	status = RtlUnicodeStringPrintf(&device_name, L"\\Device\\SYNCCOM%i", default_port_num);
@@ -94,7 +94,7 @@ struct synccom_port *synccom_port_new(WDFDRIVER Driver, IN PWDFDEVICE_INIT Devic
 		TraceEvents(TRACE_LEVEL_ERROR, DBG_PNP, "%s: RtlUnicodeStringPrintf failed %!STATUS!", __FUNCTION__, status);
 		return 0;
 	}
-    
+
 	status = WdfDeviceInitAssignName(DeviceInit, &device_name);
 	if (!NT_SUCCESS(status)) {
 		WdfDeviceInitFree(DeviceInit);
@@ -106,11 +106,11 @@ struct synccom_port *synccom_port_new(WDFDRIVER Driver, IN PWDFDEVICE_INIT Devic
 	// Note: When using SDDL for device objects, your driver must link against Wdmsec.lib.
 	status = WdfDeviceInitAssignSDDLString(DeviceInit, &SDDL_DEVOBJ_SYS_ALL_ADM_RWX_WORLD_RWX_RES_RWX);
 	if (!NT_SUCCESS(status)) {
-	WdfDeviceInitFree(DeviceInit);
-	TraceEvents(TRACE_LEVEL_ERROR, DBG_PNP, "WdfDeviceInitAssignSDDLString failed %!STATUS!", status);
-	return 0;
+		WdfDeviceInitFree(DeviceInit);
+		TraceEvents(TRACE_LEVEL_ERROR, DBG_PNP, "WdfDeviceInitAssignSDDLString failed %!STATUS!", status);
+		return 0;
 	}
-	
+
 	// I don't know if the following is necessary - it assigns a 'DeviceType'.
 	// But this is a USB driver. Does it need a DeviceType? DeviceClass?
 	WdfDeviceInitSetDeviceType(DeviceInit, FILE_DEVICE_SERIAL_PORT);
@@ -120,7 +120,7 @@ struct synccom_port *synccom_port_new(WDFDRIVER Driver, IN PWDFDEVICE_INIT Devic
 	pnpPowerCallbacks.EvtDevicePrepareHardware = SyncComEvtDevicePrepareHardware;
 	pnpPowerCallbacks.EvtDeviceReleaseHardware = SyncComEvtDeviceReleaseHardware;
 	pnpPowerCallbacks.EvtDeviceD0Entry = SyncComEvtDeviceD0Entry;
-	pnpPowerCallbacks.EvtDeviceD0Exit =  SyncComEvtDeviceD0Exit;
+	pnpPowerCallbacks.EvtDeviceD0Exit = SyncComEvtDeviceD0Exit;
 	WdfDeviceInitSetPnpPowerEventCallbacks(DeviceInit, &pnpPowerCallbacks);
 
 	WdfDeviceInitSetIoType(DeviceInit, WdfDeviceIoBuffered);
@@ -140,16 +140,16 @@ struct synccom_port *synccom_port_new(WDFDRIVER Driver, IN PWDFDEVICE_INIT Devic
 	device_state.DontDisplayInUI = WdfFalse;
 	WdfDeviceSetDeviceState(port->device, &device_state);
 
-    status = SetupUsb(port);
-    if (!NT_SUCCESS(status)) {
-        WdfObjectDelete(port->device);
-        TraceEvents(TRACE_LEVEL_ERROR, DBG_PNP, "SetupUsb failed %X\n", status);
-        return 0;
-    }
-    port->fx2_firmware_rev = 0;
-    synccom_port_get_fx2_firmware(port, register_completion, port);
+	status = SetupUsb(port);
+	if (!NT_SUCCESS(status)) {
+		WdfObjectDelete(port->device);
+		TraceEvents(TRACE_LEVEL_ERROR, DBG_PNP, "SetupUsb failed %X\n", status);
+		return 0;
+	}
+	port->fx2_firmware_rev = 0;
+	synccom_port_get_fx2_firmware(port, register_completion, port);
 
-    port_num = default_port_num;
+	port_num = default_port_num;
 	status = synccom_port_set_port_num(port, port_num);
 	if (!NT_SUCCESS(status)) {
 		WdfObjectDelete(port->device);
@@ -165,24 +165,24 @@ struct synccom_port *synccom_port_new(WDFDRIVER Driver, IN PWDFDEVICE_INIT Devic
 	pnpCaps.UINumber = port_num;
 	WdfDeviceSetPnpCapabilities(port->device, &pnpCaps);
 
-///////
-	/*
-    RtlInitEmptyUnicodeString(&dos_name, dos_name_buffer, sizeof(dos_name_buffer));
-    status = RtlUnicodeStringPrintf(&dos_name, L"\\DosDevices\\SYNCCOM%i", port_num);
-    if (!NT_SUCCESS(status)) {
-        WdfObjectDelete(port->device);
-        TraceEvents(TRACE_LEVEL_ERROR, DBG_PNP, "%s: RtlUnicodeStringPrintf failed %!STATUS!", __FUNCTION__, status);
-        return 0;
-    }
+	///////
+		/*
+		RtlInitEmptyUnicodeString(&dos_name, dos_name_buffer, sizeof(dos_name_buffer));
+		status = RtlUnicodeStringPrintf(&dos_name, L"\\DosDevices\\SYNCCOM%i", port_num);
+		if (!NT_SUCCESS(status)) {
+			WdfObjectDelete(port->device);
+			TraceEvents(TRACE_LEVEL_ERROR, DBG_PNP, "%s: RtlUnicodeStringPrintf failed %!STATUS!", __FUNCTION__, status);
+			return 0;
+		}
 
-    status = WdfDeviceCreateSymbolicLink(port->device, &dos_name);
-    if (!NT_SUCCESS(status)) {
-        WdfObjectDelete(port->device);
-        TraceEvents(TRACE_LEVEL_WARNING, DBG_PNP, "%s: WdfDeviceCreateSymbolicLink failed %!STATUS!", __FUNCTION__, status);
-        return 0;
-    }
-    TraceEvents(TRACE_LEVEL_INFORMATION, DBG_PNP, "%s: Device has a symbolic link with WdfDeviceCreateSymbolicLink: %wZ!", __FUNCTION__, &dos_name);
-	*/
+		status = WdfDeviceCreateSymbolicLink(port->device, &dos_name);
+		if (!NT_SUCCESS(status)) {
+			WdfObjectDelete(port->device);
+			TraceEvents(TRACE_LEVEL_WARNING, DBG_PNP, "%s: WdfDeviceCreateSymbolicLink failed %!STATUS!", __FUNCTION__, status);
+			return 0;
+		}
+		TraceEvents(TRACE_LEVEL_INFORMATION, DBG_PNP, "%s: Device has a symbolic link with WdfDeviceCreateSymbolicLink: %wZ!", __FUNCTION__, &dos_name);
+		*/
 
 	status = synccom_port_set_friendly_name(port->device, port->port_number);
 	if (!NT_SUCCESS(status)) {
@@ -208,7 +208,7 @@ struct synccom_port *synccom_port_new(WDFDRIVER Driver, IN PWDFDEVICE_INIT Devic
 
 	WDF_IO_QUEUE_CONFIG_INIT(&queue_config, WdfIoQueueDispatchSequential);
 	queue_config.EvtIoWrite = SyncComEvtIoWrite;
-	queue_config.EvtIoStop  = SyncComEvtIoStop;
+	queue_config.EvtIoStop = SyncComEvtIoStop;
 
 	status = WdfIoQueueCreate(port->device, &queue_config, WDF_NO_OBJECT_ATTRIBUTES, &port->write_queue);
 	if (!NT_SUCCESS(status)) {
@@ -257,7 +257,7 @@ struct synccom_port *synccom_port_new(WDFDRIVER Driver, IN PWDFDEVICE_INIT Devic
 		TraceEvents(TRACE_LEVEL_ERROR, DBG_PNP, "%s: WdfDeviceCreateDeviceInterface failed  %!STATUS!\n", __FUNCTION__, status);
 		return 0;
 	}
-    
+
 	RtlInitEmptyUnicodeString(&dos_name, dos_name_buffer, sizeof(dos_name_buffer));
 	status = RtlUnicodeStringPrintf(&dos_name, L"\\DosDevices\\SYNCCOM%i", port_num);
 	if (!NT_SUCCESS(status)) {
@@ -265,7 +265,7 @@ struct synccom_port *synccom_port_new(WDFDRIVER Driver, IN PWDFDEVICE_INIT Devic
 		TraceEvents(TRACE_LEVEL_ERROR, DBG_PNP, "%s: RtlUnicodeStringPrintf failed %!STATUS!", __FUNCTION__, status);
 		return 0;
 	}
-	
+
 	status = WdfDeviceCreateSymbolicLink(port->device, &dos_name);
 	if (!NT_SUCCESS(status)) {
 		WdfObjectDelete(port->device);
@@ -273,7 +273,7 @@ struct synccom_port *synccom_port_new(WDFDRIVER Driver, IN PWDFDEVICE_INIT Devic
 		return 0;
 	}
 	TraceEvents(TRACE_LEVEL_INFORMATION, DBG_PNP, "%s: Device has a symbolic link with WdfDeviceCreateSymbolicLink: %wZ!", __FUNCTION__, &dos_name);
-    
+
 	status = setup_spinlocks(port);
 	if (!NT_SUCCESS(status)) {
 		TraceEvents(TRACE_LEVEL_ERROR, DBG_PNP, "%s: Failed to set up spinlocks!  %!STATUS!", __FUNCTION__, status);
@@ -298,11 +298,11 @@ struct synccom_port *synccom_port_new(WDFDRIVER Driver, IN PWDFDEVICE_INIT Devic
 		return 0;
 	}
 
-    status = setup_timer(port);
-    if (!NT_SUCCESS(status)) {
-        TraceEvents(TRACE_LEVEL_ERROR, DBG_PNP, "%s: Failed to set up timer!  %!STATUS!", __FUNCTION__, status);
-        return 0;
-    }
+	status = setup_timer(port);
+	if (!NT_SUCCESS(status)) {
+		TraceEvents(TRACE_LEVEL_ERROR, DBG_PNP, "%s: Failed to set up timer!  %!STATUS!", __FUNCTION__, status);
+		return 0;
+	}
 
 	synccom_flist_init(&port->queued_oframes);
 	synccom_flist_init(&port->queued_iframes);
@@ -311,7 +311,7 @@ struct synccom_port *synccom_port_new(WDFDRIVER Driver, IN PWDFDEVICE_INIT Devic
 	return port;
 }
 
-NTSTATUS setup_spinlocks(_In_ struct synccom_port *port)
+NTSTATUS setup_spinlocks(_In_ struct synccom_port* port)
 {
 	NTSTATUS status = STATUS_SUCCESS;
 	WDF_OBJECT_ATTRIBUTES attributes;
@@ -392,7 +392,7 @@ NTSTATUS setup_spinlocks(_In_ struct synccom_port *port)
 	return STATUS_SUCCESS;
 }
 
-NTSTATUS setup_request(_In_ struct synccom_port *port)
+NTSTATUS setup_request(_In_ struct synccom_port* port)
 {
 	NTSTATUS status = STATUS_SUCCESS;
 
@@ -405,7 +405,7 @@ NTSTATUS setup_request(_In_ struct synccom_port *port)
 	return STATUS_SUCCESS;
 }
 
-NTSTATUS setup_memory(_In_ struct synccom_port *port)
+NTSTATUS setup_memory(_In_ struct synccom_port* port)
 {
 	NTSTATUS							status = STATUS_SUCCESS;
 	WDF_OBJECT_ATTRIBUTES               attributes;
@@ -422,7 +422,7 @@ NTSTATUS setup_memory(_In_ struct synccom_port *port)
 	return STATUS_SUCCESS;
 }
 
-NTSTATUS setup_dpc(_In_ struct synccom_port *port)
+NTSTATUS setup_dpc(_In_ struct synccom_port* port)
 {
 	NTSTATUS							status = STATUS_SUCCESS;
 	WDF_DPC_CONFIG						dpcConfig;
@@ -464,42 +464,42 @@ NTSTATUS setup_dpc(_In_ struct synccom_port *port)
 	return STATUS_SUCCESS;
 }
 
-NTSTATUS setup_timer(_In_ struct synccom_port *port) {
-    NTSTATUS status = STATUS_SUCCESS;
-    WDF_TIMER_CONFIG  timerConfig;
-    WDF_OBJECT_ATTRIBUTES  timerAttributes;
+NTSTATUS setup_timer(_In_ struct synccom_port* port) {
+	NTSTATUS status = STATUS_SUCCESS;
+	WDF_TIMER_CONFIG  timerConfig;
+	WDF_OBJECT_ATTRIBUTES  timerAttributes;
 
-    WDF_TIMER_CONFIG_INIT(&timerConfig, timer_handler);
-    timerConfig.Period = TIMER_DELAY_MS;
-    timerConfig.TolerableDelay = TIMER_DELAY_MS;
+	WDF_TIMER_CONFIG_INIT(&timerConfig, timer_handler);
+	timerConfig.Period = TIMER_DELAY_MS;
+	timerConfig.TolerableDelay = TIMER_DELAY_MS;
 
-    WDF_OBJECT_ATTRIBUTES_INIT(&timerAttributes);
-    timerAttributes.ParentObject = port->device;
+	WDF_OBJECT_ATTRIBUTES_INIT(&timerAttributes);
+	timerAttributes.ParentObject = port->device;
 
-    status = WdfTimerCreate(&timerConfig, &timerAttributes, &port->timer);
-    if (!NT_SUCCESS(status)) {
-        TraceEvents(TRACE_LEVEL_ERROR, DBG_PNP, "WdfTimerCreate failed %!STATUS!", status);
-        return status;
-    }
+	status = WdfTimerCreate(&timerConfig, &timerAttributes, &port->timer);
+	if (!NT_SUCCESS(status)) {
+		TraceEvents(TRACE_LEVEL_ERROR, DBG_PNP, "WdfTimerCreate failed %!STATUS!", status);
+		return status;
+	}
 
-    return status;
+	return status;
 }
 
 NTSTATUS SyncComEvtDevicePrepareHardware(WDFDEVICE Device, WDFCMRESLIST ResourceList, WDFCMRESLIST ResourceListTranslated)
 {
-    NTSTATUS                            status = STATUS_SUCCESS;
-    //WDF_USB_DEVICE_INFORMATION          deviceInfo;
-    //ULONG                               wait_wake_enable;
+	NTSTATUS                            status = STATUS_SUCCESS;
+	//WDF_USB_DEVICE_INFORMATION          deviceInfo;
+	//ULONG                               wait_wake_enable;
 	struct synccom_memory_cap			memory_cap;
 	unsigned char						clock_bits[20] = DEFAULT_CLOCK_BITS;
-	struct synccom_port					*port = 0;
+	struct synccom_port* port = 0;
 	WDF_USB_CONTINUOUS_READER_CONFIG	readerConfig;
 
-    UNREFERENCED_PARAMETER(ResourceList);
-    UNREFERENCED_PARAMETER(ResourceListTranslated);
+	UNREFERENCED_PARAMETER(ResourceList);
+	UNREFERENCED_PARAMETER(ResourceListTranslated);
 
-    PAGED_CODE();
-    port = GetPortContext(Device);
+	PAGED_CODE();
+	port = GetPortContext(Device);
 
 	WDF_USB_CONTINUOUS_READER_CONFIG_INIT(&readerConfig, port_received_data, port, 512);
 	readerConfig.NumPendingReads = 1;
@@ -545,19 +545,19 @@ NTSTATUS SyncComEvtDevicePrepareHardware(WDFDEVICE Device, WDFCMRESLIST Resource
 
 	synccom_port_purge_rx(port);
 	synccom_port_purge_tx(port);
-    synccom_port_get_register_async(port, FPGA_UPPER_ADDRESS + SYNCCOM_UPPER_OFFSET, VSTR_OFFSET, register_completion, port);
-    synccom_port_get_register_async(port, FPGA_UPPER_ADDRESS, 0x00, register_completion, port);
-    if(synccom_port_can_support_nonvolatile(port)) synccom_port_get_nonvolatile(port, register_completion, port);
+	synccom_port_get_register_async(port, FPGA_UPPER_ADDRESS + SYNCCOM_UPPER_OFFSET, VSTR_OFFSET, register_completion, port);
+	synccom_port_get_register_async(port, FPGA_UPPER_ADDRESS, 0x00, register_completion, port);
+	if (synccom_port_can_support_nonvolatile(port)) synccom_port_get_nonvolatile(port, register_completion, port);
 
-    WdfTimerStart(port->timer, WDF_ABS_TIMEOUT_IN_MS(TIMER_DELAY_MS));
+	WdfTimerStart(port->timer, WDF_ABS_TIMEOUT_IN_MS(TIMER_DELAY_MS));
 
-    return status;
+	return status;
 }
 
 NTSTATUS SyncComEvtDeviceReleaseHardware(WDFDEVICE Device, WDFCMRESLIST ResourcesTranslated)
 {
 	NTSTATUS status = STATUS_SUCCESS;
-	struct synccom_port *port = 0;
+	struct synccom_port* port = 0;
 	UNREFERENCED_PARAMETER(ResourcesTranslated);
 
 	port = GetPortContext(Device);
@@ -566,11 +566,11 @@ NTSTATUS SyncComEvtDeviceReleaseHardware(WDFDEVICE Device, WDFCMRESLIST Resource
 	WdfSpinLockAcquire(port->istream_spinlock);
 	synccom_frame_delete(port->istream);
 	WdfSpinLockRelease(port->istream_spinlock);
-	
+
 	WdfSpinLockAcquire(port->pending_iframes_spinlock);
 	synccom_flist_delete(&port->pending_iframes);
 	WdfSpinLockRelease(port->pending_iframes_spinlock);
-	
+
 	WdfSpinLockAcquire(port->pending_oframe_spinlock);
 	synccom_frame_delete(port->pending_oframe);
 	WdfSpinLockRelease(port->pending_oframe_spinlock);
@@ -589,7 +589,7 @@ NTSTATUS SyncComEvtDeviceReleaseHardware(WDFDEVICE Device, WDFCMRESLIST Resource
 NTSTATUS SyncComEvtDeviceD0Entry(WDFDEVICE Device, WDF_POWER_DEVICE_STATE PreviousState)
 {
 	NTSTATUS                status = STATUS_SUCCESS;
-	struct synccom_port					*port = 0;
+	struct synccom_port* port = 0;
 
 	UNREFERENCED_PARAMETER(PreviousState);
 
@@ -602,12 +602,12 @@ NTSTATUS SyncComEvtDeviceD0Entry(WDFDEVICE Device, WDF_POWER_DEVICE_STATE Previo
 		TraceEvents(TRACE_LEVEL_ERROR, DBG_POWER, "%!FUNC! Could not start data_read_pipe: failed 0x%x", status);
 	}
 
-	return status; 
+	return status;
 }
 
 NTSTATUS SyncComEvtDeviceD0Exit(WDFDEVICE Device, WDF_POWER_DEVICE_STATE TargetState)
 {
-	struct synccom_port *port = 0;
+	struct synccom_port* port = 0;
 	UNREFERENCED_PARAMETER(TargetState);
 	PAGED_CODE();
 	port = GetPortContext(Device);
@@ -615,74 +615,74 @@ NTSTATUS SyncComEvtDeviceD0Exit(WDFDEVICE Device, WDF_POWER_DEVICE_STATE TargetS
 	return_val_if_untrue(port, STATUS_SUCCESS);
 	WdfIoTargetStop(WdfUsbTargetPipeGetIoTarget(port->data_read_pipe), WdfIoTargetCancelSentIo);
 
-    return STATUS_SUCCESS;
+	return STATUS_SUCCESS;
 }
 
 _IRQL_requires_(PASSIVE_LEVEL)
-NTSTATUS OsrFxSetPowerPolicy(_In_ struct synccom_port *port)
+NTSTATUS OsrFxSetPowerPolicy(_In_ struct synccom_port* port)
 {
-    WDF_DEVICE_POWER_POLICY_IDLE_SETTINGS idleSettings;
-    WDF_DEVICE_POWER_POLICY_WAKE_SETTINGS wakeSettings;
-    NTSTATUS    status = STATUS_SUCCESS;
+	WDF_DEVICE_POWER_POLICY_IDLE_SETTINGS idleSettings;
+	WDF_DEVICE_POWER_POLICY_WAKE_SETTINGS wakeSettings;
+	NTSTATUS    status = STATUS_SUCCESS;
 
-    PAGED_CODE();
+	PAGED_CODE();
 
-    //
-    // Init the idle policy structure.
-    //
-    WDF_DEVICE_POWER_POLICY_IDLE_SETTINGS_INIT(&idleSettings, IdleUsbSelectiveSuspend);
-    idleSettings.IdleTimeout = 10000; // 10-sec
+	//
+	// Init the idle policy structure.
+	//
+	WDF_DEVICE_POWER_POLICY_IDLE_SETTINGS_INIT(&idleSettings, IdleUsbSelectiveSuspend);
+	idleSettings.IdleTimeout = 10000; // 10-sec
 
-    status = WdfDeviceAssignS0IdleSettings(port->device, &idleSettings);
-    if ( !NT_SUCCESS(status)) {
-        TraceEvents(TRACE_LEVEL_ERROR, DBG_PNP, "%s: WdfDeviceSetPowerPolicyS0IdlePolicy failed %x\n", __FUNCTION__, status);
-        return status;
-    }
+	status = WdfDeviceAssignS0IdleSettings(port->device, &idleSettings);
+	if (!NT_SUCCESS(status)) {
+		TraceEvents(TRACE_LEVEL_ERROR, DBG_PNP, "%s: WdfDeviceSetPowerPolicyS0IdlePolicy failed %x\n", __FUNCTION__, status);
+		return status;
+	}
 
-    //
-    // Init wait-wake policy structure.
-    //
-    WDF_DEVICE_POWER_POLICY_WAKE_SETTINGS_INIT(&wakeSettings);
+	//
+	// Init wait-wake policy structure.
+	//
+	WDF_DEVICE_POWER_POLICY_WAKE_SETTINGS_INIT(&wakeSettings);
 
-    status = WdfDeviceAssignSxWakeSettings(port->device, &wakeSettings);
-    if (!NT_SUCCESS(status)) {
-        TraceEvents(TRACE_LEVEL_ERROR, DBG_PNP, "%s: WdfDeviceAssignSxWakeSettings failed %x\n", __FUNCTION__, status);
-        return status;
-    }
+	status = WdfDeviceAssignSxWakeSettings(port->device, &wakeSettings);
+	if (!NT_SUCCESS(status)) {
+		TraceEvents(TRACE_LEVEL_ERROR, DBG_PNP, "%s: WdfDeviceAssignSxWakeSettings failed %x\n", __FUNCTION__, status);
+		return status;
+	}
 
-    return status;
+	return status;
 }
 
 _IRQL_requires_(PASSIVE_LEVEL)
-NTSTATUS SelectInterfaces(_In_ struct synccom_port *port)
+NTSTATUS SelectInterfaces(_In_ struct synccom_port* port)
 {
-    WDF_USB_DEVICE_SELECT_CONFIG_PARAMS configParams;
-    NTSTATUS                            status = STATUS_SUCCESS;
-    WDFUSBPIPE                          pipe;
-    WDF_USB_PIPE_INFORMATION            pipeInfo;
-    UCHAR                               index;
-    UCHAR                               numberConfiguredPipes;
-    PAGED_CODE();
+	WDF_USB_DEVICE_SELECT_CONFIG_PARAMS configParams;
+	NTSTATUS                            status = STATUS_SUCCESS;
+	WDFUSBPIPE                          pipe;
+	WDF_USB_PIPE_INFORMATION            pipeInfo;
+	UCHAR                               index;
+	UCHAR                               numberConfiguredPipes;
+	PAGED_CODE();
 
 
-    WDF_USB_DEVICE_SELECT_CONFIG_PARAMS_INIT_SINGLE_INTERFACE( &configParams);
+	WDF_USB_DEVICE_SELECT_CONFIG_PARAMS_INIT_SINGLE_INTERFACE(&configParams);
 
-    status = WdfUsbTargetDeviceSelectConfig(port->usb_device, WDF_NO_OBJECT_ATTRIBUTES, &configParams);
-    if(!NT_SUCCESS(status)) {
+	status = WdfUsbTargetDeviceSelectConfig(port->usb_device, WDF_NO_OBJECT_ATTRIBUTES, &configParams);
+	if (!NT_SUCCESS(status)) {
 
-        TraceEvents(TRACE_LEVEL_ERROR, DBG_PNP, "%s: WdfUsbTargetDeviceSelectConfig failed %!STATUS! \n", __FUNCTION__, status);
-        return status;
-    }
+		TraceEvents(TRACE_LEVEL_ERROR, DBG_PNP, "%s: WdfUsbTargetDeviceSelectConfig failed %!STATUS! \n", __FUNCTION__, status);
+		return status;
+	}
 
-    port->usb_interface = configParams.Types.SingleInterface.ConfiguredUsbInterface;
-    numberConfiguredPipes = configParams.Types.SingleInterface.NumberConfiguredPipes;
+	port->usb_interface = configParams.Types.SingleInterface.ConfiguredUsbInterface;
+	numberConfiguredPipes = configParams.Types.SingleInterface.NumberConfiguredPipes;
 
-    for(index=0; index < numberConfiguredPipes; index++) {
-		
-        WDF_USB_PIPE_INFORMATION_INIT(&pipeInfo);
+	for (index = 0; index < numberConfiguredPipes; index++) {
 
-        pipe = WdfUsbInterfaceGetConfiguredPipe(port->usb_interface, index, &pipeInfo);
-        WdfUsbTargetPipeSetNoMaximumPacketSizeCheck(pipe);
+		WDF_USB_PIPE_INFORMATION_INIT(&pipeInfo);
+
+		pipe = WdfUsbInterfaceGetConfiguredPipe(port->usb_interface, index, &pipeInfo);
+		WdfUsbTargetPipeSetNoMaximumPacketSizeCheck(pipe);
 
 		if (DATA_READ_ENDPOINT == pipeInfo.EndpointAddress && WdfUsbTargetPipeIsInEndpoint(pipe)) {
 			TraceEvents(TRACE_LEVEL_INFORMATION, DBG_IOCTL, "%s: data_read_pipe is 0x%p\n", __FUNCTION__, pipe);
@@ -704,67 +704,67 @@ NTSTATUS SelectInterfaces(_In_ struct synccom_port *port)
 			port->register_write_pipe = pipe;
 		}
 
-    }
+	}
 
-    if(!(port->data_read_pipe
-         && port->data_write_pipe 
-		 && port->register_read_pipe
-		 && port->register_write_pipe )) {
-        status = STATUS_INVALID_DEVICE_STATE;
-        TraceEvents(TRACE_LEVEL_ERROR, DBG_PNP, "%s: Device is not CONFIGURED properly %!STATUS!\n", __FUNCTION__,status);
-        return status;
-    }
-	
-    return status;
+	if (!(port->data_read_pipe
+		&& port->data_write_pipe
+		&& port->register_read_pipe
+		&& port->register_write_pipe)) {
+		status = STATUS_INVALID_DEVICE_STATE;
+		TraceEvents(TRACE_LEVEL_ERROR, DBG_PNP, "%s: Device is not CONFIGURED properly %!STATUS!\n", __FUNCTION__, status);
+		return status;
+	}
+
+	return status;
 }
 
-NTSTATUS SetupUsb(_In_ struct synccom_port *port)
+NTSTATUS SetupUsb(_In_ struct synccom_port* port)
 {
-    NTSTATUS                            status = STATUS_SUCCESS;
-    WDF_USB_DEVICE_INFORMATION          deviceInfo;
-    ULONG                               wait_wake_enable;
+	NTSTATUS                            status = STATUS_SUCCESS;
+	WDF_USB_DEVICE_INFORMATION          deviceInfo;
+	ULONG                               wait_wake_enable;
 
-    wait_wake_enable = FALSE;
+	wait_wake_enable = FALSE;
 
-    if (port->usb_device == NULL) {
-        WDF_USB_DEVICE_CREATE_CONFIG config;
+	if (port->usb_device == NULL) {
+		WDF_USB_DEVICE_CREATE_CONFIG config;
 
-        WDF_USB_DEVICE_CREATE_CONFIG_INIT(&config, USBD_CLIENT_CONTRACT_VERSION_602);
+		WDF_USB_DEVICE_CREATE_CONFIG_INIT(&config, USBD_CLIENT_CONTRACT_VERSION_602);
 
-        status = WdfUsbTargetDeviceCreateWithParameters(port->device, &config, WDF_NO_OBJECT_ATTRIBUTES, &port->usb_device);
-        if (!NT_SUCCESS(status)) {
-            TraceEvents(TRACE_LEVEL_ERROR, DBG_PNP, "%s: WdfUsbTargetDeviceCreateWithParameters failed with Status code %!STATUS!\n", __FUNCTION__, status);
-            return status;
-        }
-    }
+		status = WdfUsbTargetDeviceCreateWithParameters(port->device, &config, WDF_NO_OBJECT_ATTRIBUTES, &port->usb_device);
+		if (!NT_SUCCESS(status)) {
+			TraceEvents(TRACE_LEVEL_ERROR, DBG_PNP, "%s: WdfUsbTargetDeviceCreateWithParameters failed with Status code %!STATUS!\n", __FUNCTION__, status);
+			return status;
+		}
+	}
 
-    WDF_USB_DEVICE_INFORMATION_INIT(&deviceInfo);
-    status = WdfUsbTargetDeviceRetrieveInformation(port->usb_device, &deviceInfo);
-    if (NT_SUCCESS(status)) {
-        port->usb_traits = deviceInfo.Traits;
-        wait_wake_enable = deviceInfo.Traits & WDF_USB_DEVICE_TRAIT_REMOTE_WAKE_CAPABLE;
-        TraceEvents(TRACE_LEVEL_INFORMATION, DBG_PNP, "%s: IsDeviceHighSpeed: %s\n", __FUNCTION__, (deviceInfo.Traits & WDF_USB_DEVICE_TRAIT_AT_HIGH_SPEED) ? "TRUE" : "FALSE");
-        TraceEvents(TRACE_LEVEL_INFORMATION, DBG_PNP, "%s: IsDeviceSelfPowered: %s\n", __FUNCTION__, (deviceInfo.Traits & WDF_USB_DEVICE_TRAIT_SELF_POWERED) ? "TRUE" : "FALSE");
-        TraceEvents(TRACE_LEVEL_INFORMATION, DBG_PNP, "%s: IsDeviceRemoteWakeable: %s\n", __FUNCTION__, wait_wake_enable ? "TRUE" : "FALSE");
-    }
-    else {
-        port->usb_traits = 0;
-    }
+	WDF_USB_DEVICE_INFORMATION_INIT(&deviceInfo);
+	status = WdfUsbTargetDeviceRetrieveInformation(port->usb_device, &deviceInfo);
+	if (NT_SUCCESS(status)) {
+		port->usb_traits = deviceInfo.Traits;
+		wait_wake_enable = deviceInfo.Traits & WDF_USB_DEVICE_TRAIT_REMOTE_WAKE_CAPABLE;
+		TraceEvents(TRACE_LEVEL_INFORMATION, DBG_PNP, "%s: IsDeviceHighSpeed: %s\n", __FUNCTION__, (deviceInfo.Traits & WDF_USB_DEVICE_TRAIT_AT_HIGH_SPEED) ? "TRUE" : "FALSE");
+		TraceEvents(TRACE_LEVEL_INFORMATION, DBG_PNP, "%s: IsDeviceSelfPowered: %s\n", __FUNCTION__, (deviceInfo.Traits & WDF_USB_DEVICE_TRAIT_SELF_POWERED) ? "TRUE" : "FALSE");
+		TraceEvents(TRACE_LEVEL_INFORMATION, DBG_PNP, "%s: IsDeviceRemoteWakeable: %s\n", __FUNCTION__, wait_wake_enable ? "TRUE" : "FALSE");
+	}
+	else {
+		port->usb_traits = 0;
+	}
 
-    status = SelectInterfaces(port);
-    if (!NT_SUCCESS(status)) {
-        TraceEvents(TRACE_LEVEL_ERROR, DBG_PNP, "%s: SelectInterfaces failed 0x%x\n", __FUNCTION__, status);
-        return status;
-    }
+	status = SelectInterfaces(port);
+	if (!NT_SUCCESS(status)) {
+		TraceEvents(TRACE_LEVEL_ERROR, DBG_PNP, "%s: SelectInterfaces failed 0x%x\n", __FUNCTION__, status);
+		return status;
+	}
 
-    if (wait_wake_enable) {
-        status = OsrFxSetPowerPolicy(port);
-        if (!NT_SUCCESS(status)) {
-            TraceEvents(TRACE_LEVEL_ERROR, DBG_PNP, "%s: OsrFxSetPowerPolicy failed  %!STATUS!\n", __FUNCTION__, status);
-            return status;
-        }
-    }
-    return STATUS_SUCCESS;
+	if (wait_wake_enable) {
+		status = OsrFxSetPowerPolicy(port);
+		if (!NT_SUCCESS(status)) {
+			TraceEvents(TRACE_LEVEL_ERROR, DBG_PNP, "%s: OsrFxSetPowerPolicy failed  %!STATUS!\n", __FUNCTION__, status);
+			return status;
+		}
+	}
+	return STATUS_SUCCESS;
 }
 
 
@@ -785,7 +785,7 @@ NTSTATUS synccom_port_set_friendly_name(_In_ WDFDEVICE Device, unsigned portnum)
 		return STATUS_INVALID_PARAMETER;
 	}
 
-	status = WdfDeviceAssignProperty(Device, &dpd, DEVPROP_TYPE_STRING, (characters_written + 1)*sizeof(WCHAR), (PVOID)&friendlyName);
+	status = WdfDeviceAssignProperty(Device, &dpd, DEVPROP_TYPE_STRING, (characters_written + 1) * sizeof(WCHAR), (PVOID)&friendlyName);
 	if (!NT_SUCCESS(status)) {
 		TraceEvents(TRACE_LEVEL_ERROR, DBG_IOCTL, "WdfDeviceAssignProperty failed 0x%X\n", status);
 		return status;

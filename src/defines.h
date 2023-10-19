@@ -1,22 +1,22 @@
 /*
 Copyright 2023 Commtech, Inc.
 
-Permission is hereby granted, free of charge, to any person obtaining a copy 
-of this software and associated documentation files (the "Software"), to deal 
-in the Software without restriction, including without limitation the rights 
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell 
-copies of the Software, and to permit persons to whom the Software is 
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
 furnished to do so, subject to the following conditions:
 
-The above copyright notice and this permission notice shall be included in 
+The above copyright notice and this permission notice shall be included in
 all copies or substantial portions of the Software.
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE 
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER 
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, 
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN 
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 
@@ -45,7 +45,7 @@ DEFINE_GUID(GUID_DEVINTERFACE_SYNCCOM, 0x36fc9e60, 0xc465, 0x11cf, 0x80, 0x56, 0
 // These are defined in the firmware, so shouldn't be changed unless you are 100% sure
 // you know what you are doing.
 #define SYNCCOM_READ_FX2_FIRMWARE            0x02 // write: 0x02
-                                                 // read : (value - 4B)
+												 // read : (value - 4B)
 #define SYNCCOM_WRITE_REGISTER				0x6A // write: 0x6A (address - 2B) (value - 4B)
 #define SYNCCOM_READ_REGISTER				0x6B // write: 0x6B (address - 2B)
 												 // read : (value - 4B)
@@ -55,7 +55,7 @@ DEFINE_GUID(GUID_DEVINTERFACE_SYNCCOM, 0x36fc9e60, 0xc465, 0x11cf, 0x80, 0x56, 0
 												 // read : (address - 2B) (value - 4B)
 #define SYNCCOM_WRITE_NONVOLATILE           0x6E // write: 0x6E (value - 4B)
 #define SYNCCOM_READ_NONVOLATILE            0x6F // write: 0x6F
-                                                 // read : (value - 4B)
+												 // read : (value - 4B)
 
 #define SYNCCOM_GET_STATUS					0xFE
 
@@ -130,14 +130,14 @@ DEFINE_GUID(GUID_DEVINTERFACE_SYNCCOM, 0x36fc9e60, 0xc465, 0x11cf, 0x80, 0x56, 0
 
 typedef struct synccom_frame {
 	LIST_ENTRY list;
-	unsigned char *buffer;
+	unsigned char* buffer;
 	unsigned buffer_size;
 	unsigned data_length;
 	unsigned frame_size;
 	unsigned number;
 	unsigned lost_bytes;
 	LARGE_INTEGER timestamp;
-	struct synccom_port *port;
+	struct synccom_port* port;
 } synccom_FRAME;
 
 struct synccom_flist {
@@ -154,9 +154,9 @@ typedef struct synccom_port {
 	WDFUSBPIPE                      data_write_pipe;
 	WDFUSBPIPE						register_write_pipe;
 	WDFUSBPIPE						register_read_pipe;
-    UINT32                          fx2_firmware_rev;
+	UINT32                          fx2_firmware_rev;
 	UINT32							fpga_firmware_rev;
-    UINT32                          nonvolatile_reg;
+	UINT32                          nonvolatile_reg;
 
 	unsigned port_number;
 	struct synccom_registers register_storage;
@@ -164,7 +164,7 @@ typedef struct synccom_port {
 	BOOLEAN append_timestamp;
 	BOOLEAN ignore_timeout;
 	BOOLEAN rx_multiple;
-    int pending_frame_size_reads;
+	int pending_frame_size_reads;
 	int tx_modifiers;
 	struct synccom_memory_cap memory_cap;
 
@@ -188,24 +188,24 @@ typedef struct synccom_port {
 	struct synccom_flist queued_oframes; // Frames not yet in the FIFO yet 
 
 	WDFSPINLOCK istream_spinlock;
-	struct synccom_frame *istream; // Transparent stream 
+	struct synccom_frame* istream; // Transparent stream 
 
 	WDFSPINLOCK pending_iframes_spinlock;
 	struct synccom_flist pending_iframes; // Frames that are partially complete
 
 	WDFSPINLOCK pending_oframe_spinlock;
-	struct synccom_frame *pending_oframe; // Frame being put in the FIFO 
+	struct synccom_frame* pending_oframe; // Frame being put in the FIFO 
 
 	WDFDPC oframe_dpc;
 	WDFDPC iframe_dpc;
 	WDFDPC process_read_dpc;
 
-    WDFTIMER timer;
+	WDFTIMER timer;
 
 	WDFREQUEST data_read_request;
 	WDFMEMORY  data_read_memory;
-	
-} SYNCCOM_PORT, *PSYNCCOM_PORT;
+
+} SYNCCOM_PORT, * PSYNCCOM_PORT;
 
 WDF_DECLARE_CONTEXT_TYPE_WITH_NAME(SYNCCOM_PORT, GetPortContext)
 
