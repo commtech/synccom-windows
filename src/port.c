@@ -38,7 +38,7 @@ VOID SyncComEvtIoDeviceControl(_In_ WDFQUEUE Queue, _In_ WDFREQUEST Request, _In
 {
     WDFDEVICE           device;
     BOOLEAN             request_pending = FALSE;
-	NTSTATUS            status = STATUS_INVALID_DEVICE_REQUEST; 
+	NTSTATUS            status = STATUS_SUCCESS;
 	struct synccom_port	*port = 0;
 	size_t				bytes_returned = 0;
 
@@ -69,8 +69,8 @@ VOID SyncComEvtIoDeviceControl(_In_ WDFQUEUE Queue, _In_ WDFREQUEST Request, _In
 			break;
 		}
 		bytes_returned = 0;
-	}
 		break;
+	}
 	case SYNCCOM_GET_REGISTERS: {
 		struct synccom_registers *input_regs = 0;
 		struct synccom_registers *output_regs = 0;
@@ -90,30 +90,32 @@ VOID SyncComEvtIoDeviceControl(_In_ WDFQUEUE Queue, _In_ WDFREQUEST Request, _In
 		synccom_port_get_registers(port, output_regs);
 
 		bytes_returned = sizeof(*output_regs);
-	}
 		break;
+	}
 	case SYNCCOM_PURGE_TX: {
 		status = synccom_port_purge_tx(port);
 		if (!NT_SUCCESS(status)) {
 			TraceEvents(TRACE_LEVEL_WARNING, DBG_IOCTL, "%s: synccom_port_purge_tx failed %!STATUS!", __FUNCTION__, status);
 			break;
 		}
-	}
 		break;
+	}
 	case SYNCCOM_PURGE_RX: {
 		status = synccom_port_purge_rx(port);
 		if (!NT_SUCCESS(status)) {
 			TraceEvents(TRACE_LEVEL_WARNING, DBG_IOCTL, "%s: synccom_port_purge_rx failed %!STATUS!", __FUNCTION__, status);
 			break;
 		}
-	}
 		break;
-	case SYNCCOM_ENABLE_APPEND_STATUS:
+	}
+	case SYNCCOM_ENABLE_APPEND_STATUS: {
 		synccom_port_set_append_status(port, TRUE);
 		break;
-	case SYNCCOM_DISABLE_APPEND_STATUS:
+	}
+	case SYNCCOM_DISABLE_APPEND_STATUS: {
 		synccom_port_set_append_status(port, FALSE);
 		break;
+	}
 	case SYNCCOM_GET_APPEND_STATUS: {
 		BOOLEAN *append_status = 0;
 
@@ -125,14 +127,16 @@ VOID SyncComEvtIoDeviceControl(_In_ WDFQUEUE Queue, _In_ WDFREQUEST Request, _In
 
 		*append_status = synccom_port_get_append_status(port);
 		bytes_returned = sizeof(*append_status);
-	}
 		break;
-	case SYNCCOM_ENABLE_APPEND_TIMESTAMP:
+	}
+	case SYNCCOM_ENABLE_APPEND_TIMESTAMP: {
 		synccom_port_set_append_timestamp(port, TRUE);
 		break;
-	case SYNCCOM_DISABLE_APPEND_TIMESTAMP:
+	}
+	case SYNCCOM_DISABLE_APPEND_TIMESTAMP: {
 		synccom_port_set_append_timestamp(port, FALSE);
 		break;
+	}
 	case SYNCCOM_GET_APPEND_TIMESTAMP: {
 		BOOLEAN *append_timestamp = 0;
 
@@ -144,14 +148,16 @@ VOID SyncComEvtIoDeviceControl(_In_ WDFQUEUE Queue, _In_ WDFREQUEST Request, _In
 
 		*append_timestamp = synccom_port_get_append_timestamp(port);
 		bytes_returned = sizeof(*append_timestamp);
-	}
 		break;
-	case SYNCCOM_ENABLE_RX_MULTIPLE:
+	}
+	case SYNCCOM_ENABLE_RX_MULTIPLE: {
 		synccom_port_set_rx_multiple(port, TRUE);
 		break;
-	case SYNCCOM_DISABLE_RX_MULTIPLE:
+	}
+	case SYNCCOM_DISABLE_RX_MULTIPLE: {
 		synccom_port_set_rx_multiple(port, FALSE);
 		break;
+	}
 	case SYNCCOM_GET_RX_MULTIPLE: {
 		BOOLEAN *rx_multiple = 0;
 
@@ -163,8 +169,8 @@ VOID SyncComEvtIoDeviceControl(_In_ WDFQUEUE Queue, _In_ WDFREQUEST Request, _In
 
 		*rx_multiple = synccom_port_get_rx_multiple(port);
 		bytes_returned = sizeof(*rx_multiple);
-	}
 		break;
+	}
 	case SYNCCOM_SET_MEMORY_CAP: {
 		struct synccom_memory_cap *memcap = 0;
 
@@ -175,8 +181,8 @@ VOID SyncComEvtIoDeviceControl(_In_ WDFQUEUE Queue, _In_ WDFREQUEST Request, _In
 		}
 
 		synccom_port_set_memory_cap(port, memcap);
-	}
 		break;
+	}
 	case SYNCCOM_GET_MEMORY_CAP: {
 		struct synccom_memory_cap *memcap = 0;
 
@@ -189,14 +195,16 @@ VOID SyncComEvtIoDeviceControl(_In_ WDFQUEUE Queue, _In_ WDFREQUEST Request, _In
 		memcap->input = synccom_port_get_input_memory_cap(port);
 		memcap->output = synccom_port_get_output_memory_cap(port);
 		bytes_returned = sizeof(*memcap);
-	}
 		break;
-	case SYNCCOM_ENABLE_IGNORE_TIMEOUT:
+	}
+	case SYNCCOM_ENABLE_IGNORE_TIMEOUT: {
 		synccom_port_set_ignore_timeout(port, TRUE);
 		break;
-	case SYNCCOM_DISABLE_IGNORE_TIMEOUT:
+	}
+	case SYNCCOM_DISABLE_IGNORE_TIMEOUT: {
 		synccom_port_set_ignore_timeout(port, FALSE);
 		break;
+	}
 	case SYNCCOM_GET_IGNORE_TIMEOUT: {
 		BOOLEAN *ignore_timeout = 0;
 
@@ -208,8 +216,8 @@ VOID SyncComEvtIoDeviceControl(_In_ WDFQUEUE Queue, _In_ WDFREQUEST Request, _In
 
 		*ignore_timeout = synccom_port_get_ignore_timeout(port);
 		bytes_returned = sizeof(*ignore_timeout);
-	}
 		break;
+	}
 	case SYNCCOM_SET_TX_MODIFIERS: {
 		int *tx_modifiers = 0;
 
@@ -224,8 +232,8 @@ VOID SyncComEvtIoDeviceControl(_In_ WDFQUEUE Queue, _In_ WDFREQUEST Request, _In
 			TraceEvents(TRACE_LEVEL_WARNING, DBG_IOCTL, "%s: synccom_port_set_tx_modifiers failed %!STATUS!", __FUNCTION__, status);
 			break;
 		}
-	}
 		break;
+	}
 	case SYNCCOM_GET_TX_MODIFIERS: {
 		unsigned *tx_modifiers = 0;
 
@@ -237,8 +245,8 @@ VOID SyncComEvtIoDeviceControl(_In_ WDFQUEUE Queue, _In_ WDFREQUEST Request, _In
 
 		*tx_modifiers = synccom_port_get_tx_modifiers(port);
 		bytes_returned = sizeof(*tx_modifiers);
-	}
 		break;
+	}
 	case SYNCCOM_GET_WAIT_ON_WRITE: {
 		status = STATUS_NOT_SUPPORTED;
 		break;
@@ -264,8 +272,8 @@ VOID SyncComEvtIoDeviceControl(_In_ WDFQUEUE Queue, _In_ WDFREQUEST Request, _In
 		memcap->output = synccom_port_get_output_memory_usage(port);
 
 		bytes_returned = sizeof(*memcap);
-	}
 		break;
+	}
 	case SYNCCOM_SET_CLOCK_BITS: {
 		unsigned char *clock_bits = 0;
 
@@ -275,8 +283,8 @@ VOID SyncComEvtIoDeviceControl(_In_ WDFQUEUE Queue, _In_ WDFREQUEST Request, _In
 			break;
 		}
 		synccom_port_set_clock_bits(port, clock_bits);
-	}
 		break;
+	}
 	case SYNCCOM_REPROGRAM: {
 		unsigned char *firmware_line = 0;
 		size_t buffer_size = 0, data_size = 0;
@@ -293,8 +301,8 @@ VOID SyncComEvtIoDeviceControl(_In_ WDFQUEUE Queue, _In_ WDFREQUEST Request, _In
 
 		if (data_size < 51) status = synccom_port_program_firmware(port, firmware_line, data_size);
 		// Currently I get, store, get, modify, send the buffer - there's a better way, I'm just rushed.
-	}
 		break;
+	}
 	case SYNCCOM_GET_FIRMWARE: {
 			UINT32 *firmware_revision = 0;
 
@@ -305,8 +313,8 @@ VOID SyncComEvtIoDeviceControl(_In_ WDFQUEUE Queue, _In_ WDFREQUEST Request, _In
 			}
 			*firmware_revision = synccom_port_get_firmware_rev(port);
 			bytes_returned = sizeof(*firmware_revision);
+			break;
 		}
-		break;
 
     case SYNCCOM_GET_FX2_FIRMWARE: {
         UINT32 *fx2_rev = 0;
@@ -338,8 +346,8 @@ VOID SyncComEvtIoDeviceControl(_In_ WDFQUEUE Queue, _In_ WDFREQUEST Request, _In
             break;
         }
         port->nonvolatile_reg = *nonvolatile;
+		break;
     }
-    break;
     case SYNCCOM_GET_NONVOLATILE: {
         UINT32 *nonvolatile = 0;
 
@@ -355,14 +363,15 @@ VOID SyncComEvtIoDeviceControl(_In_ WDFQUEUE Queue, _In_ WDFREQUEST Request, _In
         synccom_port_get_nonvolatile(port, register_completion, port);
         *nonvolatile = port->nonvolatile_reg;
         bytes_returned = sizeof(*nonvolatile);
+		break;
     }
-    break;
 	default: {
 		TraceEvents(TRACE_LEVEL_INFORMATION, DBG_IOCTL, "%s: Default?\n", __FUNCTION__);
 		status = STATUS_INVALID_DEVICE_REQUEST;
-	}
 		break;
+		}
 	}
+
     if (request_pending == FALSE) {
 		WdfRequestCompleteWithInformation(Request, status, bytes_returned);
     }
@@ -1251,28 +1260,6 @@ NTSTATUS synccom_port_get_port_num(struct synccom_port *port, unsigned *port_num
 	UNICODE_STRING key_str;
     WDFSTRING friendlyname;
     UNICODE_STRING str;
-	//ULONG port_num_long;
-    /*
-	RtlInitUnicodeString(&key_str, L"PortNumber");
-
-	status = WdfDeviceOpenRegistryKey(port->device, PLUGPLAY_REGKEY_DEVICE,
-		STANDARD_RIGHTS_ALL,
-		WDF_NO_OBJECT_ATTRIBUTES, &devkey);
-	if (!NT_SUCCESS(status)) {
-		TraceEvents(TRACE_LEVEL_ERROR, DBG_PNP, "WdfDeviceOpenRegistryKey failed %!STATUS!", status);
-		return status;
-	}
-
-	status = WdfRegistryQueryULong(devkey, &key_str, &port_num_long);
-	if (!NT_SUCCESS(status)) {
-		TraceEvents(TRACE_LEVEL_ERROR, DBG_PNP, "WdfRegistryQueryULong failed %!STATUS!", status);
-		return status;
-	}
-
-	*port_num = (unsigned)port_num_long;
-
-	WdfRegistryClose(devkey);
-    */
 
     *port_num = 1;
 
