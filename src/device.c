@@ -519,6 +519,7 @@ NTSTATUS SyncComEvtDevicePrepareHardware(WDFDEVICE Device, WDFCMRESLIST Resource
 	synccom_port_set_memory_cap(port, &memory_cap);
 
 	port->pending_oframe = 0;
+	port->writes_in_flight = 0;
 
 	SYNCCOM_REGISTERS_INIT(port->register_storage);
 

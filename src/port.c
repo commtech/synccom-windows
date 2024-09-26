@@ -477,7 +477,7 @@ NTSTATUS synccom_port_program_firmware(_In_ struct synccom_port* port, unsigned 
 		WdfObjectDelete(firmware_request);
 		return status;
 	}
-	WdfRequestSetCompletionRoutine(firmware_request, basic_completion, write_pipe);
+	WdfRequestSetCompletionRoutine(firmware_request, basic_completion, port);
 	WdfSpinLockAcquire(port->request_spinlock);
 	if (WdfRequestSend(firmware_request, WdfUsbTargetPipeGetIoTarget(write_pipe), WDF_NO_SEND_OPTIONS) == FALSE) {
 		status = WdfRequestGetStatus(firmware_request);
@@ -544,7 +544,7 @@ NTSTATUS synccom_port_set_nonvolatile(struct synccom_port* port, UINT32 value, E
 		WdfObjectDelete(write_request);
 		return status;
 	}
-	WdfRequestSetCompletionRoutine(write_request, write_return, write_pipe);
+	WdfRequestSetCompletionRoutine(write_request, write_return, port);
 	WdfSpinLockAcquire(port->request_spinlock);
 	if (WdfRequestSend(write_request, WdfUsbTargetPipeGetIoTarget(write_pipe), WDF_NO_SEND_OPTIONS) == FALSE) {
 		WdfSpinLockRelease(port->request_spinlock);
@@ -616,7 +616,7 @@ NTSTATUS synccom_port_get_nonvolatile(struct synccom_port* port, EVT_WDF_REQUEST
 		return status;
 	}
 
-	WdfRequestSetCompletionRoutine(write_request, basic_completion, write_pipe);
+	WdfRequestSetCompletionRoutine(write_request, basic_completion, port);
 	WdfSpinLockAcquire(port->request_spinlock);
 	if (WdfRequestSend(write_request, WdfUsbTargetPipeGetIoTarget(write_pipe), WDF_NO_SEND_OPTIONS) == FALSE) {
 		WdfSpinLockRelease(port->request_spinlock);
@@ -701,7 +701,7 @@ NTSTATUS synccom_port_get_fx2_firmware(struct synccom_port* port, EVT_WDF_REQUES
 		return status;
 	}
 
-	WdfRequestSetCompletionRoutine(write_request, basic_completion, write_pipe);
+	WdfRequestSetCompletionRoutine(write_request, basic_completion, port);
 	if (WdfRequestSend(write_request, WdfUsbTargetPipeGetIoTarget(write_pipe), WDF_NO_SEND_OPTIONS) == FALSE) {
 		status = WdfRequestGetStatus(write_request);
 		WdfObjectDelete(write_request);
@@ -763,7 +763,7 @@ NTSTATUS synccom_port_set_register_async(struct synccom_port* port, unsigned cha
 		WdfObjectDelete(write_request);
 		return status;
 	}
-	WdfRequestSetCompletionRoutine(write_request, write_return, write_pipe);
+	WdfRequestSetCompletionRoutine(write_request, write_return, port);
 	WdfSpinLockAcquire(port->request_spinlock);
 	if (WdfRequestSend(write_request, WdfUsbTargetPipeGetIoTarget(write_pipe), WDF_NO_SEND_OPTIONS) == FALSE) {
 		WdfSpinLockRelease(port->request_spinlock);
@@ -867,7 +867,7 @@ NTSTATUS synccom_port_get_register_async(struct synccom_port* port, unsigned cha
 		return status;
 	}
 
-	WdfRequestSetCompletionRoutine(write_request, basic_completion, write_pipe);
+	WdfRequestSetCompletionRoutine(write_request, basic_completion, port);
 	WdfSpinLockAcquire(port->request_spinlock);
 	if (WdfRequestSend(write_request, WdfUsbTargetPipeGetIoTarget(write_pipe), WDF_NO_SEND_OPTIONS) == FALSE) {
 		WdfSpinLockRelease(port->request_spinlock);

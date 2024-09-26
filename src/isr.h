@@ -39,6 +39,7 @@ int				prepare_frame_for_fifo(struct synccom_port* port, struct synccom_frame* f
 NTSTATUS		synccom_port_data_write(struct synccom_port* port, const unsigned char* data, unsigned byte_count);
 void			register_completion(_In_ WDFREQUEST Request, _In_ WDFIOTARGET Target, _In_ PWDF_REQUEST_COMPLETION_PARAMS CompletionParams, _In_ WDFCONTEXT Context);
 void			basic_completion(_In_ WDFREQUEST Request, _In_ WDFIOTARGET Target, _In_ PWDF_REQUEST_COMPLETION_PARAMS CompletionParams, _In_ WDFCONTEXT Context);
+void			tx_completion(_In_ WDFREQUEST Request, _In_ WDFIOTARGET Target, _In_ PWDF_REQUEST_COMPLETION_PARAMS CompletionParams, _In_ WDFCONTEXT Context);
 synccom_register	synccom_port_read_data_async(struct synccom_port* port, EVT_WDF_REQUEST_COMPLETION_ROUTINE read_return, WDFCONTEXT Context);
 
 EVT_WDF_IO_QUEUE_IO_STOP SyncComEvtIoStop;

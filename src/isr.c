@@ -323,13 +323,15 @@ NTSTATUS synccom_port_data_write(struct synccom_port* port, const unsigned char*
 		WdfObjectDelete(write_request);
 		return status;
 	}
-	WdfRequestSetCompletionRoutine(write_request, basic_completion, pipe);
-	WdfSpinLockAcquire(port->request_spinlock);
+	WdfRequestSetCompletionRoutine(write_request, tx_completion, port);
+	//WdfSpinLockAcquire(port->request_spinlock);
 	if (WdfRequestSend(write_request, WdfUsbTargetPipeGetIoTarget(pipe), WDF_NO_SEND_OPTIONS) == FALSE) {
 		status = WdfRequestGetStatus(write_request);
 		WdfObjectDelete(write_request);
 	}
-	WdfSpinLockRelease(port->request_spinlock);
+	port->writes_in_flight++;
+	//WdfSpinLockRelease(port->request_spinlock);
+
 	if (reversed_data)
 		ExFreePoolWithTag(reversed_data, 'ataD');
 
@@ -362,6 +364,7 @@ void oframe_worker(WDFDPC Dpc)
 
 	port = GetPortContext(WdfDpcGetParentObject(Dpc));
 	return_if_untrue(port);
+	if (port->writes_in_flight > MAXIMUM_WRITES_IN_FLIGHT) return;
 
 	WdfSpinLockAcquire(port->board_tx_spinlock);
 	WdfSpinLockAcquire(port->pending_oframe_spinlock);
@@ -566,6 +569,25 @@ void basic_completion(_In_ WDFREQUEST Request, _In_ WDFIOTARGET Target, _In_ PWD
 	if (!NT_SUCCESS(status)) {
 		TraceEvents(TRACE_LEVEL_ERROR, DBG_WRITE, "%s: Read failed: Request status: 0x%x, UsbdStatus: 0x%x\n", __FUNCTION__, status, usb_completion_params->UsbdStatus);
 	}
+	WdfObjectDelete(Request);
+	return;
+}
+
+void tx_completion(_In_ WDFREQUEST Request, _In_ WDFIOTARGET Target, _In_ PWDF_REQUEST_COMPLETION_PARAMS CompletionParams, _In_ WDFCONTEXT Context)
+{
+	struct synccom_port* port = 0;
+
+	UNREFERENCED_PARAMETER(Target);
+	UNREFERENCED_PARAMETER(CompletionParams);
+
+	port = (PSYNCCOM_PORT)Context;
+	if (!port) {
+		WdfObjectDelete(Request);
+		return;
+	}
+
+	port->writes_in_flight--;
+	
 	WdfObjectDelete(Request);
 	return;
 }
