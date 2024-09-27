@@ -1,5 +1,8 @@
 # ChangeLog
 
+## [2.1.0.0](https://github.com/commtech/synccom-windows/releases/tag/v2.1.0.0) (09/27/2024)
+- Added code to limit the number of pending transmits to the Sync Com. This should reduce memory usage.
+
 ## [2.0.0.0](https://github.com/commtech/synccom-windows/releases/tag/v2.0.0.0) (09/22/2023)
 - Updated code to support Windows Universal.
 - No longer supports anything before Windows 10.

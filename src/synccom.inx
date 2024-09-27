@@ -29,7 +29,7 @@ CatalogFile=synccom.cat
 DriverVer=
 
 [DestinationDirs]
-DefaultDestDir = 13
+DefaultDestDir = 12
 
 ; ================= Class section =====================
 
@@ -67,7 +67,7 @@ DisplayName    = %synccom.SvcDesc%
 ServiceType    = 1                  ; SERVICE_KERNEL_DRIVER
 StartType      = 3                  ; SERVICE_DEMAND_START
 ErrorControl   = 1                  ; SERVICE_ERROR_NORMAL
-ServiceBinary  = %13%\synccom-windows.sys
+ServiceBinary  = %12%\synccom-windows.sys
 LoadOrderGroup = Base
 
 ;---------------------------------------------------------------;
