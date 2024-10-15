@@ -62,7 +62,6 @@ DEFINE_GUID(GUID_DEVINTERFACE_SYNCCOM, 0x36fc9e60, 0xc465, 0x11cf, 0x80, 0x56, 0
 #define TX_FIFO_SIZE 4096
 #define EXTRA_BLOCK_SIZE 16384
 #define TIMER_DELAY_MS 250
-#define MAXIMUM_WRITES_IN_FLIGHT 20
 
 #define UNUSED(x) (void)(x)
 
@@ -167,6 +166,7 @@ typedef struct synccom_port {
 	BOOLEAN rx_multiple;
 	int pending_frame_size_reads;
 	int tx_modifiers;
+	int max_pending_writes;
 	int writes_in_flight;
 	struct synccom_memory_cap memory_cap;
 
@@ -221,6 +221,7 @@ WDF_DECLARE_CONTEXT_TYPE_WITH_NAME(SYNCCOM_PORT, GetPortContext)
 #define DEFAULT_IGNORE_TIMEOUT_VALUE 0
 #define DEFAULT_TX_MODIFIERS_VALUE XF
 #define DEFAULT_RX_MULTIPLE_VALUE 0
+#define DEFAULT_MAX_WRITES 20
 
 #define DEFAULT_FIFOT_VALUE 0x00040004
 #define DEFAULT_CCR0_VALUE 0x0011201c

@@ -364,7 +364,7 @@ void oframe_worker(WDFDPC Dpc)
 
 	port = GetPortContext(WdfDpcGetParentObject(Dpc));
 	return_if_untrue(port);
-	if (port->writes_in_flight > MAXIMUM_WRITES_IN_FLIGHT) return;
+	if (port->writes_in_flight > port->max_pending_writes) return;
 
 	WdfSpinLockAcquire(port->board_tx_spinlock);
 	WdfSpinLockAcquire(port->pending_oframe_spinlock);

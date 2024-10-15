@@ -365,6 +365,35 @@ VOID SyncComEvtIoDeviceControl(_In_ WDFQUEUE Queue, _In_ WDFREQUEST Request, _In
 		bytes_returned = sizeof(*nonvolatile);
 		break;
 	}
+	case SYNCCOM_SET_MAX_WRITES: {
+		unsigned* max_writes;
+
+		status = WdfRequestRetrieveInputBuffer(Request, sizeof(*max_writes), (PVOID*)&max_writes, NULL);
+		if (!NT_SUCCESS(status)) {
+			TraceEvents(TRACE_LEVEL_WARNING, DBG_IOCTL, "%s: WdfRequestRetrieveInputBuffer failed %!STATUS!", __FUNCTION__, status);
+			break;
+		}
+
+		if (*max_writes < 1) {
+			status = STATUS_INVALID_PARAMETER;
+			break;
+		}
+		port->max_pending_writes = *max_writes;
+		break;
+	}
+	case SYNCCOM_GET_MAX_WRITES: {
+		unsigned* max_writes = 0;
+
+		status = WdfRequestRetrieveOutputBuffer(Request, sizeof(*max_writes), (PVOID*)&max_writes, NULL);
+		if (!NT_SUCCESS(status)) {
+			TraceEvents(TRACE_LEVEL_WARNING, DBG_IOCTL, "%s: WdfRequestRetrieveOutputBuffer failed %!STATUS!", __FUNCTION__, status);
+			break;
+		}
+
+		*max_writes = port->max_pending_writes;
+		bytes_returned = sizeof(*max_writes);
+		break;
+	}
 	default: {
 		TraceEvents(TRACE_LEVEL_INFORMATION, DBG_IOCTL, "%s: Default?\n", __FUNCTION__);
 		status = STATUS_INVALID_DEVICE_REQUEST;

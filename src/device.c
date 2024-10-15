@@ -44,6 +44,8 @@ THE SOFTWARE.
 
 NTSTATUS SetupUsb(_In_ struct synccom_port* port);
 NTSTATUS synccom_port_set_friendly_name(_In_ WDFDEVICE Device, unsigned portnum);
+NTSTATUS synccom_port_setget_default_settings(struct synccom_port* port);
+NTSTATUS synccom_port_setget_default_registers(struct synccom_port* port);
 
 NTSTATUS SyncComEvtDeviceAdd(WDFDRIVER Driver, PWDFDEVICE_INIT DeviceInit)
 {
@@ -506,41 +508,16 @@ NTSTATUS SyncComEvtDevicePrepareHardware(WDFDEVICE Device, WDFCMRESLIST Resource
 	readerConfig.EvtUsbTargetPipeReadersFailed = FX3EvtReadFailed;
 	status = WdfUsbTargetPipeConfigContinuousReader(port->data_read_pipe, &readerConfig);
 
-	synccom_port_set_append_status(port, DEFAULT_APPEND_STATUS_VALUE);
-	synccom_port_set_append_timestamp(port, DEFAULT_APPEND_TIMESTAMP_VALUE);
-	synccom_port_set_ignore_timeout(port, DEFAULT_IGNORE_TIMEOUT_VALUE);
-	synccom_port_set_tx_modifiers(port, DEFAULT_TX_MODIFIERS_VALUE);
-	synccom_port_set_rx_multiple(port, DEFAULT_RX_MULTIPLE_VALUE);
-	port->pending_frame_size_reads = 0;
-
 	memory_cap.input = DEFAULT_INPUT_MEMORY_CAP_VALUE;
 	memory_cap.output = DEFAULT_OUTPUT_MEMORY_CAP_VALUE;
-
 	synccom_port_set_memory_cap(port, &memory_cap);
 
 	port->pending_oframe = 0;
 	port->writes_in_flight = 0;
+	port->pending_frame_size_reads = 0;
 
-	SYNCCOM_REGISTERS_INIT(port->register_storage);
-
-	port->register_storage.FIFOT = DEFAULT_FIFOT_VALUE;
-	port->register_storage.CCR0 = DEFAULT_CCR0_VALUE;
-	port->register_storage.CCR1 = DEFAULT_CCR1_VALUE;
-	port->register_storage.CCR2 = DEFAULT_CCR2_VALUE;
-	port->register_storage.BGR = DEFAULT_BGR_VALUE;
-	port->register_storage.SSR = DEFAULT_SSR_VALUE;
-	port->register_storage.SMR = DEFAULT_SMR_VALUE;
-	port->register_storage.TSR = DEFAULT_TSR_VALUE;
-	port->register_storage.TMR = DEFAULT_TMR_VALUE;
-	port->register_storage.RAR = DEFAULT_RAR_VALUE;
-	port->register_storage.RAMR = DEFAULT_RAMR_VALUE;
-	port->register_storage.PPR = DEFAULT_PPR_VALUE;
-	port->register_storage.TCR = DEFAULT_TCR_VALUE;
-	port->register_storage.IMR = DEFAULT_IMR_VALUE;
-	port->register_storage.DPLLR = DEFAULT_DPLLR_VALUE;
-	port->register_storage.FCR = DEFAULT_FCR_VALUE;
-
-	synccom_port_set_registers(port, &port->register_storage);
+	synccom_port_setget_default_settings(port);
+	synccom_port_setget_default_registers(port);
 
 	synccom_port_set_clock_bits(port, clock_bits);
 
@@ -768,7 +745,6 @@ NTSTATUS SetupUsb(_In_ struct synccom_port* port)
 	return STATUS_SUCCESS;
 }
 
-
 #define FRIENDLYNAME_SIZE 256
 NTSTATUS synccom_port_set_friendly_name(_In_ WDFDEVICE Device, unsigned portnum)
 {
@@ -793,4 +769,222 @@ NTSTATUS synccom_port_set_friendly_name(_In_ WDFDEVICE Device, unsigned portnum)
 	}
 
 	return status;
+}
+
+NTSTATUS synccom_port_setget_default_registers(struct synccom_port* port)
+{
+	NTSTATUS status;
+	WDFKEY devkey;
+	UNICODE_STRING key_str;
+	ULONG value;
+
+	SYNCCOM_REGISTERS_INIT(port->register_storage);
+
+	status = WdfDeviceOpenRegistryKey(port->device, PLUGPLAY_REGKEY_DEVICE, STANDARD_RIGHTS_ALL, WDF_NO_OBJECT_ATTRIBUTES, &devkey);
+	if (!NT_SUCCESS(status)) {
+		TraceEvents(TRACE_LEVEL_ERROR, DBG_IOCTL, "WdfDeviceOpenRegistryKey failed %!STATUS!, setting default registers", status);
+		synccom_port_set_registers(port, &port->register_storage);
+		return status;
+	}
+
+	RtlInitUnicodeString(&key_str, L"FIFOT");
+	status = WdfRegistryQueryULong(devkey, &key_str, &value);
+	if (!NT_SUCCESS(status)) {
+		value = DEFAULT_FIFOT_VALUE;
+		status = WdfRegistryAssignULong(devkey, &key_str, value);
+	}
+	port->register_storage.FIFOT = (unsigned)value;
+
+	RtlInitUnicodeString(&key_str, L"CCR0");
+	status = WdfRegistryQueryULong(devkey, &key_str, &value);
+	if (!NT_SUCCESS(status)) {
+		value = DEFAULT_CCR0_VALUE;
+		status = WdfRegistryAssignULong(devkey, &key_str, value);
+	}
+	port->register_storage.CCR0 = (unsigned)value;
+
+	RtlInitUnicodeString(&key_str, L"CCR1");
+	status = WdfRegistryQueryULong(devkey, &key_str, &value);
+	if (!NT_SUCCESS(status)) {
+		value = DEFAULT_CCR1_VALUE;
+		status = WdfRegistryAssignULong(devkey, &key_str, value);
+	}
+	port->register_storage.CCR1 = (unsigned)value;
+
+	RtlInitUnicodeString(&key_str, L"CCR2");
+	status = WdfRegistryQueryULong(devkey, &key_str, &value);
+	if (!NT_SUCCESS(status)) {
+		value = DEFAULT_CCR2_VALUE;
+		status = WdfRegistryAssignULong(devkey, &key_str, value);
+	}
+	port->register_storage.CCR2 = (unsigned)value;
+
+	RtlInitUnicodeString(&key_str, L"BGR");
+	status = WdfRegistryQueryULong(devkey, &key_str, &value);
+	if (!NT_SUCCESS(status)) {
+		value = DEFAULT_BGR_VALUE;
+		status = WdfRegistryAssignULong(devkey, &key_str, value);
+	}
+	port->register_storage.BGR = (unsigned)value;
+
+	RtlInitUnicodeString(&key_str, L"SSR");
+	status = WdfRegistryQueryULong(devkey, &key_str, &value);
+	if (!NT_SUCCESS(status)) {
+		value = DEFAULT_SSR_VALUE;
+		status = WdfRegistryAssignULong(devkey, &key_str, value);
+	}
+	port->register_storage.SSR = (unsigned)value;
+
+	RtlInitUnicodeString(&key_str, L"SMR");
+	status = WdfRegistryQueryULong(devkey, &key_str, &value);
+	if (!NT_SUCCESS(status)) {
+		value = DEFAULT_SMR_VALUE;
+		status = WdfRegistryAssignULong(devkey, &key_str, value);
+	}
+	port->register_storage.SMR = (unsigned)value;
+
+	RtlInitUnicodeString(&key_str, L"TSR");
+	status = WdfRegistryQueryULong(devkey, &key_str, &value);
+	if (!NT_SUCCESS(status)) {
+		value = DEFAULT_TSR_VALUE;
+		status = WdfRegistryAssignULong(devkey, &key_str, value);
+	}
+	port->register_storage.TSR = (unsigned)value;
+
+	RtlInitUnicodeString(&key_str, L"TMR");
+	status = WdfRegistryQueryULong(devkey, &key_str, &value);
+	if (!NT_SUCCESS(status)) {
+		value = DEFAULT_TMR_VALUE;
+		status = WdfRegistryAssignULong(devkey, &key_str, value);
+	}
+	port->register_storage.TMR = (unsigned)value;
+
+	RtlInitUnicodeString(&key_str, L"RAR");
+	status = WdfRegistryQueryULong(devkey, &key_str, &value);
+	if (!NT_SUCCESS(status)) {
+		value = DEFAULT_RAR_VALUE;
+		status = WdfRegistryAssignULong(devkey, &key_str, value);
+	}
+	port->register_storage.RAR = (unsigned)value;
+
+	RtlInitUnicodeString(&key_str, L"RAMR");
+	status = WdfRegistryQueryULong(devkey, &key_str, &value);
+	if (!NT_SUCCESS(status)) {
+		value = DEFAULT_RAMR_VALUE;
+		status = WdfRegistryAssignULong(devkey, &key_str, value);
+	}
+	port->register_storage.RAMR = (unsigned)value;
+
+	RtlInitUnicodeString(&key_str, L"PPR");
+	status = WdfRegistryQueryULong(devkey, &key_str, &value);
+	if (!NT_SUCCESS(status)) {
+		value = DEFAULT_PPR_VALUE;
+		status = WdfRegistryAssignULong(devkey, &key_str, value);
+	}
+	port->register_storage.PPR = (unsigned)value;
+
+	RtlInitUnicodeString(&key_str, L"TCR");
+	status = WdfRegistryQueryULong(devkey, &key_str, &value);
+	if (!NT_SUCCESS(status)) {
+		value = DEFAULT_TCR_VALUE;
+		status = WdfRegistryAssignULong(devkey, &key_str, value);
+	}
+	port->register_storage.TCR = (unsigned)value;
+
+	RtlInitUnicodeString(&key_str, L"IMR");
+	status = WdfRegistryQueryULong(devkey, &key_str, &value);
+	if (!NT_SUCCESS(status)) {
+		value = DEFAULT_IMR_VALUE;
+		status = WdfRegistryAssignULong(devkey, &key_str, value);
+	}
+	port->register_storage.IMR = (unsigned)value;
+
+	RtlInitUnicodeString(&key_str, L"DPLLR");
+	status = WdfRegistryQueryULong(devkey, &key_str, &value);
+	if (!NT_SUCCESS(status)) {
+		value = DEFAULT_DPLLR_VALUE;
+		status = WdfRegistryAssignULong(devkey, &key_str, value);
+	}
+	port->register_storage.DPLLR = (unsigned)value;
+
+	RtlInitUnicodeString(&key_str, L"FCR");
+	status = WdfRegistryQueryULong(devkey, &key_str, &value);
+	if (!NT_SUCCESS(status)) {
+		value = DEFAULT_FCR_VALUE;
+		status = WdfRegistryAssignULong(devkey, &key_str, value);
+	}
+	port->register_storage.FCR = (unsigned)value;
+
+	WdfRegistryClose(devkey);
+
+	synccom_port_set_registers(port, &port->register_storage);
+
+	return STATUS_SUCCESS;
+}
+
+NTSTATUS synccom_port_setget_default_settings(struct synccom_port* port)
+{
+	NTSTATUS status;
+	WDFKEY devkey;
+	UNICODE_STRING key_str;
+	ULONG value;
+
+	status = WdfDeviceOpenRegistryKey(port->device, PLUGPLAY_REGKEY_DEVICE, STANDARD_RIGHTS_ALL, WDF_NO_OBJECT_ATTRIBUTES, &devkey);
+	if (!NT_SUCCESS(status)) {
+		TraceEvents(TRACE_LEVEL_ERROR, DBG_IOCTL, "WdfDeviceOpenRegistryKey failed %!STATUS!, setting default max writes", status);
+		port->max_pending_writes = DEFAULT_MAX_WRITES;
+		return status;
+	}
+
+	RtlInitUnicodeString(&key_str, L"MAX_WRITES");
+	status = WdfRegistryQueryULong(devkey, &key_str, &value);
+	if (!NT_SUCCESS(status)) {
+		value = DEFAULT_MAX_WRITES;
+		status = WdfRegistryAssignULong(devkey, &key_str, value);
+	}
+	port->max_pending_writes = (unsigned)value;
+
+	RtlInitUnicodeString(&key_str, L"TX_MODIFIERS");
+	status = WdfRegistryQueryULong(devkey, &key_str, &value);
+	if (!NT_SUCCESS(status)) {
+		value = DEFAULT_TX_MODIFIERS_VALUE;
+		status = WdfRegistryAssignULong(devkey, &key_str, value);
+	}
+	synccom_port_set_tx_modifiers(port, (unsigned)value);
+
+	RtlInitUnicodeString(&key_str, L"APPEND_STATUS");
+	status = WdfRegistryQueryULong(devkey, &key_str, &value);
+	if (!NT_SUCCESS(status)) {
+		value = DEFAULT_APPEND_STATUS_VALUE;
+		status = WdfRegistryAssignULong(devkey, &key_str, value);
+	}
+	synccom_port_set_append_status(port, (BOOLEAN)value);
+
+	RtlInitUnicodeString(&key_str, L"APPEND_TIMESTAMP");
+	status = WdfRegistryQueryULong(devkey, &key_str, &value);
+	if (!NT_SUCCESS(status)) {
+		value = DEFAULT_APPEND_TIMESTAMP_VALUE;
+		status = WdfRegistryAssignULong(devkey, &key_str, value);
+	}
+	synccom_port_set_append_timestamp(port, (BOOLEAN)value);
+
+	RtlInitUnicodeString(&key_str, L"IGNORE_TIMEOUT");
+	status = WdfRegistryQueryULong(devkey, &key_str, &value);
+	if (!NT_SUCCESS(status)) {
+		value = DEFAULT_IGNORE_TIMEOUT_VALUE;
+		status = WdfRegistryAssignULong(devkey, &key_str, value);
+	}
+	synccom_port_set_ignore_timeout(port, (BOOLEAN)value);
+
+	RtlInitUnicodeString(&key_str, L"RX_MULTIPLE");
+	status = WdfRegistryQueryULong(devkey, &key_str, &value);
+	if (!NT_SUCCESS(status)) {
+		value = DEFAULT_RX_MULTIPLE_VALUE;
+		status = WdfRegistryAssignULong(devkey, &key_str, value);
+	}
+	synccom_port_set_rx_multiple(port, (BOOLEAN)value);
+
+	WdfRegistryClose(devkey);
+	
+	return STATUS_SUCCESS;
 }
