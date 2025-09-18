@@ -1,5 +1,8 @@
 # ChangeLog
 
+## [2.2.0.1](https://github.com/commtech/synccom-windows/releases/tag/v2.2.0.1) (09/18/2025)
+- Fixed an integer overflow when receiving data.
+
 ## [2.2.0.0](https://github.com/commtech/synccom-windows/releases/tag/v2.2.0.0) (10/15/2024)
 - Added the ability to change the number of pending transmits to the Sync Com from the driver.
 
