@@ -711,7 +711,7 @@ NTSTATUS SetupUsb(_In_ struct synccom_port* port)
 
 		status = WdfUsbTargetDeviceCreateWithParameters(port->device, &config, WDF_NO_OBJECT_ATTRIBUTES, &port->usb_device);
 		if (!NT_SUCCESS(status)) {
-			TraceEvents(TRACE_LEVEL_ERROR, DBG_PNP, "%s: WdfUsbTargetDeviceCreateWithParameters failed with Status code %!STATUS!\n", __FUNCTION__, status);
+			TraceEvents(TRACE_LEVEL_ERROR, DBG_PNP, "%s: WdfUsbTargetDeviceCreateWithParameters failed with Status code 0x%x\n", __FUNCTION__, status);
 			return status;
 		}
 	}
@@ -738,7 +738,7 @@ NTSTATUS SetupUsb(_In_ struct synccom_port* port)
 	if (wait_wake_enable) {
 		status = OsrFxSetPowerPolicy(port);
 		if (!NT_SUCCESS(status)) {
-			TraceEvents(TRACE_LEVEL_ERROR, DBG_PNP, "%s: OsrFxSetPowerPolicy failed  %!STATUS!\n", __FUNCTION__, status);
+			TraceEvents(TRACE_LEVEL_ERROR, DBG_PNP, "%s: OsrFxSetPowerPolicy failed  0x%x\n", __FUNCTION__, status);
 			return status;
 		}
 	}

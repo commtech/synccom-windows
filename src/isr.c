@@ -609,14 +609,14 @@ void port_received_data(__in  WDFUSBPIPE Pipe, __in  WDFMEMORY Buffer, __in  siz
 
 	receive_length = NumBytesTransferred;
 
-	if (receive_length % 2) TraceEvents(TRACE_LEVEL_WARNING, DBG_WRITE, "%s: receive_length not even: %d.", __FUNCTION__, receive_length);
+	if (receive_length % 2) TraceEvents(TRACE_LEVEL_WARNING, DBG_WRITE, "%s: receive_length not even: %d.\n", __FUNCTION__, receive_length);
 	read_buffer = WdfMemoryGetBuffer(Buffer, &buffer_size);
 
 	payload_size = (size_t)read_buffer[0];
 	payload_size = (payload_size << 8) | (size_t)read_buffer[1];
 	if (payload_size > receive_length - 2)
 	{
-		TraceEvents(TRACE_LEVEL_WARNING, DBG_WRITE, "%s: Payload larger than buffer-2: Payload: %d, Receive Length: %d.", __FUNCTION__, payload_size, receive_length);
+		TraceEvents(TRACE_LEVEL_WARNING, DBG_WRITE, "%s: Payload larger than buffer-2: Payload: %d, Receive Length: %d.\n", __FUNCTION__, payload_size, receive_length);
 		return;
 	}
 
@@ -640,17 +640,24 @@ void port_received_data(__in  WDFUSBPIPE Pipe, __in  WDFMEMORY Buffer, __in  siz
 	memory_cap = synccom_port_get_input_memory_cap(port);
 	if (payload_size + current_memory > memory_cap)
 	{
-		unsigned bytes_lost = payload_size + current_memory - memory_cap;
+		unsigned bytes_lost;
 		struct synccom_frame* frame = 0;
+		
+		if (current_memory >= memory_cap) {
+			bytes_lost = payload_size;
+			payload_size = 0;
+		}
+		else {
+			bytes_lost = payload_size + current_memory - memory_cap;
+			payload_size = memory_cap - current_memory;
+		}
 
-		if (bytes_lost > payload_size) bytes_lost = payload_size;
-		payload_size = memory_cap - current_memory;
 		if (!synccom_port_is_streaming(port))
 		{
 			frame = synccom_flist_peek_back(&port->pending_iframes);
 			if (frame) frame->lost_bytes += bytes_lost;
 		}
-		TraceEvents(TRACE_LEVEL_WARNING, DBG_WRITE, "%s: Payload too large, new payload size: %d.", __FUNCTION__, payload_size);
+		TraceEvents(TRACE_LEVEL_WARNING, DBG_WRITE, "%s: Payload too large, new payload size: %d.\n", __FUNCTION__, payload_size);
 		if (payload_size < 1) return;
 	}
 
@@ -658,8 +665,8 @@ void port_received_data(__in  WDFUSBPIPE Pipe, __in  WDFMEMORY Buffer, __in  siz
 	status = synccom_frame_add_data(port->istream, read_buffer + 2, (unsigned)payload_size);
 	WdfSpinLockRelease(port->istream_spinlock);
 
-	if (status == FALSE) TraceEvents(TRACE_LEVEL_WARNING, DBG_WRITE, "%s: Failed to add data to istream.", __FUNCTION__);
-	else TraceEvents(TRACE_LEVEL_INFORMATION, DBG_WRITE, "%s: Stream <= %i byte%s", __FUNCTION__, (int)payload_size, (payload_size == 1) ? " " : "s");
+	if (status == FALSE) TraceEvents(TRACE_LEVEL_WARNING, DBG_WRITE, "%s: Failed to add data to istream.\n", __FUNCTION__);
+	else TraceEvents(TRACE_LEVEL_INFORMATION, DBG_WRITE, "%s: Stream <= %i byte%s\n", __FUNCTION__, (int)payload_size, (payload_size == 1) ? " " : "s");
 	rejected_last_stream = 0;
 	WdfDpcEnqueue(port->iframe_dpc);
 	return;
