@@ -27,6 +27,7 @@ ClassGuid={50906cb8-ba12-11d1-bf5d-0000f805f530}
 Provider=%ManufacturerName%
 CatalogFile=synccom.cat
 DriverVer=
+PnpLockdown=1
 
 [DestinationDirs]
 DefaultDestDir = 12
